@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { FaGoogle, FaApple, FaFacebook } from 'react-icons/fa';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface AuthFormProps {
   defaultTab?: 'login' | 'signup';
@@ -15,13 +16,30 @@ interface AuthFormProps {
 
 const AuthForm = ({ defaultTab = 'login' }: AuthFormProps) => {
   const navigate = useNavigate();
+  const { login, signup, isLoading } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   
-  // Mock authentication function - would be replaced with real auth logic
-  const handleSubmit = (e: React.FormEvent) => {
+  // Form state
+  const [loginData, setLoginData] = useState({
+    email: '',
+    password: ''
+  });
+  
+  const [signupData, setSignupData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: ''
+  });
+
+  const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // Simulate login/signup success
-    navigate('/');
+    login(loginData.email, loginData.password);
+  };
+
+  const handleSignup = (e: React.FormEvent) => {
+    e.preventDefault();
+    signup(signupData.firstName, signupData.lastName, signupData.email, signupData.password);
   };
 
   return (
@@ -40,7 +58,7 @@ const AuthForm = ({ defaultTab = 'login' }: AuthFormProps) => {
           </TabsList>
           
           <TabsContent value="login">
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <div className="relative">
@@ -52,6 +70,8 @@ const AuthForm = ({ defaultTab = 'login' }: AuthFormProps) => {
                     autoComplete="email" 
                     required 
                     className="pl-10"
+                    value={loginData.email}
+                    onChange={(e) => setLoginData({...loginData, email: e.target.value})}
                   />
                 </div>
               </div>
@@ -69,6 +89,8 @@ const AuthForm = ({ defaultTab = 'login' }: AuthFormProps) => {
                     type={showPassword ? "text" : "password"} 
                     required 
                     className="pl-10"
+                    value={loginData.password}
+                    onChange={(e) => setLoginData({...loginData, password: e.target.value})}
                   />
                   <Button 
                     type="button"
@@ -81,20 +103,36 @@ const AuthForm = ({ defaultTab = 'login' }: AuthFormProps) => {
                   </Button>
                 </div>
               </div>
-              <Button type="submit" className="w-full">Login</Button>
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? "Logging in..." : "Login"}
+              </Button>
+              
+              <div className="text-center text-sm text-muted-foreground mt-2">
+                <p>Demo account: demo@example.com / password</p>
+              </div>
             </form>
           </TabsContent>
           
           <TabsContent value="signup">
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSignup} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="firstName">First Name</Label>
-                  <Input id="firstName" required />
+                  <Input 
+                    id="firstName" 
+                    required
+                    value={signupData.firstName}
+                    onChange={(e) => setSignupData({...signupData, firstName: e.target.value})}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="lastName">Last Name</Label>
-                  <Input id="lastName" required />
+                  <Input 
+                    id="lastName" 
+                    required
+                    value={signupData.lastName}
+                    onChange={(e) => setSignupData({...signupData, lastName: e.target.value})}
+                  />
                 </div>
               </div>
               <div className="space-y-2">
@@ -108,6 +146,8 @@ const AuthForm = ({ defaultTab = 'login' }: AuthFormProps) => {
                     autoComplete="email" 
                     required 
                     className="pl-10"
+                    value={signupData.email}
+                    onChange={(e) => setSignupData({...signupData, email: e.target.value})}
                   />
                 </div>
               </div>
@@ -120,6 +160,8 @@ const AuthForm = ({ defaultTab = 'login' }: AuthFormProps) => {
                     type={showPassword ? "text" : "password"} 
                     required 
                     className="pl-10"
+                    value={signupData.password}
+                    onChange={(e) => setSignupData({...signupData, password: e.target.value})}
                   />
                   <Button 
                     type="button"
@@ -132,7 +174,9 @@ const AuthForm = ({ defaultTab = 'login' }: AuthFormProps) => {
                   </Button>
                 </div>
               </div>
-              <Button type="submit" className="w-full">Create Account</Button>
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? "Creating Account..." : "Create Account"}
+              </Button>
             </form>
           </TabsContent>
         </Tabs>
@@ -161,7 +205,7 @@ const AuthForm = ({ defaultTab = 'login' }: AuthFormProps) => {
         </div>
       </CardContent>
       <CardFooter className="text-center text-xs text-muted-foreground">
-        By continuing, you agree to our <Button variant="link" className="p-0 h-auto text-xs">Terms of Service</Button> and <Button variant="link" className="p-0 h-auto text-xs">Privacy Policy</Button>.
+        By continuing, you agree to our <Button variant="link" className="p-0 h-auto text-xs" onClick={() => navigate('/privacy')}>Terms of Service</Button> and <Button variant="link" className="p-0 h-auto text-xs" onClick={() => navigate('/privacy')}>Privacy Policy</Button>.
       </CardFooter>
     </Card>
   );
