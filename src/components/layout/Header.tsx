@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
@@ -107,14 +108,14 @@ const Header = () => {
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b",
         isScrolled
-          ? "bg-background/95 backdrop-blur-sm border-border"
-          : "bg-transparent border-transparent"
+          ? "bg-background/95 backdrop-blur-sm border-border shadow-sm"
+          : "bg-background/80 backdrop-blur-md border-transparent"
       )}
     >
       <div className="container flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
-        <Link to="/" className="flex items-center gap-2">
+        <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-serenity-purple-dark flex items-center justify-center">
-            <span className="text-white font-bold">S</span>
+            <span className="text-white font-bold text-sm">S</span>
           </div>
           <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-serenity-purple-dark">
             Serenity
@@ -130,13 +131,16 @@ const Header = () => {
                     <NavigationMenuLink
                       className={cn(
                         navigationMenuTriggerStyle(),
-                        "text-sm transition-colors",
+                        "text-sm transition-colors group",
                         location.pathname === item.href
                           ? "text-primary bg-primary/10"
-                          : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                          : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
                       )}
                     >
-                      {item.name}
+                      <div className="flex items-center gap-2">
+                        {item.icon}
+                        {item.name}
+                      </div>
                     </NavigationMenuLink>
                   </Link>
                 </NavigationMenuItem>
@@ -151,7 +155,7 @@ const Header = () => {
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
-                  className="relative h-10 w-10 rounded-full"
+                  className="relative h-10 w-10 rounded-full hover:bg-accent/50"
                   aria-label="User account menu"
                 >
                   <Avatar>
@@ -189,11 +193,18 @@ const Header = () => {
             </DropdownMenu>
           ) : (
             <div className="flex items-center gap-2">
-              <Button variant="ghost" onClick={() => navigate("/login")} className="flex items-center gap-2">
+              <Button 
+                variant="ghost" 
+                onClick={() => navigate("/login")} 
+                className="flex items-center gap-2 hover:bg-accent/50"
+              >
                 <LogIn className="h-4 w-4" />
                 <span>Login</span>
               </Button>
-              <Button onClick={() => navigate("/signup")} className="flex items-center gap-2">
+              <Button 
+                onClick={() => navigate("/signup")} 
+                className="flex items-center gap-2"
+              >
                 <UserPlus className="h-4 w-4" />
                 <span>Sign Up</span>
               </Button>
@@ -225,10 +236,10 @@ const Header = () => {
                       key={item.name}
                       variant="ghost"
                       className={cn(
-                        "justify-start px-4 py-2 h-12",
+                        "justify-start px-4 py-2 h-12 w-full text-left",
                         location.pathname === item.href
                           ? "bg-primary/10 text-primary"
-                          : "text-muted-foreground"
+                          : "text-muted-foreground hover:bg-accent/50"
                       )}
                       onClick={() => handleNavItemClick(item.href)}
                     >
