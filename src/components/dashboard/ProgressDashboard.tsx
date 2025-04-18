@@ -206,7 +206,13 @@ const ProgressDashboard = () => {
               {achievements
                 .filter(achievement => achievement.achieved)
                 .map(achievement => (
-                  <AchievementBadge key={achievement.id} achievement={achievement} />
+                  <AchievementBadge 
+                    key={achievement.id}
+                    icon={achievement.image.split('seed=')[1]} // Using the seed part as icon
+                    title={achievement.title}
+                    description={achievement.description}
+                    unlocked={achievement.achieved}
+                  />
                 ))}
             </TabsContent>
             
@@ -214,7 +220,14 @@ const ProgressDashboard = () => {
               {achievements
                 .filter(achievement => !achievement.achieved)
                 .map(achievement => (
-                  <AchievementBadge key={achievement.id} achievement={achievement} />
+                  <AchievementBadge
+                    key={achievement.id}
+                    icon={achievement.image.split('seed=')[1]} // Using the seed part as icon
+                    title={achievement.title}
+                    description={achievement.description}
+                    unlocked={achievement.achieved}
+                    progress={30} // Adding some progress for locked achievements
+                  />
                 ))}
             </TabsContent>
           </Tabs>
