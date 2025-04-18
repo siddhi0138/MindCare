@@ -12,6 +12,7 @@ import MeditationPage from "./pages/MeditationPage";
 import ChatPage from "./pages/ChatPage";
 import ResourcesPage from "./pages/ResourcesPage";
 import CommunityPage from "./pages/CommunityPage";
+import AssessmentPage from "./pages/AssessmentPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,6 +32,7 @@ const App = () => (
           <Route path="/chat" element={<ChatPage />} />
           <Route path="/resources" element={<ResourcesPage />} />
           <Route path="/community" element={<CommunityPage />} />
+          <Route path="/assessment" element={<AssessmentPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
