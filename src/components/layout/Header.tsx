@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
@@ -22,7 +21,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import { Menu, X, User, Settings, LogOut, LineChart, Book, MessageCircle, Users, Activity, Brain, UserPlus, LogIn, Sparkles } from "lucide-react";
-import { useMobile } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface NavItem {
   name: string;
@@ -34,11 +33,10 @@ const Header = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const isMobile = useMobile();
+  const isMobile = useIsMobile();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  // Navigation items
   const navItems: NavItem[] = [
     {
       name: "Journal",
@@ -82,7 +80,6 @@ const Header = () => {
     }
   ];
 
-  // Listen to scroll events
   useEffect(() => {
     const handleScroll = () => {
       const scrollTop = window.scrollY;
@@ -93,13 +90,11 @@ const Header = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Handle navigation item click for mobile menu
   const handleNavItemClick = (href: string) => {
     navigate(href);
-    setIsMenuOpen(false); // Close menu after navigation
+    setIsMenuOpen(false);
   };
 
-  // Get user initials for avatar fallback
   const getUserInitials = () => {
     if (user?.firstName && user?.lastName) {
       return `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`;
@@ -126,13 +121,12 @@ const Header = () => {
           </span>
         </Link>
 
-        {/* Desktop Navigation */}
         {!isMobile && (
           <NavigationMenu className="hidden md:flex">
             <NavigationMenuList>
               {navItems.map((item) => (
                 <NavigationMenuItem key={item.name}>
-                  <Link to={item.href} legacyBehavior passHref>
+                  <Link to={item.href}>
                     <NavigationMenuLink
                       className={cn(
                         navigationMenuTriggerStyle(),
@@ -151,7 +145,6 @@ const Header = () => {
           </NavigationMenu>
         )}
 
-        {/* User Authentication / Account Section */}
         <div className="flex items-center gap-2">
           {isAuthenticated ? (
             <DropdownMenu>
@@ -207,7 +200,6 @@ const Header = () => {
             </div>
           )}
 
-          {/* Mobile Menu Button */}
           {isMobile && (
             <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
               <SheetTrigger asChild>
