@@ -52,6 +52,23 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+                // Serenity app colors
+                serenity: {
+                    purple: {
+                        DEFAULT: '#9b87f5',
+                        dark: '#7E69AB',
+                        darker: '#6E59A5',
+                        light: '#D6BCFA',
+                    },
+                    green: '#F2FCE2',
+                    yellow: '#FEF7CD',
+                    orange: '#FEC6A1',
+                    pink: '#FFDEE2',
+                    peach: '#FDE1D3',
+                    blue: '#D3E4FD',
+                    gray: '#F1F0FB',
+                    charcoal: '#1A1F2C',
+                },
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',
