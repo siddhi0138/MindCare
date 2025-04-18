@@ -1,7 +1,7 @@
-import { Navigate } from 'react-router-dom';
-import HomePage from './HomePage';
 
-// Redirect to the new HomePage component
+import { Navigate } from 'react-router-dom';
+
+// Redirect to the HomePage
 const Index = () => {
   return <Navigate to="/" replace />;
 };
