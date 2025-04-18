@@ -18,7 +18,7 @@ import {
   Clock,
   Bell,
   BellOff,
-  WaterDroplet,
+  Droplet,
   Pill,
   Moon,
   Coffee,
@@ -37,7 +37,7 @@ interface Reminder {
 }
 
 const reminderTypes = [
-  { value: 'hydrate', label: 'Hydrate', icon: <WaterDroplet className="h-4 w-4" /> },
+  { value: 'hydrate', label: 'Hydrate', icon: <Droplet className="h-4 w-4" /> },
   { value: 'medication', label: 'Medication', icon: <Pill className="h-4 w-4" /> },
   { value: 'sleep', label: 'Sleep', icon: <Moon className="h-4 w-4" /> },
   { value: 'break', label: 'Take a Break', icon: <Coffee className="h-4 w-4" /> },
