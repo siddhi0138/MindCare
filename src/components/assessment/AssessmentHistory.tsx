@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { format, parseISO, subMonths } from "date-fns";
+import { AssessmentType } from "./AssessmentHub";
 
 interface AssessmentResult {
   id: string;
@@ -15,7 +16,11 @@ interface AssessmentResult {
   interpretation: string;
 }
 
-const AssessmentHistory = () => {
+interface AssessmentHistoryProps {
+  onSelectAssessment: (type: AssessmentType) => void;
+}
+
+const AssessmentHistory = ({ onSelectAssessment }: AssessmentHistoryProps) => {
   const [history, setHistory] = useState<AssessmentResult[]>([]);
   const [chartType, setChartType] = useState<"depression" | "anxiety" | "stress">("depression");
   

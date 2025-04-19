@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertCircle, MessageCircle, Users, Shield, ArrowRight } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
+import { ChatRoomsProps } from "./ChatRooms.d";
 
 interface ChatRoom {
   id: string;
@@ -137,7 +137,7 @@ const SAMPLE_MESSAGES: Message[] = [
   }
 ];
 
-const ChatRooms = () => {
+const ChatRooms = ({ onJoinRoom }: ChatRoomsProps) => {
   const [rooms] = useState<ChatRoom[]>(CHATROOMS_DATA);
   const [selectedRoom, setSelectedRoom] = useState<ChatRoom | null>(null);
   const [messages, setMessages] = useState<Message[]>(SAMPLE_MESSAGES);
@@ -147,6 +147,9 @@ const ChatRooms = () => {
   const handleJoinChat = (room: ChatRoom) => {
     setSelectedRoom(room);
     setChatOpen(true);
+    if (onJoinRoom) {
+      onJoinRoom(room.name);
+    }
   };
 
   const handleSendMessage = () => {
