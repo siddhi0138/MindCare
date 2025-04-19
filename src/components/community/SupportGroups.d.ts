@@ -1,4 +1,4 @@
 
-interface SupportGroupsProps {
-  onJoinGroup: (group: string) => void;
+export interface SupportGroupsProps {
+  onJoinGroup: (groupName: string) => void;
 }

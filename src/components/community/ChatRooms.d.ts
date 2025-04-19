@@ -1,4 +1,4 @@
 
-interface ChatRoomsProps {
-  onJoinRoom: (room: string) => void;
+export interface ChatRoomsProps {
+  onJoinRoom: (roomName: string) => void;
 }
