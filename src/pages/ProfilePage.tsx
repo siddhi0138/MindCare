@@ -44,6 +44,7 @@ const ProfilePage = () => {
           </TabsContent>
           
           <TabsContent value="progress">
+            {/* Pass userId as an optional prop */}
             <ProgressDashboard userId={user?.id} />
           </TabsContent>
           
