@@ -69,7 +69,7 @@ const CommunityHub = () => {
               <CardTitle>Live Chat Rooms</CardTitle>
             </CardHeader>
             <CardContent>
-              <ChatRooms onJoinRoom={(room: string) => handleJoinGroup(room)} />
+              <ChatRooms onJoinRoom={handleJoinGroup} />
             </CardContent>
           </Card>
         </TabsContent>
@@ -80,7 +80,7 @@ const CommunityHub = () => {
               <CardTitle>Support Groups</CardTitle>
             </CardHeader>
             <CardContent>
-              <SupportGroups onJoinGroup={(group: string) => handleJoinGroup(group)} />
+              <SupportGroups onJoinGroup={handleJoinGroup} />
             </CardContent>
           </Card>
         </TabsContent>
@@ -91,7 +91,7 @@ const CommunityHub = () => {
               <CardTitle>Upcoming Events & Workshops</CardTitle>
             </CardHeader>
             <CardContent>
-              <EventsWorkshops onRSVP={(event: string) => handleRSVP(event)} />
+              <EventsWorkshops onRSVP={handleRSVP} />
             </CardContent>
           </Card>
         </TabsContent>
