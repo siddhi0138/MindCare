@@ -14,6 +14,18 @@ const CommunityHub = () => {
   const { isAuthenticated, user } = useAuth();
   const [activeTab, setActiveTab] = useState("chat-rooms");
   
+  const handleJoinRoom = (roomName: string) => {
+    if (isAuthenticated) {
+      toast.success(`Joined ${roomName}`, {
+        description: "You'll receive notifications for this room."
+      });
+    } else {
+      toast.error("Authentication required", {
+        description: "Please login to join community chat rooms."
+      });
+    }
+  };
+  
   const handleJoinGroup = (groupName: string) => {
     if (isAuthenticated) {
       toast.success(`Joined ${groupName}`, {
@@ -69,7 +81,7 @@ const CommunityHub = () => {
               <CardTitle>Live Chat Rooms</CardTitle>
             </CardHeader>
             <CardContent>
-              <ChatRooms onJoinRoom={handleJoinGroup} />
+              <ChatRooms onJoinRoom={handleJoinRoom} />
             </CardContent>
           </Card>
         </TabsContent>
