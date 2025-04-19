@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "@/components/ui/sonner";
 import AssessmentResult from "./AssessmentResult";
+import { AnxietyAssessmentProps } from "./AnxietyAssessment.d";
 
 // GAD-7 questions
 const questions = [
@@ -33,10 +35,6 @@ const interpretations = [
   { range: [10, 14], severity: "Moderate anxiety", description: "Your symptoms suggest moderate anxiety." },
   { range: [15, 21], severity: "Severe anxiety", description: "Your symptoms suggest severe anxiety." }
 ];
-
-interface AnxietyAssessmentProps {
-  onComplete: () => void;
-}
 
 const AnxietyAssessment = ({ onComplete }: AnxietyAssessmentProps) => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -74,6 +72,11 @@ const AnxietyAssessment = ({ onComplete }: AnxietyAssessmentProps) => {
       toast.success("Assessment completed", {
         description: "Your results have been saved to your history."
       });
+      
+      // Pass the score to the parent component
+      if (onComplete) {
+        onComplete(totalScore);
+      }
     }
   };
 

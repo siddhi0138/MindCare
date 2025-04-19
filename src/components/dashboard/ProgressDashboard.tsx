@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   LineChart,
@@ -18,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AchievementBadge from "@/components/common/AchievementBadge";
 import { Calendar } from "lucide-react";
+import { ProgressDashboardProps } from "./ProgressDashboard.d";
 
 // Mock data
 const moodData = [
@@ -85,7 +85,7 @@ const achievements = [
   }
 ];
 
-const ProgressDashboard = () => {
+const ProgressDashboard = ({ userId }: ProgressDashboardProps) => {
   return (
     <div className="space-y-8">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

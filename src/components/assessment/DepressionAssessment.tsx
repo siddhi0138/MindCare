@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "@/components/ui/sonner";
 import AssessmentResult from "./AssessmentResult";
+import { DepressionAssessmentProps } from "./DepressionAssessment.d";
 
 // PHQ-9 questions
 const questions = [
@@ -38,7 +39,7 @@ const interpretations = [
 ];
 
 interface DepressionAssessmentProps {
-  onComplete?: () => void;
+  onComplete?: (score: number) => void;
 }
 
 const DepressionAssessment = ({ onComplete }: DepressionAssessmentProps) => {
@@ -79,7 +80,7 @@ const DepressionAssessment = ({ onComplete }: DepressionAssessmentProps) => {
       });
       
       if (onComplete) {
-        onComplete();
+        onComplete(totalScore);
       }
     }
   };
