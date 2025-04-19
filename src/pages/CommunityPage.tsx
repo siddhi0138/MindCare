@@ -1,49 +1,28 @@
 
 import MainLayout from "@/components/layout/MainLayout";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import SupportGroups from "@/components/community/SupportGroups";
-import EventsWorkshops from "@/components/community/EventsWorkshops";
-import ChatRooms from "@/components/community/ChatRooms";
-import { Users, Calendar, MessageCircle } from "lucide-react";
+import CommunityHub from "@/components/community/CommunityHub";
+import { useAuth } from "@/contexts/AuthContext";
 
 const CommunityPage = () => {
+  const { isAuthenticated } = useAuth();
+
   return (
     <MainLayout>
-      <div className="max-w-6xl mx-auto">
-        <h1 className="text-3xl font-bold mb-6">Community & Support</h1>
-        <p className="text-muted-foreground mb-8 max-w-3xl">
-          Connect with others on similar mental health journeys, join support groups, 
-          attend events, and participate in moderated chat rooms for guidance and encouragement.
-        </p>
+      <div className="container py-6 space-y-8">
+        <CommunityHub />
         
-        <Tabs defaultValue="groups" className="w-full">
-          <TabsList className="grid grid-cols-3 w-full md:w-[400px] mb-8">
-            <TabsTrigger value="groups" className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              <span>Support Groups</span>
-            </TabsTrigger>
-            <TabsTrigger value="events" className="flex items-center gap-2">
-              <Calendar className="h-4 w-4" />
-              <span>Events</span>
-            </TabsTrigger>
-            <TabsTrigger value="chats" className="flex items-center gap-2">
-              <MessageCircle className="h-4 w-4" />
-              <span>Chat Rooms</span>
-            </TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="groups">
-            <SupportGroups />
-          </TabsContent>
-          
-          <TabsContent value="events">
-            <EventsWorkshops />
-          </TabsContent>
-          
-          <TabsContent value="chats">
-            <ChatRooms />
-          </TabsContent>
-        </Tabs>
+        {isAuthenticated && (
+          <div className="p-4 bg-primary-foreground rounded-lg border">
+            <h2 className="text-lg font-medium mb-2">Community Guidelines</h2>
+            <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
+              <li>Be respectful and kind to fellow community members</li>
+              <li>Maintain confidentiality - what's shared here stays here</li>
+              <li>Avoid giving medical advice - suggest seeking professional help instead</li>
+              <li>Focus on support, not diagnosis</li>
+              <li>Report any concerning content to moderators</li>
+            </ul>
+          </div>
+        )}
       </div>
     </MainLayout>
   );

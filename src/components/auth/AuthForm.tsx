@@ -7,8 +7,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { FaGoogle, FaApple, FaFacebook } from 'react-icons/fa';
-import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, User } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { toast } from '@/components/ui/sonner';
 
 interface AuthFormProps {
   defaultTab?: 'login' | 'signup';
@@ -29,7 +30,8 @@ const AuthForm = ({ defaultTab = 'login' }: AuthFormProps) => {
     firstName: '',
     lastName: '',
     email: '',
-    password: ''
+    password: '',
+    confirmPassword: ''
   });
 
   const handleLogin = (e: React.FormEvent) => {
@@ -39,7 +41,28 @@ const AuthForm = ({ defaultTab = 'login' }: AuthFormProps) => {
 
   const handleSignup = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (signupData.password !== signupData.confirmPassword) {
+      toast.error('Passwords do not match', {
+        description: 'Please make sure your passwords match'
+      });
+      return;
+    }
+    
+    if (signupData.password.length < 8) {
+      toast.error('Password is too short', {
+        description: 'Password must be at least 8 characters long'
+      });
+      return;
+    }
+
     signup(signupData.firstName, signupData.lastName, signupData.email, signupData.password);
+  };
+
+  const handleSocialLogin = (provider: string) => {
+    toast.info(`${provider} login coming soon`, {
+      description: 'This feature will be available in the next update'
+    });
   };
 
   return (
@@ -78,7 +101,8 @@ const AuthForm = ({ defaultTab = 'login' }: AuthFormProps) => {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="password">Password</Label>
-                  <Button variant="link" className="text-xs p-0 h-auto" type="button">
+                  <Button variant="link" className="text-xs p-0 h-auto" type="button" 
+                    onClick={() => toast.info("Reset password", { description: "Password reset feature coming soon." })}>
                     Forgot password?
                   </Button>
                 </div>
@@ -118,21 +142,29 @@ const AuthForm = ({ defaultTab = 'login' }: AuthFormProps) => {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="firstName">First Name</Label>
-                  <Input 
-                    id="firstName" 
-                    required
-                    value={signupData.firstName}
-                    onChange={(e) => setSignupData({...signupData, firstName: e.target.value})}
-                  />
+                  <div className="relative">
+                    <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input 
+                      id="firstName" 
+                      required
+                      className="pl-10"
+                      value={signupData.firstName}
+                      onChange={(e) => setSignupData({...signupData, firstName: e.target.value})}
+                    />
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="lastName">Last Name</Label>
-                  <Input 
-                    id="lastName" 
-                    required
-                    value={signupData.lastName}
-                    onChange={(e) => setSignupData({...signupData, lastName: e.target.value})}
-                  />
+                  <div className="relative">
+                    <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input 
+                      id="lastName" 
+                      required
+                      className="pl-10"
+                      value={signupData.lastName}
+                      onChange={(e) => setSignupData({...signupData, lastName: e.target.value})}
+                    />
+                  </div>
                 </div>
               </div>
               <div className="space-y-2">
@@ -174,6 +206,20 @@ const AuthForm = ({ defaultTab = 'login' }: AuthFormProps) => {
                   </Button>
                 </div>
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input 
+                    id="confirmPassword" 
+                    type={showPassword ? "text" : "password"} 
+                    required 
+                    className="pl-10"
+                    value={signupData.confirmPassword}
+                    onChange={(e) => setSignupData({...signupData, confirmPassword: e.target.value})}
+                  />
+                </div>
+              </div>
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? "Creating Account..." : "Create Account"}
               </Button>
@@ -193,13 +239,28 @@ const AuthForm = ({ defaultTab = 'login' }: AuthFormProps) => {
         </div>
         
         <div className="grid grid-cols-3 gap-3">
-          <Button variant="outline" type="button" className="flex items-center justify-center gap-2">
+          <Button 
+            variant="outline" 
+            type="button" 
+            className="flex items-center justify-center gap-2"
+            onClick={() => handleSocialLogin('Google')}
+          >
             <FaGoogle className="text-red-500" />
           </Button>
-          <Button variant="outline" type="button" className="flex items-center justify-center gap-2">
+          <Button 
+            variant="outline" 
+            type="button" 
+            className="flex items-center justify-center gap-2"
+            onClick={() => handleSocialLogin('Apple')}
+          >
             <FaApple />
           </Button>
-          <Button variant="outline" type="button" className="flex items-center justify-center gap-2">
+          <Button 
+            variant="outline" 
+            type="button" 
+            className="flex items-center justify-center gap-2"
+            onClick={() => handleSocialLogin('Facebook')}
+          >
             <FaFacebook className="text-blue-600" />
           </Button>
         </div>
