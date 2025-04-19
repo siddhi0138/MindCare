@@ -1,0 +1,4 @@
+
+interface ProgressDashboardProps {
+  userId?: string;
+}
