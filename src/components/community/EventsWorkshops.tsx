@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Calendar, Clock, MapPin, Users, Filter, ExternalLink } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
+import { EventsWorkshopsProps } from "./EventsWorkshops.d";
 
 interface Event {
   id: string;
@@ -101,12 +101,15 @@ const EVENTS_DATA: Event[] = [
   }
 ];
 
-const EventsWorkshops = () => {
+const EventsWorkshops = ({ onRSVP }: EventsWorkshopsProps) => {
   const [events] = useState<Event[]>(EVENTS_DATA);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
 
   const handleRSVP = (event: Event) => {
     setSelectedEvent(event);
+    if (onRSVP) {
+      onRSVP(event.title);
+    }
   };
 
   const confirmRSVP = () => {
@@ -116,7 +119,6 @@ const EventsWorkshops = () => {
     setSelectedEvent(null);
   };
 
-  // Format date to readable format
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
     return date.toLocaleDateString('en-US', { 

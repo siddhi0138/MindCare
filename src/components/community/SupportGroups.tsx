@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Lock, Plus, Users } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
+import { SupportGroupsProps } from "./SupportGroups.d";
 
 interface Group {
   id: string;
@@ -68,7 +68,7 @@ const GROUPS_DATA: Group[] = [
   }
 ];
 
-const SupportGroups = () => {
+const SupportGroups = ({ onJoinGroup }: SupportGroupsProps) => {
   const [groups] = useState<Group[]>(GROUPS_DATA);
   const [joinDialogOpen, setJoinDialogOpen] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
@@ -76,6 +76,9 @@ const SupportGroups = () => {
   const handleJoinGroup = (group: Group) => {
     setSelectedGroup(group);
     setJoinDialogOpen(true);
+    if (onJoinGroup) {
+      onJoinGroup(group.name);
+    }
   };
 
   const confirmJoinGroup = () => {
