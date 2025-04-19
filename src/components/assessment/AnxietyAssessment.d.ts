@@ -1,4 +1,4 @@
 
-interface AnxietyAssessmentProps {
+export interface AnxietyAssessmentProps {
   onComplete: (score: number) => void;
 }

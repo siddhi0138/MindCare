@@ -1,4 +1,4 @@
 
-interface EventsWorkshopsProps {
-  onRSVP: (event: string) => void;
+export interface EventsWorkshopsProps {
+  onRSVP: (eventName: string) => void;
 }

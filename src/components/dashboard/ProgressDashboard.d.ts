@@ -1,4 +1,4 @@
 
-interface ProgressDashboardProps {
+export interface ProgressDashboardProps {
   userId?: string;
 }
