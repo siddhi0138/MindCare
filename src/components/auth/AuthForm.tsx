@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -20,7 +19,6 @@ const AuthForm = ({ defaultTab = 'login' }: AuthFormProps) => {
   const { login, signup, isLoading } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   
-  // Form state
   const [loginData, setLoginData] = useState({
     email: '',
     password: ''
@@ -60,8 +58,8 @@ const AuthForm = ({ defaultTab = 'login' }: AuthFormProps) => {
   };
 
   const handleSocialLogin = (provider: string) => {
-    toast.info(`${provider} login coming soon`, {
-      description: 'This feature will be available in the next update'
+    toast.error('Authentication method not available', {
+      description: `${provider} authentication is not configured. Please use email/password login.`
     });
   };
 
@@ -233,36 +231,9 @@ const AuthForm = ({ defaultTab = 'login' }: AuthFormProps) => {
           </div>
           <div className="relative flex justify-center text-xs uppercase">
             <span className="bg-card px-2 text-muted-foreground">
-              Or continue with
+              Email login only
             </span>
           </div>
-        </div>
-        
-        <div className="grid grid-cols-3 gap-3">
-          <Button 
-            variant="outline" 
-            type="button" 
-            className="flex items-center justify-center gap-2"
-            onClick={() => handleSocialLogin('Google')}
-          >
-            <FaGoogle className="text-red-500" />
-          </Button>
-          <Button 
-            variant="outline" 
-            type="button" 
-            className="flex items-center justify-center gap-2"
-            onClick={() => handleSocialLogin('Apple')}
-          >
-            <FaApple />
-          </Button>
-          <Button 
-            variant="outline" 
-            type="button" 
-            className="flex items-center justify-center gap-2"
-            onClick={() => handleSocialLogin('Facebook')}
-          >
-            <FaFacebook className="text-blue-600" />
-          </Button>
         </div>
       </CardContent>
       <CardFooter className="text-center text-xs text-muted-foreground">

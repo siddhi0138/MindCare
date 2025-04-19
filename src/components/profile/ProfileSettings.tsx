@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -72,6 +71,18 @@ const ProfileSettings = () => {
     }));
   };
   
+  const handleImageUpload = () => {
+    toast.error('Feature unavailable', {
+      description: 'Profile image upload is not yet available.'
+    });
+  };
+
+  const handlePasswordReset = () => {
+    toast.error('Feature unavailable', {
+      description: 'Password reset functionality is not yet available.'
+    });
+  };
+
   const getUserInitials = () => {
     if (formData.firstName && formData.lastName) {
       return `${formData.firstName.charAt(0)}${formData.lastName.charAt(0)}`;
@@ -98,9 +109,7 @@ const ProfileSettings = () => {
               <Button 
                 size="icon" 
                 className="absolute -bottom-2 -right-2 rounded-full h-8 w-8"
-                onClick={() => toast.info("Feature coming soon", {
-                  description: "Profile image upload will be available in the next update"
-                })}>
+                onClick={handleImageUpload}>
                 <Camera className="h-4 w-4" />
               </Button>
             </div>
