@@ -26,9 +26,14 @@ const queryClient = new QueryClient();
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, isLoading } = useAuth();
 
-  // Show nothing while checking authentication
+  // Show loading state while checking authentication
   if (isLoading) {
-    return <div className="h-screen w-screen flex items-center justify-center">Loading...</div>;
+    return (
+      <div className="h-screen w-screen flex flex-col items-center justify-center gap-4">
+        <div className="w-8 h-8 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
+        <p className="text-muted-foreground">Loading...</p>
+      </div>
+    );
   }
 
   // Redirect to login if not authenticated
