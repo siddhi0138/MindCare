@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -38,7 +37,11 @@ const interpretations = [
   { range: [27, 40], severity: "High stress", description: "Your symptoms suggest high perceived stress." }
 ];
 
-const StressAssessment = () => {
+interface StressAssessmentProps {
+  onComplete?: () => void;
+}
+
+const StressAssessment = ({ onComplete }: StressAssessmentProps) => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<number[]>(Array(questions.length).fill(-1));
   const [completed, setCompleted] = useState(false);
@@ -121,8 +124,15 @@ const StressAssessment = () => {
         title="PSS-10 Stress Assessment Results"
         score={score}
         maxScore={40}
+        level={interpretation?.severity || "Unknown"}
         interpretation={interpretation?.severity || "Unknown"}
         description={interpretation?.description || ""}
+        recommendations={[
+          "Practice mindfulness meditation",
+          "Engage in regular physical activity",
+          "Prioritize and delegate tasks",
+          "Establish healthy boundaries"
+        ]}
         onRestart={handleRestart}
       />
     );

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -35,7 +34,11 @@ const interpretations = [
   { range: [15, 21], severity: "Severe anxiety", description: "Your symptoms suggest severe anxiety." }
 ];
 
-const AnxietyAssessment = () => {
+interface AnxietyAssessmentProps {
+  onComplete: () => void;
+}
+
+const AnxietyAssessment = ({ onComplete }: AnxietyAssessmentProps) => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<number[]>(Array(questions.length).fill(-1));
   const [completed, setCompleted] = useState(false);
@@ -107,8 +110,15 @@ const AnxietyAssessment = () => {
         title="GAD-7 Anxiety Assessment Results"
         score={score}
         maxScore={21}
+        level={interpretation?.severity || "Unknown"}
         interpretation={interpretation?.severity || "Unknown"}
         description={interpretation?.description || ""}
+        recommendations={[
+          "Practice deep breathing exercises",
+          "Consider talking to a mental health professional",
+          "Establish a regular sleep schedule",
+          "Limit caffeine and alcohol"
+        ]}
         onRestart={handleRestart}
       />
     );

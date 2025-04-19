@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -38,7 +37,11 @@ const interpretations = [
   { range: [20, 27], severity: "Severe", description: "Your symptoms suggest severe depression." }
 ];
 
-const DepressionAssessment = () => {
+interface DepressionAssessmentProps {
+  onComplete?: () => void;
+}
+
+const DepressionAssessment = ({ onComplete }: DepressionAssessmentProps) => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<number[]>(Array(questions.length).fill(-1));
   const [completed, setCompleted] = useState(false);
@@ -74,6 +77,10 @@ const DepressionAssessment = () => {
       toast.success("Assessment completed", {
         description: "Your results have been saved to your history."
       });
+      
+      if (onComplete) {
+        onComplete();
+      }
     }
   };
 
@@ -110,8 +117,15 @@ const DepressionAssessment = () => {
         title="PHQ-9 Depression Assessment Results"
         score={score}
         maxScore={27}
+        level={interpretation?.severity || "Unknown"}
         interpretation={interpretation?.severity || "Unknown"}
         description={interpretation?.description || ""}
+        recommendations={[
+          "Reach out to a mental health professional",
+          "Establish a consistent daily routine",
+          "Regular physical activity",
+          "Connect with supportive friends and family"
+        ]}
         onRestart={handleRestart}
       />
     );

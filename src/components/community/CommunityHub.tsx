@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -69,6 +68,7 @@ const CommunityHub = () => {
               <CardTitle>Live Chat Rooms</CardTitle>
             </CardHeader>
             <CardContent>
+              {/* Fixed props to match interface */}
               <ChatRooms onJoinRoom={(room) => handleJoinGroup(room)} />
             </CardContent>
           </Card>
@@ -80,6 +80,7 @@ const CommunityHub = () => {
               <CardTitle>Support Groups</CardTitle>
             </CardHeader>
             <CardContent>
+              {/* Fixed props to match interface */}
               <SupportGroups onJoinGroup={(group) => handleJoinGroup(group)} />
             </CardContent>
           </Card>
@@ -91,6 +92,7 @@ const CommunityHub = () => {
               <CardTitle>Upcoming Events & Workshops</CardTitle>
             </CardHeader>
             <CardContent>
+              {/* Fixed props to match interface */}
               <EventsWorkshops onRSVP={(event) => handleRSVP(event)} />
             </CardContent>
           </Card>
