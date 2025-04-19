@@ -208,7 +208,7 @@ const AssessmentHub = () => {
       )}
       
       {activeTab === 'history' && (
-        <AssessmentHistory onSelectAssessment={(type) => startAssessment(type)} />
+        <AssessmentHistory onSelectAssessment={(type) => startAssessment(type as AssessmentType)} />
       )}
     </div>
   );
