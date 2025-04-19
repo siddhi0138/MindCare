@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "@/components/ui/sonner";
 import AssessmentResult from "./AssessmentResult";
+import { StressAssessmentProps } from "./StressAssessment.d";
 
 // PSS-10 questions
 const questions = [
@@ -36,10 +38,6 @@ const interpretations = [
   { range: [14, 26], severity: "Moderate stress", description: "Your symptoms suggest moderate perceived stress." },
   { range: [27, 40], severity: "High stress", description: "Your symptoms suggest high perceived stress." }
 ];
-
-interface StressAssessmentProps {
-  onComplete?: () => void;
-}
 
 const StressAssessment = ({ onComplete }: StressAssessmentProps) => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -88,6 +86,10 @@ const StressAssessment = ({ onComplete }: StressAssessmentProps) => {
       toast.success("Assessment completed", {
         description: "Your results have been saved to your history."
       });
+      
+      if (onComplete) {
+        onComplete(totalScore);
+      }
     }
   };
 
