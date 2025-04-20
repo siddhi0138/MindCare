@@ -37,14 +37,14 @@ const Header = () => {
 
   return (
     <header className="sticky top-0 z-40 w-full bg-background shadow-sm">
-      <div className="container flex h-16 items-center px-4 sm:px-6 lg:px-8">
-        <Link to="/" className="flex items-center gap-2">
-          <Heart className="h-6 w-6 text-serenity-purple" />
-          <span className="text-xl font-bold">Serenity</span>
-        </Link>
+      <div className="container flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
+          <Link to="/" className="flex items-center justify-start gap-2">
+            <Heart className="h-6 w-6 text-serenity-purple" />
+            <span className="text-xl font-bold">Serenity</span>
+          </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex ml-10 space-x-1 lg:space-x-2">
+        <nav className="hidden md:flex space-x-6">
           {isAuthenticated && (
             <>
               <DropdownMenu>
@@ -95,6 +95,9 @@ const Header = () => {
                   <DropdownMenuItem asChild>
                     <Link to="/assessment" className="w-full">Assessments</Link>
                   </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/exercises" className="w-full">Exercises</Link>
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
               
@@ -121,7 +124,7 @@ const Header = () => {
           )}
         </nav>
 
-        <div className="ml-auto flex items-center gap-4">
+        <div className="flex items-center gap-4">
           {isAuthenticated ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -138,7 +141,7 @@ const Header = () => {
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end" forceMount>
+              <DropdownMenuContent className="md:w-56 w-full" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium leading-none">
@@ -302,6 +305,13 @@ const Header = () => {
                   >
                     <Activity className="h-4 w-4" />
                     Assessments
+                  </Link>
+                  <Link
+                    to="/exercises"
+                    className="flex items-center gap-3 px-2 py-1.5 text-sm rounded-md hover:bg-muted"
+                    onClick={toggleMobileMenu}
+                  >
+                    Exercises
                   </Link>
                 </div>
                 

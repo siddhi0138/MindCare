@@ -7,18 +7,18 @@ import { UserSearch, CalendarClock, Video } from "lucide-react";
 const TherapistPage = () => {
   return (
     <MainLayout>
-      <div className="max-w-7xl mx-auto px-4 py-8 md:py-12">
+      <div className="w-full mx-auto px-4 py-8 md:px-6 md:py-12 lg:px-8">
         <div className="mb-10">
           <h1 className="text-3xl md:text-4xl font-bold text-foreground">Find a Mental Health Professional</h1>
-          <p className="text-muted-foreground text-lg max-w-3xl mt-4 leading-relaxed">
+          <p className="text-muted-foreground text-lg mt-4 leading-relaxed">
             Connect with licensed therapists specializing in anxiety, depression, relationships, and more.
             Choose between in-person or virtual sessions to begin your wellness journey.
           </p>
         </div>
         
         <Tabs defaultValue="find" className="w-full">
-          <TabsList className="bg-background border-b rounded-none w-full max-w-md mb-10">
-            <TabsTrigger value="find" className="flex items-center gap-2 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">
+          <TabsList className="bg-background border-b rounded-none w-full mb-10">
+            <TabsTrigger value="find" className="flex items-center gap-2 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none ">
               <UserSearch className="h-4 w-4" />
               <span>Browse Therapists</span>
             </TabsTrigger>

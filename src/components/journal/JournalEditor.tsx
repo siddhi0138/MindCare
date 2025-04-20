@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -9,7 +8,11 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
-import { Calendar as CalendarIcon, Save, Lock, Smile, Cloud } from 'lucide-react';
+import { Calendar as CalendarIcon, Save, Lock, Cloud } from 'lucide-react';
+import { collection, addDoc, Timestamp } from 'firebase/firestore';
+import { db } from '@/configs/firebase';
+import { toast } from '@/components/ui/sonner';
+import { useAuth } from '@/contexts/AuthContext';
 
 const JournalEditor = () => {
   const [title, setTitle] = useState('');
@@ -17,6 +20,7 @@ const JournalEditor = () => {
   const [date, setDate] = useState<Date>(new Date());
   const [mood, setMood] = useState('neutral');
   const [isSaving, setIsSaving] = useState(false);
+  const { user } = useAuth();
 
   const moods = [
     { label: 'Happy', value: 'happy', emoji: '😊' },
@@ -26,31 +30,55 @@ const JournalEditor = () => {
     { label: 'Sad', value: 'sad', emoji: '😔' },
   ];
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    if (!user) {
+      toast.error("You must be logged in to save entries.");
+      return;
+    }
+    if (!content.trim()) {
+      toast.error("Entry content cannot be empty.");
+      return;
+    }
     setIsSaving(true);
-    // Simulate saving
-    setTimeout(() => {
+    try {
+      await addDoc(collection(db, "journalEntries"), {
+        userId: user.id,
+        title,
+        content,
+        date,
+        mood,
+        timestamp: Timestamp.now(),
+      });
+      toast.success("Journal entry saved successfully!");
+      setTitle('');
+      setContent('');
+      setDate(new Date());
+      setMood('neutral');
+    } catch (error) {
+      console.error("Error saving entry:", error);
+      toast.error("Failed to save journal entry.");
+    } finally {
       setIsSaving(false);
-      // Reset or navigate in a real app
-    }, 1500);
+    }
   };
 
   return (
     <Card className="border-primary/10 w-full">
       <CardHeader className="pb-3">
-        <CardTitle>Journal Entry</CardTitle>
+        <CardTitle>New Journal Entry</CardTitle>
       </CardHeader>
+
       <CardContent className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="title">Title</Label>
-          <Input 
-            id="title" 
+          <Input
+            id="title"
             placeholder="Give your entry a title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
         </div>
-        
+
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label>Date</Label>
@@ -74,7 +102,7 @@ const JournalEditor = () => {
               </PopoverContent>
             </Popover>
           </div>
-          
+
           <div className="space-y-2">
             <Label>Mood</Label>
             <div className="grid grid-cols-5 gap-1">
@@ -96,11 +124,11 @@ const JournalEditor = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="space-y-2">
           <Label htmlFor="content">Your thoughts</Label>
-          <Textarea 
-            id="content" 
+          <Textarea
+            id="content"
             placeholder="Write your journal entry here..."
             value={content}
             onChange={(e) => setContent(e.target.value)}
@@ -109,6 +137,7 @@ const JournalEditor = () => {
           />
         </div>
       </CardContent>
+
       <CardFooter className="flex justify-between">
         <div className="flex items-center text-xs text-muted-foreground gap-2">
           <Lock size={12} />

@@ -4,8 +4,8 @@ import AuthForm from "@/components/auth/AuthForm";
 
 const SignupPage = () => {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-background via-background to-secondary/20 p-4 sm:p-6 md:p-8">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-background via-background to-secondary/20 p-4 sm:p-6">
+      <div className="w-full">
         <Link to="/" className="flex items-center gap-2 mb-8 justify-center">
           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-serenity-purple-dark flex items-center justify-center">
             <span className="text-white font-bold text-lg">S</span>

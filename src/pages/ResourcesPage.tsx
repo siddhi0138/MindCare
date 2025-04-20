@@ -87,9 +87,9 @@ const ResourcesPage = () => {
           <h1 className="text-3xl font-bold">Mental Health Resources</h1>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input 
+            <Input
               placeholder="Search resources..." 
-              className="pl-10 w-full md:w-[250px]" 
+              className="pl-10 w-full md:w-1/2"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />

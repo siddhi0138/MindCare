@@ -5,9 +5,9 @@ import { Heart, Phone } from 'lucide-react';
 
 const Footer = () => {
   return (
-    <footer className="bg-background border-t py-10 px-6 mt-auto">
+    <footer className="bg-background border-t py-10 px-6">
       <div className="container mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 md:gap-8">
           <div className="col-span-1 md:col-span-1">
             <Link to="/" className="flex items-center gap-2 mb-4">
               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-serenity-purple-dark flex items-center justify-center">

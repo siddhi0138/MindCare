@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import MainLayout from "@/components/layout/MainLayout";
 import MeditationPlayer from "@/components/meditation/MeditationPlayer";
 import { Button } from "@/components/ui/button";
@@ -14,15 +14,17 @@ const meditationData = [
     title: "Morning Calm",
     description: "Start your day with clarity and peace",
     imageUrl: "https://images.unsplash.com/photo-1519834785169-98be25ec3f84?ixlib=rb-4.0.3",
-    duration: "10 min",
+    duration: "2:09 min",
     category: "morning",
+    audioSrc: "public/meditation/audio1.mp3", // Placeholder audio source
   },
   {
     id: "2",
     title: "Deep Sleep",
     description: "Drift into restful sleep with gentle sounds",
     imageUrl: "https://images.unsplash.com/photo-1511295742362-92c96b478480?ixlib=rb-4.0.3",
-    duration: "30 min",
+    duration: "10 min",
+    audioSrc: "public/meditation/audio2.mp3",
     category: "sleep",
   },
   {
@@ -30,7 +32,8 @@ const meditationData = [
     title: "Anxiety Relief",
     description: "Release tension and find your center",
     imageUrl: "https://images.unsplash.com/photo-1528319725582-ddc096101511?ixlib=rb-4.0.3",
-    duration: "15 min",
+    duration: "3:01 min",
+    audioSrc: "public/meditation/audio3.mp3",
     category: "anxiety",
   },
   {
@@ -38,13 +41,50 @@ const meditationData = [
     title: "Breathing Focus",
     description: "Control your breathing to calm your mind",
     imageUrl: "https://images.unsplash.com/photo-1515894274780-af5088f7114a?ixlib=rb-4.0.3",
-    duration: "5 min",
+    duration: "10 min",
+    audioSrc: "public/meditation/audio4.mp3",
     category: "breathing",
   },
+  {
+    id: "5",
+    title: "Mindful Focus",
+    description: "Sharpen your attention and stay grounded with this guided focus session",
+    imageUrl: "https://images.unsplash.com/photo-1505678261036-a3fcc5e884ee?ixlib=rb-4.0.3",
+    duration: "3:14 min",
+    category: "focus",
+    audioSrc: "public/meditation/audio5.mp3",
+  },
+  
 ];
 
 const MeditationPage = () => {
-  const [featuredMeditation] = useState(meditationData[0]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentMeditation, setCurrentMeditation] = useState(
+    meditationData[currentIndex]
+  );
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredMeditations, setFilteredMeditations] =
+    useState(meditationData);
+
+  useEffect(() => {
+    setCurrentMeditation(meditationData[currentIndex]);
+  }, [currentIndex]);
+
+  useEffect(() => {
+    setFilteredMeditations(
+      meditationData.filter(
+        (meditation) =>
+          meditation.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          meditation.description
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase())
+      )
+    );
+  }, [searchTerm]);
+  const handlePlayMeditation = (meditation) => {
+    setCurrentMeditation(meditation);
+  };
+
 
   return (
     <MainLayout>
@@ -53,16 +93,22 @@ const MeditationPage = () => {
           <h1 className="text-3xl font-bold">Guided Meditations</h1>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Search meditations..." className="pl-10 w-[250px]" />
+            <Input
+              placeholder="Search meditations..."
+              className="pl-10 w-[250px]"
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
         </div>
         
         <div className="mb-12">
-          <MeditationPlayer 
-            title={featuredMeditation.title}
-            description={featuredMeditation.description}
-            imageUrl={featuredMeditation.imageUrl}
-            duration={featuredMeditation.duration}
+          <MeditationPlayer currentMeditation={currentMeditation}
+            onNext={() => setCurrentIndex((currentIndex + 1) % meditationData.length)}
+            onPrev={() =>
+              setCurrentIndex(
+                (currentIndex - 1 + meditationData.length) % meditationData.length
+              )
+            } 
           />
         </div>
         
@@ -92,7 +138,7 @@ const MeditationPage = () => {
           </TabsList>
           
           <TabsContent value="all" className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-            {meditationData.map((meditation) => (
+            {filteredMeditations.map((meditation) => (
               <Card key={meditation.id} className="border-primary/10 overflow-hidden cursor-pointer card-hover">
                 <div 
                   className="h-40 bg-cover bg-center"
@@ -107,7 +153,7 @@ const MeditationPage = () => {
                 <CardContent className="p-4">
                   <h3 className="font-medium text-lg">{meditation.title}</h3>
                   <p className="text-muted-foreground text-sm">{meditation.description}</p>
-                  <Button className="w-full mt-4">
+                  <Button className="w-full mt-4" onClick={() => handlePlayMeditation(meditation)}>
                     Play Meditation
                   </Button>
                 </CardContent>
@@ -118,7 +164,7 @@ const MeditationPage = () => {
           {["sleep", "morning", "anxiety", "focus", "quick"].map((category) => (
             <TabsContent key={category} value={category}>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                {meditationData
+                {filteredMeditations
                   .filter((m) => m.category === category || category === "all")
                   .map((meditation) => (
                     <Card key={meditation.id} className="border-primary/10 overflow-hidden cursor-pointer card-hover">
@@ -135,7 +181,7 @@ const MeditationPage = () => {
                       <CardContent className="p-4">
                         <h3 className="font-medium text-lg">{meditation.title}</h3>
                         <p className="text-muted-foreground text-sm">{meditation.description}</p>
-                        <Button className="w-full mt-4">
+                        <Button className="w-full mt-4" onClick={() => handlePlayMeditation(meditation)}>
                           Play Meditation
                         </Button>
                       </CardContent>

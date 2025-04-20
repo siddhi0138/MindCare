@@ -21,7 +21,8 @@ const AuthForm = ({ defaultTab = 'login' }: AuthFormProps) => {
   const { login, signup, isLoading } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
-  
+  const { loginWithGoogle } = useAuth();
+
   const [loginData, setLoginData] = useState({
     email: '',
     password: ''
@@ -60,10 +61,13 @@ const AuthForm = ({ defaultTab = 'login' }: AuthFormProps) => {
     signup(signupData.firstName, signupData.lastName, signupData.email, signupData.password);
   };
 
-  const handleSocialLogin = (provider: string) => {
-    toast.error('Authentication method not available', {
-      description: `${provider} authentication is not configured. Please use email/password login.`
-    });
+  const handleGoogleLogin = async () => {
+    try {
+      await loginWithGoogle();
+    } catch (error) {
+      console.error("Google login failed:", error);
+
+    }
   };
 
   if (showForgotPassword) {
@@ -72,7 +76,7 @@ const AuthForm = ({ defaultTab = 'login' }: AuthFormProps) => {
 
   return (
     <Card className="w-full max-w-md mx-auto shadow-lg border-primary/10">
-      <CardHeader className="space-y-1 text-center">
+      <CardHeader className="space-y-1 text-center flex flex-col items-center">
         <CardTitle className="text-2xl font-bold">Welcome to Serenity</CardTitle>
         <CardDescription>
           Your journey to mental wellbeing starts here
@@ -128,7 +132,7 @@ const AuthForm = ({ defaultTab = 'login' }: AuthFormProps) => {
                     type="button"
                     variant="ghost" 
                     size="sm" 
-                    className="absolute right-0 top-0 h-10 px-3" 
+                    className="absolute top-0 h-10 px-3" 
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -246,30 +250,14 @@ const AuthForm = ({ defaultTab = 'login' }: AuthFormProps) => {
           </div>
         </div>
         
-        <div className="grid grid-cols-3 gap-3 mt-4">
+        <div className="grid grid-cols-1 mt-4">
           <Button 
             variant="outline" 
             type="button" 
             className="flex items-center justify-center gap-2"
-            onClick={() => handleSocialLogin('Google')}
+            onClick={() => handleGoogleLogin()}
           >
             <FaGoogle className="h-4 w-4" />
-          </Button>
-          <Button 
-            variant="outline" 
-            type="button" 
-            className="flex items-center justify-center gap-2"
-            onClick={() => handleSocialLogin('Apple')}
-          >
-            <FaApple className="h-4 w-4" />
-          </Button>
-          <Button 
-            variant="outline" 
-            type="button" 
-            className="flex items-center justify-center gap-2"
-            onClick={() => handleSocialLogin('Facebook')}
-          >
-            <FaFacebook className="h-4 w-4" />
           </Button>
         </div>
       </CardContent>

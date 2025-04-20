@@ -1,227 +1,217 @@
-
-import { useState, useEffect } from "react";
 import MainLayout from "@/components/layout/MainLayout";
-import MoodJournalEntry from "@/components/journal/MoodJournalEntry";
+import React, { useState, useEffect, useContext } from 'react';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { format } from "date-fns";
-import { PlusCircle, BookOpen, Calendar, Book, Trash } from "lucide-react";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { toast } from "@/components/ui/sonner";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { AuthContext } from '@/contexts/AuthContext'; // Import AuthContext
+import { db } from '@/configs/firebase'; // Import db
+import { collection, addDoc, query, where, getDocs, Timestamp, orderBy } from "firebase/firestore";
+import { toast } from '@/components/ui/sonner'; // For feedback
 
-interface MoodEntry {
-  id: string;
-  date: Date;
-  mood: string;
-  factors: string[];
-  notes: string;
+// Define the structure of a Journal Entry
+interface JournalEntry {
+  id?: string; // Firestore document ID
+  userId: string;
+  timestamp: Timestamp;
+  mood: string; // e.g., '😊', '😐', '😢', 'Great', 'Okay', 'Bad'
+  entryText: string;
+  gratitude?: string; // Optional gratitude entry
 }
 
-const MoodJournalPage = () => {
-  const [entries, setEntries] = useState<MoodEntry[]>([]);
-  const [isCreating, setIsCreating] = useState(false);
-  const [editingEntry, setEditingEntry] = useState<MoodEntry | null>(null);
+const MoodJournalPage: React.FC = () => {
 
-  useEffect(() => {
-    const storedEntries = localStorage.getItem("moodJournalEntries");
-    if (storedEntries) {
-      const parsedEntries = JSON.parse(storedEntries).map((entry: any) => ({
+  const { user, isLoading: authIsLoading } = useContext(AuthContext); // Get user and loading state from context
+  const [mood, setMood] = useState<string>(''); // State for current mood selection
+  const [entryText, setEntryText] = useState<string>(''); // State for journal text
+  const [gratitudeText, setGratitudeText] = useState<string>(''); // State for gratitude text
+  const [journalEntries, setJournalEntries] = useState<JournalEntry[]>([]); // State for fetched entries
+  const [isLoading, setIsLoading] = useState<boolean>(false); // Loading state for fetching/saving
+  const [isSaving, setIsSaving] = useState<boolean>(false); // Saving state
+
+  const moodOptions = ['😊 Happy', '😌 Calm', '😐 Neutral', '😟 Anxious', '😢 Sad', '😠 Angry']; // Example moods
+
+  // --- Firestore Functions ---
+
+  // Function to save a new journal entry
+  const saveJournalEntry = async (entry: Omit<JournalEntry, 'id' | 'timestamp'>) => {
+    if (!user) return; // Should not happen if page is protected
+    setIsSaving(true);
+    try {
+      const docRef = await addDoc(collection(db, "journalEntries"), {
         ...entry,
-        date: new Date(entry.date),
-      }));
-      setEntries(parsedEntries);
-    }
-  }, []);
-
-  const handleSave = (entry: MoodEntry) => {
-    if (editingEntry) {
-      setEntries(entries.map((e) => (e.id === entry.id ? entry : e)));
-      setEditingEntry(null);
-    } else {
-      setEntries([...entries, entry]);
-      setIsCreating(false);
+        timestamp: Timestamp.now() // Add server timestamp
+      });
+      // Add the new entry locally for immediate UI update
+      setJournalEntries(prev => [{ ...entry, id: docRef.id, timestamp: Timestamp.now() }, ...prev]);
+      // Clear the form
+      setMood('');
+      setEntryText('');
+      setGratitudeText('');
+      toast.success("Journal entry saved!");
+    } catch (e) {
+      console.error("Error adding document: ", e);
+      toast.error("Failed to save entry. Please try again.");
+    } finally {
+      setIsSaving(false);
     }
   };
 
-  const handleDelete = (id: string) => {
-    setEntries(entries.filter((entry) => entry.id !== id));
-    const storedEntries = JSON.parse(localStorage.getItem("moodJournalEntries") || "[]");
-    const updatedEntries = storedEntries.filter((entry: any) => entry.id !== id);
-    localStorage.setItem("moodJournalEntries", JSON.stringify(updatedEntries));
-    toast.success("Journal entry deleted");
+  // Function to fetch journal entries for the current user
+  const fetchJournalEntries = async () => {
+    if (!user) return;
+    setIsLoading(true);
+    try {
+      const q = query(
+        collection(db, "journalEntries"),
+        where("userId", "==", user.id),
+        orderBy("timestamp", "desc") // Show newest first
+      );
+      const querySnapshot = await getDocs(q);
+      const entries: JournalEntry[] = [];
+      querySnapshot.forEach((doc) => {
+        entries.push({ id: doc.id, ...doc.data() } as JournalEntry);
+      });
+      setJournalEntries(entries);
+    } catch (e) {
+      console.error("Error fetching documents: ", e);
+      toast.error("Failed to load past entries.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const getMoodIcon = (mood: string) => {
-    switch (mood) {
-      case "great":
-        return <span className="text-green-500">😄</span>;
-      case "good":
-        return <span className="text-teal-500">🙂</span>;
-      case "okay":
-        return <span className="text-amber-500">😐</span>;
-      case "poor":
-        return <span className="text-red-500">😞</span>;
-      default:
-        return null;
+  // Fetch entries when the component mounts and user is available
+  useEffect(() => {
+    console.log("User object:", user); // Log the user object
+    if (user) {
+      fetchJournalEntries();
     }
+  }, [user]); // Dependency array includes user
+
+  // Handler for submitting the form
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user || !mood || !entryText) {
+        toast.warning("Please select a mood and write an entry.");
+        return;
+    };
+
+    const newEntry: Omit<JournalEntry, 'id' | 'timestamp'> = {
+      userId: user.id,
+      mood: mood,
+      entryText: entryText,
+      gratitude: gratitudeText || undefined, // Only include if not empty
+    };
+    saveJournalEntry(newEntry);
   };
 
   return (
     <MainLayout>
-      <div className="container py-6">
-        <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-8 gap-4">
-          <div>
-            <h1 className="text-3xl font-bold">Mood Journal</h1>
-            <p className="text-muted-foreground">Track your feelings and reflect on your emotional well-being</p>
-          </div>
-          <Button 
-            onClick={() => {
-              setIsCreating(true);
-              setEditingEntry(null);
-            }}
-            className="flex items-center gap-2"
-          >
-            <PlusCircle size={16} />
-            New Entry
-          </Button>
+      {authIsLoading ? (
+        <div className="container mx-auto p-4">
+          <p>Loading user data...</p>
         </div>
+      ) : (
+        <div className="container mx-auto p-4 space-y-6">
+          <h1 className="text-3xl font-bold">Mood Journal</h1>
 
-        {(isCreating || editingEntry) ? (
-          <div className="mb-10">
-            <MoodJournalEntry 
-              onSave={handleSave}
-              existingEntry={editingEntry || undefined}
-            />
-            <div className="mt-4 flex justify-end">
-              <Button 
-                variant="outline" 
-                onClick={() => {
-                  setIsCreating(false);
-                  setEditingEntry(null);
-                }}
-              >
-                Cancel
-              </Button>
-            </div>
-          </div>
-        ) : null}
+          {/* Entry Form Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle>How are you feeling today?</CardTitle>
+              <CardDescription>Log your mood and thoughts.</CardDescription>
+            </CardHeader>
+            <form onSubmit={handleSubmit}>
+              <CardContent className="space-y-4">
+                {/* Mood Selection */}
+                <div>
+                  <Label className="mb-2 block">Select your mood:</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {moodOptions.map((option) => (
+                      <Button
+                        key={option}
+                        type="button" // Important: prevent form submission on click
+                        variant={mood === option ? "default" : "outline"}
+                        onClick={() => setMood(option)}
+                        className="text-lg px-3 py-1 h-auto" // Adjust padding/height
+                      >
+                        {option}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
 
-        <Tabs defaultValue="entries" className="mt-8">
-          <TabsList>
-            <TabsTrigger value="entries" className="flex items-center gap-2">
-              <BookOpen size={16} />
-              Journal Entries
-            </TabsTrigger>
-            <TabsTrigger value="calendar" className="flex items-center gap-2">
-              <Calendar size={16} />
-              Calendar View
-            </TabsTrigger>
-          </TabsList>
+                {/* Journal Entry */}
+                <div>
+                  <Label htmlFor="journal-entry">Today's thoughts:</Label>
+                  <Textarea
+                    id="journal-entry"
+                    placeholder="Write about your day, feelings, or anything on your mind..."
+                    value={entryText}
+                    onChange={(e) => setEntryText(e.target.value)}
+                    rows={5}
+                    required
+                  />
+                </div>
 
-          <TabsContent value="entries">
-            <div className="space-y-4 mt-4">
-              {entries.length > 0 ? (
-                entries
-                  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-                  .map((entry) => (
-                    <Card key={entry.id} className="border-primary/10">
-                      <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-lg font-medium flex items-center gap-2">
-                          {getMoodIcon(entry.mood)}
-                          {format(new Date(entry.date), "PPPP")}
-                        </CardTitle>
-                        <div className="flex items-center gap-2">
-                          <Button variant="ghost" size="icon" onClick={() => setEditingEntry(entry)}>
-                            <Book size={16} />
-                          </Button>
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button variant="ghost" size="icon" className="text-destructive">
-                                <Trash size={16} />
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Delete Entry?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  This action cannot be undone. This will permanently delete this journal entry.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => handleDelete(entry.id)}>Delete</AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        {entry.factors.length > 0 && (
-                          <div className="mb-4">
-                            <p className="text-sm font-medium mb-2">Factors:</p>
-                            <div className="flex flex-wrap gap-2">
-                              {entry.factors.map((factor) => (
-                                <div key={factor} className="bg-muted text-muted-foreground text-xs py-1 px-2 rounded-full">
-                                  {factor}
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                        {entry.notes && (
-                          <div>
-                            <p className="text-sm font-medium mb-2">Notes:</p>
-                            <p className="text-sm whitespace-pre-wrap">{entry.notes}</p>
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  ))
-              ) : (
-                <Card className="border-primary/10">
-                  <CardContent className="p-8 text-center">
-                    <Book className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-xl font-medium mb-2">No Journal Entries Yet</h3>
-                    <p className="text-muted-foreground mb-4">
-                      Start tracking your mood and thoughts to gain insights into your emotional wellbeing.
-                    </p>
-                    <Button onClick={() => setIsCreating(true)}>
-                      Create Your First Entry
-                    </Button>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="calendar">
-            <Card className="border-primary/10 mt-4">
-              <CardContent className="p-6">
-                <div className="text-center py-12">
-                  <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-xl font-medium mb-2">Calendar View Coming Soon</h3>
-                  <p className="text-muted-foreground max-w-md mx-auto">
-                    Soon you'll be able to visualize your mood patterns over time with our calendar view.
-                  </p>
+                {/* Gratitude Entry (Optional) */}
+                <div>
+                  <Label htmlFor="gratitude-entry">Something you're grateful for today? (Optional)</Label>
+                  <Textarea
+                    id="gratitude-entry"
+                    placeholder="e.g., A sunny morning, a helpful friend..."
+                    value={gratitudeText}
+                    onChange={(e) => setGratitudeText(e.target.value)}
+                    rows={3}
+                  />
                 </div>
               </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </div>
+              <CardFooter>
+                <Button type="submit" disabled={isSaving || !user || !mood || !entryText}>
+                  {isSaving ? "Saving..." : "Save Entry"}
+                </Button>
+                {!user && <p className="ml-4 text-red-500 text-sm">Please log in to save entries.</p>}
+              </CardFooter>
+            </form>
+          </Card>
+
+          {/* Past Entries Section */}
+          <div className="space-y-4">
+            <h2 className="text-2xl font-semibold">Past Entries</h2>
+            {isLoading ? (
+              <p>Loading entries...</p>
+            ) : journalEntries.length === 0 ? (
+              <p>No journal entries yet.</p>
+            ) : (
+              journalEntries.map((entry) => (
+                <Card key={entry.id}>
+                  <CardHeader>
+                    {/* Format timestamp for display */}
+                    <CardTitle className="flex justify-between items-center">
+                      <span>Mood: {entry.mood}</span>
+                      <span className="text-sm font-normal text-gray-500">
+                        {entry.timestamp?.toDate().toLocaleDateString()} {entry.timestamp?.toDate().toLocaleTimeString()}
+                      </span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="whitespace-pre-wrap">{entry.entryText}</p>
+                    {entry.gratitude && (
+                      <div className="mt-3 pt-3 border-t">
+                        <p className="font-semibold">Grateful for:</p>
+                        <p className="whitespace-pre-wrap">{entry.gratitude}</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </div>
+        </div>
+      )}
     </MainLayout>
   );
 };
-
 export default MoodJournalPage;
+
