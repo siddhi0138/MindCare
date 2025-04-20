@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { ArrowRight, Eye, Ear, Nose, Hand, Brain } from "lucide-react";
+import { ArrowRight, Eye, Ear, Thermometer, Hand, Brain } from "lucide-react";
 
 const steps = [
   {
@@ -27,7 +27,7 @@ const steps = [
   {
     title: "2 Things You Can Smell",
     description: "Identify 2 scents in your environment, or recall 2 scents you enjoy if none are present.",
-    icon: <Nose className="h-8 w-8" />,
+    icon: <Thermometer className="h-8 w-8" />,
     color: "bg-orange-500"
   },
   {
