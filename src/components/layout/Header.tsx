@@ -1,13 +1,6 @@
 
-import { useState, useEffect } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
-import {
-  NavigationMenu,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  navigationMenuTriggerStyle,
-} from "@/components/ui/navigation-menu";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,293 +9,349 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/contexts/AuthContext";
-import { cn } from "@/lib/utils";
-import { 
-  Menu, X, User, Settings, LogOut, LineChart, Book, MessageCircle, 
-  Users, Activity, Brain, UserPlus, LogIn, Sparkles 
+import {
+  Menu,
+  X,
+  BookOpen,
+  MessageCircle,
+  Activity,
+  Users,
+  Moon,
+  FileText,
+  User,
+  LogOut,
+  Brain,
+  Heart
 } from "lucide-react";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useState } from "react";
 
 const Header = () => {
   const { user, isAuthenticated, logout } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
-  const isMobile = useIsMobile();
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const navItems = [
-    {
-      name: "Journal",
-      href: "/journal",
-      icon: <Book className="h-4 w-4" />
-    },
-    {
-      name: "Meditation",
-      href: "/meditation",
-      icon: <Brain className="h-4 w-4" />
-    },
-    {
-      name: "Chat",
-      href: "/chat",
-      icon: <MessageCircle className="h-4 w-4" />
-    },
-    {
-      name: "Assessments",
-      href: "/assessment",
-      icon: <Activity className="h-4 w-4" />
-    },
-    {
-      name: "Therapists",
-      href: "/therapists",
-      icon: <User className="h-4 w-4" />
-    },
-    {
-      name: "Coping Tools",
-      href: "/coping-tools",
-      icon: <Sparkles className="h-4 w-4" />
-    },
-    {
-      name: "Resources",
-      href: "/resources",
-      icon: <Book className="h-4 w-4" />
-    },
-    {
-      name: "Community",
-      href: "/community",
-      icon: <Users className="h-4 w-4" />
-    }
-  ];
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollTop = window.scrollY;
-      setIsScrolled(scrollTop > 10);
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  const handleNavItemClick = (href: string) => {
-    navigate(href);
-    setIsMenuOpen(false);
-  };
-
-  const getUserInitials = () => {
-    if (user?.firstName && user?.lastName) {
-      return `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`;
-    }
-    return "U";
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen(!mobileMenuOpen);
   };
 
   return (
-    <header
-      className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b",
-        isScrolled
-          ? "bg-background/95 backdrop-blur-sm border-border shadow-md"
-          : "bg-serenity-gray/40 backdrop-blur-md border-transparent",
-        "rounded-b-xl" // Added rounded bottom corners
-      )}
-    >
-      <div className="container flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
-        <Link 
-          to="/" 
-          className="flex items-center gap-3 hover:opacity-80 transition-opacity group"
-        >
-          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-serenity-purple to-serenity-purple-dark flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
-            <span className="text-white font-bold text-sm">S</span>
-          </div>
-          <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-serenity-purple to-serenity-purple-dark group-hover:opacity-80 transition-opacity">
-            Serenity
-          </span>
+    <header className="sticky top-0 z-40 w-full bg-background shadow-sm">
+      <div className="container flex h-16 items-center px-4 sm:px-6 lg:px-8">
+        <Link to="/" className="flex items-center gap-2">
+          <Heart className="h-6 w-6 text-serenity-purple" />
+          <span className="text-xl font-bold">Serenity</span>
         </Link>
 
-        {!isMobile && (
-          <NavigationMenu className="hidden md:flex">
-            <NavigationMenuList>
-              {navItems.map((item) => (
-                <NavigationMenuItem key={item.name}>
-                  <Link to={item.href}>
-                    <NavigationMenuLink
-                      className={cn(
-                        navigationMenuTriggerStyle(),
-                        "text-sm transition-all group",
-                        location.pathname === item.href
-                          ? "text-serenity-purple bg-serenity-purple/10 hover:bg-serenity-purple/20"
-                          : "text-muted-foreground hover:text-foreground hover:bg-serenity-gray/50"
-                      )}
-                    >
-                      <div className="flex items-center gap-2">
-                        {item.icon}
-                        {item.name}
-                      </div>
-                    </NavigationMenuLink>
-                  </Link>
-                </NavigationMenuItem>
-              ))}
-            </NavigationMenuList>
-          </NavigationMenu>
-        )}
+        {/* Desktop Navigation */}
+        <nav className="hidden md:flex ml-10 space-x-1 lg:space-x-2">
+          {isAuthenticated && (
+            <>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="flex items-center gap-1.5">
+                    <FileText className="h-4 w-4" />
+                    <span>Journal</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem asChild>
+                    <Link to="/journal" className="w-full">Thought Journal</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/mood-journal" className="w-full">Mood Journal</Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              
+              <Button variant="ghost" asChild>
+                <Link to="/meditation" className="flex items-center gap-1.5">
+                  <Moon className="h-4 w-4" />
+                  <span>Meditation</span>
+                </Link>
+              </Button>
+              
+              <Button variant="ghost" asChild>
+                <Link to="/chat" className="flex items-center gap-1.5">
+                  <MessageCircle className="h-4 w-4" />
+                  <span>Chat</span>
+                </Link>
+              </Button>
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="flex items-center gap-1.5">
+                    <Brain className="h-4 w-4" />
+                    <span>Tools</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem asChild>
+                    <Link to="/coping-tools" className="w-full">Coping Tools</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/interactive-tools" className="w-full">Interactive Tools</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/assessment" className="w-full">Assessments</Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="flex items-center gap-1.5">
+                    <BookOpen className="h-4 w-4" />
+                    <span>Resources</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem asChild>
+                    <Link to="/resources" className="w-full">Library</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/therapists" className="w-full">Find Therapists</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/community" className="w-full">Community</Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </>
+          )}
+        </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="ml-auto flex items-center gap-4">
           {isAuthenticated ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
-                  className="relative h-10 w-10 rounded-full hover:bg-serenity-purple/10 transition-colors"
-                  aria-label="User account menu"
+                  className="relative h-8 w-8 rounded-full"
                 >
-                  <Avatar className="border-2 border-serenity-purple/30 hover:border-serenity-purple/50 transition-all">
-                    <AvatarImage src={user?.profileImage} />
-                    <AvatarFallback className="bg-serenity-purple/20 text-serenity-purple-dark">
-                      {getUserInitials()}
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={user?.profileImage} alt={user?.firstName} />
+                    <AvatarFallback>
+                      {user?.firstName?.[0]}
+                      {user?.lastName?.[0]}
                     </AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 bg-white/90 backdrop-blur-md">
-                <DropdownMenuLabel className="flex flex-col">
-                  <span className="font-semibold text-serenity-purple-dark">{user?.firstName} {user?.lastName}</span>
-                  <span className="text-xs font-normal text-muted-foreground">
-                    {user?.email}
-                  </span>
+              <DropdownMenuContent className="w-56" align="end" forceMount>
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">
+                      {user?.firstName} {user?.lastName}
+                    </p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {user?.email}
+                    </p>
+                  </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => navigate("/profile")}>
-                  <User className="mr-2 h-4 w-4 text-serenity-purple" />
-                  <span>Profile</span>
+                <DropdownMenuItem asChild>
+                  <Link to="/profile" className="cursor-pointer flex w-full items-center">
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Profile</span>
+                  </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate("/profile?tab=progress")}>
-                  <LineChart className="mr-2 h-4 w-4 text-serenity-purple" />
-                  <span>Progress Dashboard</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate("/profile?tab=settings")}>
-                  <Settings className="mr-2 h-4 w-4 text-serenity-purple" />
-                  <span>Settings</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={logout}>
-                  <LogOut className="mr-2 h-4 w-4 text-destructive" />
+                <DropdownMenuItem onClick={logout} className="cursor-pointer">
+                  <LogOut className="mr-2 h-4 w-4" />
                   <span>Log out</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <div className="flex items-center gap-2">
-              <Button 
-                variant="ghost" 
-                onClick={() => navigate("/login")} 
-                className="flex items-center gap-2 hover:bg-serenity-purple/10"
-              >
-                <LogIn className="h-4 w-4 text-serenity-purple" />
-                <span>Login</span>
+            <div className="hidden md:flex items-center space-x-4">
+              <Button variant="ghost" asChild>
+                <Link to="/login">Log in</Link>
               </Button>
-              <Button 
-                onClick={() => navigate("/signup")} 
-                className="flex items-center gap-2 bg-serenity-purple hover:bg-serenity-purple-dark transition-colors"
-              >
-                <UserPlus className="h-4 w-4" />
-                <span>Sign Up</span>
+              <Button asChild>
+                <Link to="/signup">Sign up</Link>
               </Button>
             </div>
           )}
 
-          {isMobile && (
-            <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-              <SheetTrigger asChild>
-                <Button variant="outline" size="icon" className="ml-2">
-                  <Menu className="h-5 w-5" />
-                  <span className="sr-only">Toggle menu</span>
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="right" className="w-[80%] sm:w-[350px] p-0 bg-white/95 backdrop-blur-md">
-                <SheetHeader className="p-4 border-b border-serenity-purple/20">
-                  <SheetTitle className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-full bg-gradient-to-br from-serenity-purple to-serenity-purple-dark flex items-center justify-center">
-                      <span className="text-white font-bold text-sm">S</span>
-                    </div>
-                    <span className="font-bold bg-clip-text text-transparent bg-gradient-to-r from-serenity-purple to-serenity-purple-dark">
-                      Serenity
-                    </span>
-                  </SheetTitle>
-                </SheetHeader>
-                <div className="flex flex-col py-2">
-                  {navItems.map((item) => (
-                    <Button
-                      key={item.name}
-                      variant="ghost"
-                      className={cn(
-                        "justify-start px-4 py-2 h-12 w-full text-left transition-colors",
-                        location.pathname === item.href
-                          ? "bg-serenity-purple/10 text-serenity-purple-dark"
-                          : "text-muted-foreground hover:bg-serenity-purple/10"
-                      )}
-                      onClick={() => handleNavItemClick(item.href)}
-                    >
-                      {item.icon}
-                      <span className="ml-3">{item.name}</span>
-                    </Button>
-                  ))}
-
-                  <div className="border-t mt-2 pt-2">
-                    {isAuthenticated ? (
-                      <>
-                        <Button
-                          variant="ghost"
-                          className="justify-start w-full px-4 py-2 h-12"
-                          onClick={() => {
-                            handleNavItemClick("/profile");
-                          }}
-                        >
-                          <User className="h-4 w-4" />
-                          <span className="ml-3">Profile</span>
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          className="justify-start w-full px-4 py-2 h-12"
-                          onClick={() => {
-                            logout();
-                            setIsMenuOpen(false);
-                          }}
-                        >
-                          <LogOut className="h-4 w-4" />
-                          <span className="ml-3">Log out</span>
-                        </Button>
-                      </>
-                    ) : (
-                      <>
-                        <Button
-                          variant="ghost"
-                          className="justify-start w-full px-4 py-2 h-12"
-                          onClick={() => handleNavItemClick("/login")}
-                        >
-                          <LogIn className="h-4 w-4" />
-                          <span className="ml-3">Login</span>
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          className="justify-start w-full px-4 py-2 h-12"
-                          onClick={() => handleNavItemClick("/signup")}
-                        >
-                          <UserPlus className="h-4 w-4" />
-                          <span className="ml-3">Sign Up</span>
-                        </Button>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </SheetContent>
-            </Sheet>
-          )}
+          {/* Mobile menu button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden"
+            onClick={toggleMobileMenu}
+          >
+            <Menu className="h-6 w-6" />
+            <span className="sr-only">Toggle menu</span>
+          </Button>
         </div>
       </div>
+
+      {/* Mobile menu */}
+      {mobileMenuOpen && (
+        <div className="md:hidden fixed inset-0 z-50 bg-background">
+          <div className="container flex h-16 items-center px-4 sm:px-6">
+            <Link to="/" className="flex items-center gap-2">
+              <Heart className="h-6 w-6 text-serenity-purple" />
+              <span className="text-xl font-bold">Serenity</span>
+            </Link>
+            
+            <Button
+              variant="ghost"
+              size="icon"
+              className="ml-auto"
+              onClick={toggleMobileMenu}
+            >
+              <X className="h-6 w-6" />
+              <span className="sr-only">Close menu</span>
+            </Button>
+          </div>
+          
+          <nav className="container px-4 sm:px-6 pb-6 space-y-1">
+            {isAuthenticated ? (
+              <>
+                <div className="pt-4 pb-6 border-b">
+                  <div className="flex items-center gap-4 mb-4">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={user?.profileImage} alt={user?.firstName} />
+                      <AvatarFallback>
+                        {user?.firstName?.[0]}
+                        {user?.lastName?.[0]}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-medium">
+                        {user?.firstName} {user?.lastName}
+                      </p>
+                      <p className="text-sm text-muted-foreground">{user?.email}</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-4">
+                    <Button asChild variant="outline" size="sm" className="flex-1">
+                      <Link to="/profile">Profile</Link>
+                    </Button>
+                    <Button onClick={logout} size="sm" className="flex-1">
+                      Log out
+                    </Button>
+                  </div>
+                </div>
+                
+                <div className="space-y-1 py-2">
+                  <p className="text-sm font-medium text-muted-foreground px-2 py-1">
+                    Journal
+                  </p>
+                  <Link
+                    to="/journal"
+                    className="flex items-center gap-3 px-2 py-1.5 text-sm rounded-md hover:bg-muted"
+                    onClick={toggleMobileMenu}
+                  >
+                    <FileText className="h-4 w-4" />
+                    Thought Journal
+                  </Link>
+                  <Link
+                    to="/mood-journal"
+                    className="flex items-center gap-3 px-2 py-1.5 text-sm rounded-md hover:bg-muted"
+                    onClick={toggleMobileMenu}
+                  >
+                    <Activity className="h-4 w-4" />
+                    Mood Journal
+                  </Link>
+                </div>
+                
+                <Link
+                  to="/meditation"
+                  className="flex items-center gap-3 px-2 py-1.5 text-sm rounded-md hover:bg-muted"
+                  onClick={toggleMobileMenu}
+                >
+                  <Moon className="h-4 w-4" />
+                  Meditation
+                </Link>
+                
+                <Link
+                  to="/chat"
+                  className="flex items-center gap-3 px-2 py-1.5 text-sm rounded-md hover:bg-muted"
+                  onClick={toggleMobileMenu}
+                >
+                  <MessageCircle className="h-4 w-4" />
+                  Chat
+                </Link>
+                
+                <div className="space-y-1 py-2">
+                  <p className="text-sm font-medium text-muted-foreground px-2 py-1">
+                    Tools
+                  </p>
+                  <Link
+                    to="/coping-tools"
+                    className="flex items-center gap-3 px-2 py-1.5 text-sm rounded-md hover:bg-muted"
+                    onClick={toggleMobileMenu}
+                  >
+                    <Brain className="h-4 w-4" />
+                    Coping Tools
+                  </Link>
+                  <Link
+                    to="/interactive-tools"
+                    className="flex items-center gap-3 px-2 py-1.5 text-sm rounded-md hover:bg-muted"
+                    onClick={toggleMobileMenu}
+                  >
+                    <Brain className="h-4 w-4" />
+                    Interactive Tools
+                  </Link>
+                  <Link
+                    to="/assessment"
+                    className="flex items-center gap-3 px-2 py-1.5 text-sm rounded-md hover:bg-muted"
+                    onClick={toggleMobileMenu}
+                  >
+                    <Activity className="h-4 w-4" />
+                    Assessments
+                  </Link>
+                </div>
+                
+                <div className="space-y-1 py-2">
+                  <p className="text-sm font-medium text-muted-foreground px-2 py-1">
+                    Resources
+                  </p>
+                  <Link
+                    to="/resources"
+                    className="flex items-center gap-3 px-2 py-1.5 text-sm rounded-md hover:bg-muted"
+                    onClick={toggleMobileMenu}
+                  >
+                    <BookOpen className="h-4 w-4" />
+                    Library
+                  </Link>
+                  <Link
+                    to="/therapists"
+                    className="flex items-center gap-3 px-2 py-1.5 text-sm rounded-md hover:bg-muted"
+                    onClick={toggleMobileMenu}
+                  >
+                    <User className="h-4 w-4" />
+                    Find Therapists
+                  </Link>
+                  <Link
+                    to="/community"
+                    className="flex items-center gap-3 px-2 py-1.5 text-sm rounded-md hover:bg-muted"
+                    onClick={toggleMobileMenu}
+                  >
+                    <Users className="h-4 w-4" />
+                    Community
+                  </Link>
+                </div>
+              </>
+            ) : (
+              <div className="pt-4 flex flex-col space-y-3">
+                <Button asChild variant="outline">
+                  <Link to="/login" onClick={toggleMobileMenu}>
+                    Log in
+                  </Link>
+                </Button>
+                <Button asChild>
+                  <Link to="/signup" onClick={toggleMobileMenu}>
+                    Sign up
+                  </Link>
+                </Button>
+              </div>
+            )}
+          </nav>
+        </div>
+      )}
     </header>
   );
 };
