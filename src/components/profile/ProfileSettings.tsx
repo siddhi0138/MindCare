@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -22,6 +23,7 @@ const ProfileSettings = () => {
   });
   
   const [isEditing, setIsEditing] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -72,15 +74,30 @@ const ProfileSettings = () => {
   };
   
   const handleImageUpload = () => {
-    toast.error('Feature unavailable', {
-      description: 'Profile image upload is not yet available.'
-    });
-  };
-
-  const handlePasswordReset = () => {
-    toast.error('Feature unavailable', {
-      description: 'Password reset functionality is not yet available.'
-    });
+    setIsUploading(true);
+    
+    // Simulate upload process
+    setTimeout(() => {
+      // Generate a random profile image using DiceBear API
+      const timestamp = Date.now();
+      const newImageUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.firstName || 'user'}-${timestamp}`;
+      
+      // Update profile with new image
+      updateProfile({
+        profileImage: newImageUrl
+      });
+      
+      setFormData(prev => ({
+        ...prev,
+        profileImage: newImageUrl
+      }));
+      
+      setIsUploading(false);
+      
+      toast.success('Profile picture updated', {
+        description: 'Your new profile picture has been set'
+      });
+    }, 1500);
   };
 
   const getUserInitials = () => {
@@ -109,8 +126,13 @@ const ProfileSettings = () => {
               <Button 
                 size="icon" 
                 className="absolute -bottom-2 -right-2 rounded-full h-8 w-8"
-                onClick={handleImageUpload}>
-                <Camera className="h-4 w-4" />
+                onClick={handleImageUpload}
+                disabled={isUploading}>
+                {isUploading ? (
+                  <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <Camera className="h-4 w-4" />
+                )}
               </Button>
             </div>
             <div className="space-y-1 text-center sm:text-left">

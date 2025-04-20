@@ -5,6 +5,7 @@ import AffirmationGenerator from "@/components/coping/AffirmationGenerator";
 import GuidedBreathingExercise from "@/components/coping/GuidedBreathingExercise";
 import GroundingExercise from "@/components/coping/GroundingExercise";
 import AffirmationCards from "@/components/coping/AffirmationCards";
+import MoodBoostGames from "@/components/coping/MoodBoostGames";
 
 const InteractiveToolsPage = () => {
   return (
@@ -73,12 +74,7 @@ const InteractiveToolsPage = () => {
           </TabsContent>
           
           <TabsContent value="mood-boost">
-            <div className="py-12 text-center">
-              <h3 className="text-xl font-medium mb-2">Interactive Games Coming Soon</h3>
-              <p className="text-muted-foreground max-w-md mx-auto">
-                We're developing fun, evidence-based games designed to boost your mood and build positive thinking patterns.
-              </p>
-            </div>
+            <MoodBoostGames />
           </TabsContent>
         </Tabs>
       </div>

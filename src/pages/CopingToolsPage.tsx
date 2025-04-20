@@ -6,6 +6,7 @@ import AffirmationCards from "@/components/coping/AffirmationCards";
 import { Wind, Heart, Gamepad2, Sparkles } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 const CopingToolsPage = () => {
   return (
@@ -47,7 +48,9 @@ const CopingToolsPage = () => {
                     <p className="text-sm text-muted-foreground mb-4">
                       Reduces anxiety and helps with sleep by regulating your breathing pattern.
                     </p>
-                    <Button>Start Exercise</Button>
+                    <Link to="/interactive-tools">
+                      <Button>Start Exercise</Button>
+                    </Link>
                   </div>
                 </CardContent>
               </Card>
@@ -59,7 +62,9 @@ const CopingToolsPage = () => {
                     <p className="text-sm text-muted-foreground mb-4">
                       A technique used by Navy SEALs to reduce stress and improve concentration.
                     </p>
-                    <Button>Start Exercise</Button>
+                    <Link to="/interactive-tools">
+                      <Button>Start Exercise</Button>
+                    </Link>
                   </div>
                 </CardContent>
               </Card>
@@ -75,13 +80,18 @@ const CopingToolsPage = () => {
           </TabsContent>
           
           <TabsContent value="games">
-            <div className="text-center py-16">
-              <Gamepad2 className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
-              <h3 className="text-xl font-medium mb-2">Coming Soon</h3>
-              <p className="text-muted-foreground max-w-md mx-auto">
-                Interactive mood-boosting games are currently in development.
-                Check back soon for memory games, gratitude challenges, and more.
+            <div className="bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-950/20 dark:to-indigo-950/20 rounded-lg p-8 text-center">
+              <Gamepad2 className="mx-auto h-16 w-16 text-primary mb-4" />
+              <h3 className="text-xl font-medium mb-4">Interactive Mood-Boosting Games</h3>
+              <p className="text-muted-foreground max-w-md mx-auto mb-6">
+                Play our collection of scientifically-designed games to improve your mood, 
+                practice gratitude, and develop positive thinking patterns.
               </p>
+              <Link to="/interactive-tools?tab=mood-boost">
+                <Button size="lg">
+                  Play Games Now
+                </Button>
+              </Link>
             </div>
           </TabsContent>
           
@@ -138,7 +148,9 @@ const CopingToolsPage = () => {
                       </div>
                     </div>
                     
-                    <Button>Start Guided Exercise</Button>
+                    <Link to="/interactive-tools?tab=grounding">
+                      <Button>Start Guided Exercise</Button>
+                    </Link>
                   </div>
                 </CardContent>
               </Card>
