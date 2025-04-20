@@ -18,6 +18,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   signup: (firstName: string, lastName: string, email: string, password: string) => Promise<void>;
   logout: () => void;
+  resetPassword: (email: string) => Promise<void>;
   updateProfile: (userData: Partial<User>) => void;
 }
 
@@ -120,6 +121,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const resetPassword = async (email: string) => {
+    try {
+      setIsLoading(true);
+      // In a real app, this would be an API call to your auth service
+      
+      // Simulate network request
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // In a real implementation, an email would be sent to the user
+      toast.success('Password reset email sent', {
+        description: `If an account exists for ${email}, you'll receive reset instructions.`
+      });
+      
+      return Promise.resolve();
+    } catch (error) {
+      console.error('Password reset error:', error);
+      toast.error('Password reset failed', {
+        description: 'Something went wrong. Please try again.'
+      });
+      return Promise.reject(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const logout = () => {
     setUser(null);
     localStorage.removeItem('user');
@@ -145,6 +171,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         login,
         signup,
         logout,
+        resetPassword,
         updateProfile
       }}
     >

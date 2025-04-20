@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -9,6 +10,7 @@ import { FaGoogle, FaApple, FaFacebook } from 'react-icons/fa';
 import { Mail, Lock, Eye, EyeOff, User } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/components/ui/sonner';
+import ForgotPasswordForm from './ForgotPasswordForm';
 
 interface AuthFormProps {
   defaultTab?: 'login' | 'signup';
@@ -18,6 +20,7 @@ const AuthForm = ({ defaultTab = 'login' }: AuthFormProps) => {
   const navigate = useNavigate();
   const { login, signup, isLoading } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   
   const [loginData, setLoginData] = useState({
     email: '',
@@ -63,6 +66,10 @@ const AuthForm = ({ defaultTab = 'login' }: AuthFormProps) => {
     });
   };
 
+  if (showForgotPassword) {
+    return <ForgotPasswordForm onBack={() => setShowForgotPassword(false)} />;
+  }
+
   return (
     <Card className="w-full max-w-md mx-auto shadow-lg border-primary/10">
       <CardHeader className="space-y-1 text-center">
@@ -99,8 +106,11 @@ const AuthForm = ({ defaultTab = 'login' }: AuthFormProps) => {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="password">Password</Label>
-                  <Button variant="link" className="text-xs p-0 h-auto" type="button" 
-                    onClick={() => toast.info("Reset password", { description: "Password reset feature coming soon." })}>
+                  <Button 
+                    variant="link" 
+                    className="text-xs p-0 h-auto" 
+                    type="button" 
+                    onClick={() => setShowForgotPassword(true)}>
                     Forgot password?
                   </Button>
                 </div>
@@ -231,9 +241,36 @@ const AuthForm = ({ defaultTab = 'login' }: AuthFormProps) => {
           </div>
           <div className="relative flex justify-center text-xs uppercase">
             <span className="bg-card px-2 text-muted-foreground">
-              Email login only
+              Or continue with
             </span>
           </div>
+        </div>
+        
+        <div className="grid grid-cols-3 gap-3 mt-4">
+          <Button 
+            variant="outline" 
+            type="button" 
+            className="flex items-center justify-center gap-2"
+            onClick={() => handleSocialLogin('Google')}
+          >
+            <FaGoogle className="h-4 w-4" />
+          </Button>
+          <Button 
+            variant="outline" 
+            type="button" 
+            className="flex items-center justify-center gap-2"
+            onClick={() => handleSocialLogin('Apple')}
+          >
+            <FaApple className="h-4 w-4" />
+          </Button>
+          <Button 
+            variant="outline" 
+            type="button" 
+            className="flex items-center justify-center gap-2"
+            onClick={() => handleSocialLogin('Facebook')}
+          >
+            <FaFacebook className="h-4 w-4" />
+          </Button>
         </div>
       </CardContent>
       <CardFooter className="text-center text-xs text-muted-foreground">
