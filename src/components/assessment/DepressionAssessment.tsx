@@ -38,10 +38,6 @@ const interpretations = [
   { range: [20, 27], severity: "Severe", description: "Your symptoms suggest severe depression." }
 ];
 
-interface DepressionAssessmentProps {
-  onComplete?: (score: number) => void;
-}
-
 const DepressionAssessment = ({ onComplete }: DepressionAssessmentProps) => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<number[]>(Array(questions.length).fill(-1));
@@ -53,7 +49,6 @@ const DepressionAssessment = ({ onComplete }: DepressionAssessmentProps) => {
     newAnswers[currentQuestion] = parseInt(value);
     setAnswers(newAnswers);
     
-    // Move to next question or complete the assessment
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
     } else {
@@ -61,7 +56,6 @@ const DepressionAssessment = ({ onComplete }: DepressionAssessmentProps) => {
       setScore(totalScore);
       setCompleted(true);
       
-      // Save result to history
       const newResult = {
         id: Date.now().toString(),
         type: "depression",
@@ -71,7 +65,6 @@ const DepressionAssessment = ({ onComplete }: DepressionAssessmentProps) => {
         interpretation: getInterpretation(totalScore)
       };
       
-      // In a real app, this would send data to a server
       const history = JSON.parse(localStorage.getItem('assessmentHistory') || '[]');
       localStorage.setItem('assessmentHistory', JSON.stringify([...history, newResult]));
       
