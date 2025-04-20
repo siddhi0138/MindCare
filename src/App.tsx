@@ -9,6 +9,7 @@ import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import JournalPage from "./pages/JournalPage";
+import MoodJournalPage from "./pages/MoodJournalPage";
 import MeditationPage from "./pages/MeditationPage";
 import ChatPage from "./pages/ChatPage";
 import ResourcesPage from "./pages/ResourcesPage";
@@ -16,6 +17,7 @@ import CommunityPage from "./pages/CommunityPage";
 import AssessmentPage from "./pages/AssessmentPage";
 import TherapistPage from "./pages/TherapistPage";
 import CopingToolsPage from "./pages/CopingToolsPage";
+import InteractiveToolsPage from "./pages/InteractiveToolsPage";
 import ProfilePage from "./pages/ProfilePage";
 import NotFound from "./pages/NotFound";
 import PrivacyPage from "./pages/PrivacyPage";
@@ -54,6 +56,7 @@ const AppRoutes = () => {
       
       {/* Protected routes */}
       <Route path="/journal" element={<ProtectedRoute><JournalPage /></ProtectedRoute>} />
+      <Route path="/mood-journal" element={<ProtectedRoute><MoodJournalPage /></ProtectedRoute>} />
       <Route path="/meditation" element={<ProtectedRoute><MeditationPage /></ProtectedRoute>} />
       <Route path="/chat" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
       <Route path="/resources" element={<ProtectedRoute><ResourcesPage /></ProtectedRoute>} />
@@ -61,6 +64,7 @@ const AppRoutes = () => {
       <Route path="/assessment" element={<ProtectedRoute><AssessmentPage /></ProtectedRoute>} />
       <Route path="/therapists" element={<ProtectedRoute><TherapistPage /></ProtectedRoute>} />
       <Route path="/coping-tools" element={<ProtectedRoute><CopingToolsPage /></ProtectedRoute>} />
+      <Route path="/interactive-tools" element={<ProtectedRoute><InteractiveToolsPage /></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
       
       {/* 404 route */}
