@@ -51,17 +51,9 @@ const Header = () => {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="flex items-center gap-1.5">
                     <FileText className="h-4 w-4" />
-                    <span>Journal</span>
+                    <Link to="/journal" className="w-full">Journal</Link>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem asChild>
-                    <Link to="/journal" className="w-full">Thought Journal</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/mood-journal" className="w-full">Mood Journal</Link>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
               </DropdownMenu>
               
               <Button variant="ghost" asChild>
