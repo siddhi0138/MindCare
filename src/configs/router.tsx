@@ -13,7 +13,6 @@ import PrivacyPage from '@/pages/PrivacyPage';
 
 // Protected Pages
 import JournalPage from '@/pages/JournalPage';
-import MoodJournalPage from '@/pages/MoodJournalPage';
 import MeditationPage from '@/pages/MeditationPage';
 import ChatPage from '@/pages/ChatPage';
 import ResourcesPage from '@/pages/ResourcesPage';
@@ -61,7 +60,6 @@ const AppRouter = () => {
 
       {/* Protected routes */}
       <Route path="/journal" element={<ProtectedRoute><JournalPage /></ProtectedRoute>} />
-      <Route path="/mood-journal" element={<ProtectedRoute><MoodJournalPage /></ProtectedRoute>} />
       <Route path="/meditation" element={<ProtectedRoute><MeditationPage /></ProtectedRoute>} />
       <Route path="/chat" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
       <Route path="/resources" element={<ProtectedRoute><ResourcesPage /></ProtectedRoute>} />
