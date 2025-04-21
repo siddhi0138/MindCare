@@ -5,13 +5,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Calendar as CalendarIcon, List, FileText, PlusCircle } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext'; 
+import { useAuth } from '@/contexts/AuthContext';
 import { collection, query, where, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from '@/configs/firebase';
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
-
-// Import the emoji
+import { DayProps } from 'react-day-picker';
 
 interface JournalEntry {
   id: string;
@@ -20,15 +19,29 @@ interface JournalEntry {
   date: Date;
   mood: string;
   timestamp: any;
-  type: 'past' | 'current';
+  type?: 'past' | 'current';
   emoji?: string;
 }
+
+const moodEmojiMap: { [key: string]: string } = {
+  happy: '😊',
+  calm: '😌',
+  neutral: '😐',
+  anxious: '😰',
+  sad: '😔',
+};
+
+const getNormalizedDate = (date: Date) => {
+  const newDate = new Date(date);
+  return new Date(newDate.getFullYear(), newDate.getMonth(), newDate.getDate());
+};
 
 const JournalPage = () => {
   const [entries, setEntries] = useState<JournalEntry[]>([]);
   const [selectedEntry, setSelectedEntry] = useState<JournalEntry | undefined>(undefined);
   const [editorKey, setEditorKey] = useState(0);
-  const { currentUser } = useAuth(); // Access currentUser from AuthContext
+  const { currentUser } = useAuth();
+
   useEffect(() => {
     if (currentUser) {
       const q = query(
@@ -38,29 +51,62 @@ const JournalPage = () => {
       );
 
       const unsubscribe = onSnapshot(q, (querySnapshot) => {
-        const journalEntries: JournalEntry[] = [];
-        querySnapshot.docChanges().forEach((change) => {
-          const doc = change.doc;
-          (doc.data() as any).type = change.type === 'added' ? 'current' : 'past';
-          journalEntries.push({ id: doc.id, ...doc.data() } as JournalEntry);
+        const fetchedEntries: JournalEntry[] = [];
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          fetchedEntries.push({
+            id: doc.id,
+            ...data,
+            timestamp: data.timestamp?.toDate(),
+          } as JournalEntry);
         });
-        setEntries(journalEntries);
+        setEntries(fetchedEntries);
       });
+
       return () => unsubscribe();
     }
   }, [currentUser]);
 
+  const getCalendarEntry = (date: Date) => {
+    const entriesForDate = entries.filter(
+      (entry) =>
+        entry.timestamp && 
+        getNormalizedDate(entry.timestamp).getTime() === getNormalizedDate(date).getTime()
+    );
 
-  return ( // Update to use currentUser
+    if (entriesForDate.length === 0) {
+      return '';
+    }
+
+    // Find the latest entry for this date
+    const latestEntry = entriesForDate.reduce((prev, current) =>
+      prev.timestamp > current.timestamp ? prev : current
+    );
+
+    return moodEmojiMap[latestEntry.mood] || moodEmojiMap['neutral'];
+  };
+
+  // Custom day component for calendar
+  const renderDay = (day: DayProps) => {    
+    const emoji = getCalendarEntry(day.date);
+    return (
+      <div className="flex justify-center items-center w-full h-full">
+        {day.date.getDate()}
+        {emoji && <span className="absolute text-xl">{emoji}</span>}
+      </div>
+    );
+  };
+
+  return (
     <MainLayout>
       <div className="w-full mx-auto">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">My Journal</h1>
-          <Button onClick={() => {
-            setSelectedEntry(undefined);
-            setEditorKey(prevKey => prevKey + 1);
-          }
-          }
+          <Button
+            onClick={() => {
+              setSelectedEntry(undefined);
+              setEditorKey((prevKey) => prevKey + 1);
+            }}
           >
             <PlusCircle className="mr-2 h-4 w-4" />
             New Entry
@@ -90,17 +136,18 @@ const JournalPage = () => {
                   <Card
                     key={entry.id}
                     className={`border-primary/10 cursor-pointer card-hover ${
-                      entry.type === 'current' ? 'bg-primary/10' : ''
+                      selectedEntry?.id === entry.id ? 'bg-primary/10' : ''
                     }`}
                     onClick={() => {
                       setSelectedEntry(entry);
-                      setEditorKey(prevKey => prevKey + 1);
-                    }}>
+                      setEditorKey((prevKey) => prevKey + 1);
+                    }}
+                  >
                     <CardHeader className="pb-2">
                       <CardTitle className="flex justify-between items-center">
                         <span>{entry.title || 'Untitled'}</span>
                         <span className="text-sm text-muted-foreground">
-                          {entry.timestamp ? format(entry.timestamp.toDate(), 'PPP') : 'No Date'}
+                          {entry.timestamp ? format(entry.timestamp, 'PPP') : 'No Date'}
                         </span>
                       </CardTitle>
                     </CardHeader>
@@ -131,10 +178,36 @@ const JournalPage = () => {
                   <Calendar
                     mode="single"
                     className="rounded-md border mx-auto"
-                    entries={entries.map(entry => ({
-                      date: entry.date instanceof Date ? entry.date : new Date(),
-                      emoji: entry.emoji ?? '🙂',
-                    }))}
+                    selected={null}
+                    modifiers={{
+                      hasEntry: entries
+                        .map(entry => entry.timestamp)
+                        .filter(Boolean)
+                        .map(date => getNormalizedDate(date as Date))
+                    }}
+                    modifiersStyles={{
+                      hasEntry: { fontWeight: 'bold' }
+                    }}
+                    components={{
+                      Day: renderDay
+                    }}
+                    onSelect={(date) => {
+                      if (date) {
+                        const entriesForDate = entries.filter(
+                          (entry) => 
+                            entry.timestamp && 
+                            getNormalizedDate(entry.timestamp).getTime() === getNormalizedDate(date).getTime()
+                        );
+                        if (entriesForDate.length > 0) {
+                          // Select the most recent entry for this date
+                          const latestEntry = entriesForDate.reduce((prev, current) =>
+                            prev.timestamp > current.timestamp ? prev : current
+                          );
+                          setSelectedEntry(latestEntry);
+                          setEditorKey((prevKey) => prevKey + 1);
+                        }
+                      }
+                    }}
                   />
                 </div>
               </CardContent>
