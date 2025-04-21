@@ -11,7 +11,7 @@ import { useAuth } from '@/contexts/AuthContext';
 const ProfilePage = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { currentUser } = useAuth();
   
   // Extract tab from URL query params
   const queryParams = new URLSearchParams(location.search);
@@ -45,7 +45,7 @@ const ProfilePage = () => {
           
           <TabsContent value="progress">
             {/* Pass userId as an optional prop */}
-            <ProgressDashboard userId={user?.id} />
+            <ProgressDashboard userId={currentUser?.id} />
           </TabsContent>
           
           <TabsContent value="reminders">

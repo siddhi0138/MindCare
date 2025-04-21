@@ -28,7 +28,7 @@ import {
 import { useState } from "react";
 
 const Header = () => {
-  const {user, isAuthenticated, logout } = useAuth();
+  const {currentUser, isAuthenticated, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const toggleMobileMenu = () => {
@@ -130,22 +130,22 @@ const Header = () => {
                   className="relative h-8 w-8 rounded-full"
                 >
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={user?.profileImage} alt={user?.firstName} />
+                    <AvatarImage src={currentUser?.profileImage} alt={currentUser?.firstName} />
                     <AvatarFallback>
-                      {user?.firstName?.[0]}
-                      {user?.lastName?.[0]}
+                      {currentUser?.firstName?.[0]}
+                      {currentUser?.lastName?.[0]}
                     </AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="md:w-56 w-full" align="end" forceMount>
+              <DropdownMenuContent className="w-full md:w-56" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium leading-none">
-                      {user?.firstName} {user?.lastName}
+                      {currentUser?.firstName} {currentUser?.lastName}
                     </p>
                     <p className="text-xs leading-none text-muted-foreground">
-                      {user?.email}
+                      {currentUser?.email}
                     </p>
                   </div>
                 </DropdownMenuLabel>
@@ -212,23 +212,23 @@ const Header = () => {
                 <div className="pt-4 pb-6 border-b">
                   <div className="flex items-center gap-4 mb-4">
                     <Avatar className="h-10 w-10">
-                      <AvatarImage src={user?.profileImage} alt={user?.firstName} />
+                      <AvatarImage src={currentUser?.profileImage} alt={currentUser?.firstName} />
                       <AvatarFallback>
-                        {user?.firstName?.[0]}
-                        {user?.lastName?.[0]}
+                        {currentUser?.firstName?.[0]}
+                        {currentUser?.lastName?.[0]}
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <p className="font-medium">
-                        {user?.firstName} {user?.lastName}
+                      <p className="font-medium"> {currentUser?.firstName} {currentUser?.lastName}
                       </p>
-                      <p className="text-sm text-muted-foreground">{user?.email}</p>
+                      <p className="text-sm text-muted-foreground">{currentUser?.email}</p>
                     </div>
                   </div>
                   <div className="flex gap-4">
-                    <Button asChild variant="outline" size="sm" className="flex-1">
-                      <Link to="/profile">Profile</Link>
-                    </Button>
+                    <Link to="/profile">
+                      <Button asChild variant="outline" size="sm" className="flex-1">
+                        Profile
+                      </Button> </Link>
                     <Button onClick={logout} size="sm" className="flex-1">
                       Log out
                     </Button>
@@ -288,20 +288,13 @@ const Header = () => {
                     Coping Tools
                   </Link>
                   <Link
-                    to="/interactive-tools"
-                    className="flex items-center gap-3 px-2 py-1.5 text-sm rounded-md hover:bg-muted"
-                    onClick={toggleMobileMenu}
-                  >
-                    <Brain className="h-4 w-4" />
-                    Interactive Tools
-                  </Link>
-                  <Link
                     to="/assessment"
                     className="flex items-center gap-3 px-2 py-1.5 text-sm rounded-md hover:bg-muted"
                     onClick={toggleMobileMenu}
                   >
                     <Activity className="h-4 w-4" />
                     Assessments
+
                   </Link>
                   <Link
                     to="/exercises"
@@ -309,7 +302,9 @@ const Header = () => {
                     onClick={toggleMobileMenu}
                   >
                     Exercises
+
                   </Link>
+
                 </div>
                 
                 <div className="space-y-1 py-2">
@@ -332,7 +327,9 @@ const Header = () => {
                     <User className="h-4 w-4" />
                     Find Therapists
                   </Link>
-                  <Link
+
+                      <Link
+
                     to="/community"
                     className="flex items-center gap-3 px-2 py-1.5 text-sm rounded-md hover:bg-muted"
                     onClick={toggleMobileMenu}
@@ -340,6 +337,7 @@ const Header = () => {
                     <Users className="h-4 w-4" />
                     Community
                   </Link>
+
                 </div>
               </>
             ) : (

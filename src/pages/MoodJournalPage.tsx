@@ -21,7 +21,7 @@ interface JournalEntry {
 
 const MoodJournalPage: React.FC = () => {
 
-  const { user, isLoading: authIsLoading } = useContext(AuthContext); // Get user and loading state from context
+  const { currentUser, isLoading: authIsLoading } = useContext(AuthContext); // Get user and loading state from context
   const [mood, setMood] = useState<string>(''); // State for current mood selection
   const [entryText, setEntryText] = useState<string>(''); // State for journal text
   const [gratitudeText, setGratitudeText] = useState<string>(''); // State for gratitude text
@@ -35,7 +35,7 @@ const MoodJournalPage: React.FC = () => {
 
   // Function to save a new journal entry
   const saveJournalEntry = async (entry: Omit<JournalEntry, 'id' | 'timestamp'>) => {
-    if (!user) return; // Should not happen if page is protected
+    if (!currentUser) return; // Should not happen if page is protected
     setIsSaving(true);
     try {
       const docRef = await addDoc(collection(db, "journalEntries"), {
@@ -59,14 +59,14 @@ const MoodJournalPage: React.FC = () => {
 
   // Function to fetch journal entries for the current user
   const fetchJournalEntries = async () => {
-    if (!user) return;
+    if (!currentUser) return;
     setIsLoading(true);
     try {
       const q = query(
         collection(db, "journalEntries"),
-        where("userId", "==", user.id),
-        orderBy("timestamp", "desc") // Show newest first
-      );
+        where("userId", "==", currentUser.id),
+        orderBy("timestamp", "desc")
+        );
       const querySnapshot = await getDocs(q);
       const entries: JournalEntry[] = [];
       querySnapshot.forEach((doc) => {
@@ -83,26 +83,28 @@ const MoodJournalPage: React.FC = () => {
 
   // Fetch entries when the component mounts and user is available
   useEffect(() => {
-    console.log("User object:", user); // Log the user object
-    if (user) {
+    console.log("User object:", currentUser); // Log the user object
+    if (currentUser) {
       fetchJournalEntries();
     }
-  }, [user]); // Dependency array includes user
+  }, [currentUser]); // Dependency array includes user
 
   // Handler for submitting the form
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !mood || !entryText) {
-        toast.warning("Please select a mood and write an entry.");
-        return;
-    };
+    if (!currentUser || !mood || !entryText) {
+      toast.warning("Please select a mood and write an entry.");
+      return;
+    }
 
-    const newEntry: Omit<JournalEntry, 'id' | 'timestamp'> = {
-      userId: user.id,
+
+    const newEntry: Omit<JournalEntry, 'id' | 'timestamp'> = {      
+      userId: currentUser?.id,
       mood: mood,
       entryText: entryText,
       gratitude: gratitudeText || undefined, // Only include if not empty
     };
+
     saveJournalEntry(newEntry);
   };
 
@@ -168,10 +170,10 @@ const MoodJournalPage: React.FC = () => {
                 </div>
               </CardContent>
               <CardFooter>
-                <Button type="submit" disabled={isSaving || !user || !mood || !entryText}>
+                <Button type="submit" disabled={isSaving || !currentUser || !mood || !entryText}>
                   {isSaving ? "Saving..." : "Save Entry"}
                 </Button>
-                {!user && <p className="ml-4 text-red-500 text-sm">Please log in to save entries.</p>}
+                {!currentUser && <p className="ml-4 text-red-500 text-sm">Please log in to save entries.</p>}
               </CardFooter>
             </form>
           </Card>

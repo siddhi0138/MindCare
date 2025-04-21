@@ -20,7 +20,7 @@ const JournalEditor = () => {
   const [date, setDate] = useState<Date>(new Date());
   const [mood, setMood] = useState('neutral');
   const [isSaving, setIsSaving] = useState(false);
-  const { user } = useAuth();
+  const { currentUser } = useAuth();
 
   const moods = [
     { label: 'Happy', value: 'happy', emoji: '😊' },
@@ -31,7 +31,7 @@ const JournalEditor = () => {
   ];
 
   const handleSave = async () => {
-    if (!user) {
+    if (!currentUser) {
       toast.error("You must be logged in to save entries.");
       return;
     }
@@ -41,8 +41,8 @@ const JournalEditor = () => {
     }
     setIsSaving(true);
     try {
-      await addDoc(collection(db, "journalEntries"), {
-        userId: user.id,
+      await addDoc(collection(db, 'journalEntries'), {
+        userId: currentUser.id,
         title,
         content,
         date,

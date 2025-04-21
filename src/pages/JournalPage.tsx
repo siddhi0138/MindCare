@@ -28,13 +28,11 @@ const JournalPage = () => {
   const [entries, setEntries] = useState<JournalEntry[]>([]);
   const [selectedEntry, setSelectedEntry] = useState<JournalEntry | undefined>(undefined);
   const [editorKey, setEditorKey] = useState(0);
-  const { user } = useAuth();
-
+  const { currentUser } = useAuth(); // Access currentUser from AuthContext
   useEffect(() => {
-    if (user) {
+    if (currentUser) {
       const q = query(
         collection(db, 'journalEntries'),
-        where('userId', '==', user.id),
         orderBy('timestamp', 'desc')
       );
 
@@ -49,10 +47,10 @@ const JournalPage = () => {
       });
       return () => unsubscribe();
     }
-  }, [user]);
+  }, [currentUser]);
 
 
-  return (
+  return ( // Update to use currentUser
     <MainLayout>
       <div className="w-full mx-auto">
         <div className="flex justify-between items-center mb-8">

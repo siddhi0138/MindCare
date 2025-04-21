@@ -10,13 +10,13 @@ import { User, Mail, Lock, Camera } from 'lucide-react';
 import { toast } from '@/components/ui/sonner';
 
 const ProfileSettings = () => {
-  const { user, updateProfile } = useAuth();
+  const { currentUser, updateProfile } = useAuth();
   
-  const [formData, setFormData] = useState({
-    firstName: user?.firstName || '',
-    lastName: user?.lastName || '',
-    email: user?.email || '',
-    profileImage: user?.profileImage || '',
+  const [formData, setFormData] = useState({    
+    firstName: currentUser?.firstName || '',
+    lastName: currentUser?.lastName || '',
+    email: currentUser?.email || '',
+    profileImage: currentUser?.profileImage || '',
     currentPassword: '',
     newPassword: '',
     confirmPassword: ''
@@ -79,8 +79,8 @@ const ProfileSettings = () => {
     // Simulate upload process
     setTimeout(() => {
       // Generate a random profile image using DiceBear API
-      const timestamp = Date.now();
-      const newImageUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.firstName || 'user'}-${timestamp}`;
+      const timestamp = Date.now();      
+      const newImageUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser?.firstName || 'user'}-${timestamp}`;
       
       // Update profile with new image
       updateProfile({
