@@ -23,6 +23,10 @@ import CopingToolsPage from '@/pages/CopingToolsPage';
 import ProfilePage from '@/pages/ProfilePage';
 import ExercisesPage from '@/pages/ExercisesPage';
 
+import MemoryGamePage from '@/pages/MemoryGamePage';
+import WordZenPage from '@/pages/WordZenPage';
+import ColoringGamePage from '@/pages/ColoringGamePage';
+
 // --- Protected Route Component ---
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -69,6 +73,13 @@ const AppRouter = () => {
       <Route path="/coping-tools" element={<ProtectedRoute><CopingToolsPage /></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
       <Route path="/exercises" element={<ProtectedRoute><ExercisesPage /></ProtectedRoute>} />
+
+      {/* Nested protected routes for games */}
+      <Route path="/games">
+        <Route path="memory" element={<ProtectedRoute><MemoryGamePage /></ProtectedRoute>} />
+        <Route path="word-zen" element={<ProtectedRoute><WordZenPage /></ProtectedRoute>} />
+        <Route path="coloring" element={<ProtectedRoute><ColoringGamePage /></ProtectedRoute>} />
+      </Route>
 
       {/* 404 route */}
       <Route path="*" element={<NotFound />} />
