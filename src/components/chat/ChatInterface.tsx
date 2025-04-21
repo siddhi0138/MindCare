@@ -265,12 +265,12 @@ const ChatInterface = () => {
             // Handle the case where the user ID is not available, e.g., display an error message
             return;
         }
-
         try {
             const chatHistoryCollection = collection(db, `users/${currentUser.id}/chatHistory`);
             await addDoc(chatHistoryCollection, {
                 messages,
                 timestamp: new Date(),
+
                 // Add other metadata if needed, e.g., userId: currentUser.id
             });
             console.log('Chat history saved successfully!');

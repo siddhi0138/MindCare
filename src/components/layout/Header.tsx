@@ -28,7 +28,7 @@ import {
 import { useState } from "react";
 
 const Header = () => {
-  const { user, isAuthenticated, logout } = useAuth();
+  const {user, isAuthenticated, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const toggleMobileMenu = () => {
@@ -88,9 +88,6 @@ const Header = () => {
                 <DropdownMenuContent>
                   <DropdownMenuItem asChild>
                     <Link to="/coping-tools" className="w-full">Coping Tools</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/interactive-tools" className="w-full">Interactive Tools</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link to="/assessment" className="w-full">Assessments</Link>
