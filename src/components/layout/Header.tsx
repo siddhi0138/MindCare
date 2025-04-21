@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,13 +22,41 @@ import {
   User,
   LogOut,
   Brain,
-  Heart
+  Heart,
+  Sun
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const Header = () => {
   const {currentUser, isAuthenticated, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+
+  useEffect(() => {
+    // Check for system preference or stored preference
+    const savedTheme = localStorage.getItem("theme");
+    const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    
+    if (savedTheme === "dark" || (!savedTheme && systemPrefersDark)) {
+      setTheme("dark");
+      document.documentElement.classList.add("dark");
+    } else {
+      setTheme("light");
+      document.documentElement.classList.remove("dark");
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    if (theme === "light") {
+      setTheme("dark");
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      setTheme("light");
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    }
+  };
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
@@ -114,6 +141,20 @@ const Header = () => {
         </nav>
 
         <div className="flex items-center gap-4">
+          {/* Theme Toggle Button - Added before profile */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleTheme}
+            aria-label="Toggle theme"
+          >
+            {theme === "light" ? (
+              <Moon className="h-5 w-5" />
+            ) : (
+              <Sun className="h-5 w-5" />
+            )}
+          </Button>
+
           {isAuthenticated ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -217,6 +258,24 @@ const Header = () => {
                     </div>
                   </div>
                   <div className="flex gap-4">
+                    <Button 
+                      onClick={toggleTheme} 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex items-center gap-2"
+                    >
+                      {theme === "light" ? (
+                        <>
+                          <Moon className="h-4 w-4" />
+                          <span>Dark</span>
+                        </>
+                      ) : (
+                        <>
+                          <Sun className="h-4 w-4" />
+                          <span>Light</span>
+                        </>
+                      )}
+                    </Button>
                     <Link to="/profile">
                       <Button asChild variant="outline" size="sm" className="flex-1">
                         Profile
@@ -320,8 +379,7 @@ const Header = () => {
                     Find Therapists
                   </Link>
 
-                      <Link
-
+                  <Link
                     to="/community"
                     className="flex items-center gap-3 px-2 py-1.5 text-sm rounded-md hover:bg-muted"
                     onClick={toggleMobileMenu}
@@ -334,6 +392,23 @@ const Header = () => {
               </>
             ) : (
               <div className="pt-4 flex flex-col space-y-3">
+                <Button 
+                  onClick={toggleTheme} 
+                  variant="outline" 
+                  className="flex items-center justify-center gap-2"
+                >
+                  {theme === "light" ? (
+                    <>
+                      <Moon className="h-4 w-4" />
+                      <span>Dark mode</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sun className="h-4 w-4" />
+                      <span>Light mode</span>
+                    </>
+                  )}
+                </Button>
                 <Button asChild variant="outline">
                   <Link to="/login" onClick={toggleMobileMenu}>
                     Log in
