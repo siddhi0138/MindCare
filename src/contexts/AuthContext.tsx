@@ -229,6 +229,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
 
       setCurrentUser(profileData); // Update local state immediately
+      // Close the popup window after successful login to handle COOP policy.
       navigate('/'); // Redirect after successful login/signup
 
     } catch (error: any) {

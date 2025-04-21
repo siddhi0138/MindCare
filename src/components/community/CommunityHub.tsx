@@ -11,7 +11,7 @@ import { Users, Calendar, MessageCircle } from 'lucide-react';
 import { toast } from '@/components/ui/sonner';
 
 const CommunityHub = () => {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth() || {};
   const [activeTab, setActiveTab] = useState("chat-rooms");
   
   const handleJoinRoom = (roomName: string) => {
