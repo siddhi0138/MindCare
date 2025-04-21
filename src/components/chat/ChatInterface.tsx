@@ -1,19 +1,24 @@
 
-import { useState } from 'react';
+import { useState, useRef, useContext } from 'react';
+import { toast } from '@/components/ui/sonner';
+import { db } from '@/configs/firebase'; // Assuming you have your Firebase config in this path
+import { doc, setDoc, collection, addDoc } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardFooter, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Send, Mic, Image, RefreshCcw, Smile, PlusCircle, RotateCw, Paperclip } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { toast } from '@/components/ui/sonner';
+import { AuthContext } from '@/contexts/AuthContext';
 
-interface Message {
-  id: string;
-  content: string;
-  sender: 'user' | 'bot';
-  timestamp: Date;
-  suggested?: boolean;
+declare global {
+  interface Window {
+    SpeechRecognition: any;
+    webkitSpeechRecognition: any;
+  }
+}
+
+interface Message {  id: string;  content: string;  sender: 'user' | 'bot';  timestamp: Date;  suggested?: boolean;
 }
 
 // AI suggestions based on different emotional states
@@ -39,6 +44,11 @@ const SUGGESTIONS = {
     "How can I quiet my mind at night?"
   ]
 };
+
+interface ToastProps {
+  description: string;
+  variant: "default" | "destructive" | "outline" | "secondary";
+}
 
 // AI responses with helpful resources and techniques
 const AI_RESPONSES = [
@@ -93,6 +103,8 @@ const findResponse = (message: string): string | null => {
 };
 
 const ChatInterface = () => {
+  const { currentUser } = useContext(AuthContext) || {};
+
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -104,6 +116,44 @@ const ChatInterface = () => {
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>(SUGGESTIONS.anxiety);
+  const [showEmojis, setShowEmojis] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const emojis = ["😀", "😂", "😍", "🤔", "😊", "😎", "😢", "😠", "😴", "😋"];
+
+  const handleEmojiClick = (emoji: string) => {
+    setInput((prevInput) => prevInput + emoji);
+    setShowEmojis(false);
+  };
+
+  const toggleEmojis = () => {
+    setShowEmojis(!showEmojis);
+  };
+
+  const handleVoiceInput = () => {
+    if (typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const recognition = new SpeechRecognition();
+      recognition.lang = 'en-us';
+
+      recognition.onresult = (event: any) => { // Using any for now, needs proper typing
+        const transcript = event.results[0][0].transcript;
+        setInput((prevInput) => prevInput + transcript);
+      };
+
+      recognition.onerror = (event: any) => { // Keep 'any' for SpeechRecognitionErrorEvent
+        console.error("Speech recognition error:", event.error);
+        const toastProps: ToastProps = {
+          description: `Speech recognition error: ${event.error}`,
+          variant: "destructive"
+        }
+      };
+
+      recognition.start();
+    } else {
+      alert('Speech recognition is not supported in this browser.');
+    }
+  };
 
   const handleSend = () => {
     if (!input.trim()) return;
@@ -116,9 +166,8 @@ const ChatInterface = () => {
       timestamp: new Date(),
     };
 
-    setMessages((prev) => [...prev, userMessage]);
-    setInput('');
-    setIsTyping(true);
+    setMessages((prev) => [...prev, userMessage]);    
+    setIsTyping(true);    
 
     // Find if there's a specific response for this message
     const specificResponse = findResponse(input);
@@ -210,11 +259,34 @@ const ChatInterface = () => {
     }, 1500);
   };
 
+    const saveChatHistory = async (messages: Message[]) => {
+        if (!currentUser?.id) {
+            console.error("User ID not found. Cannot save chat history.");
+            // Handle the case where the user ID is not available, e.g., display an error message
+            return;
+        }
+
+        try {
+            const chatHistoryCollection = collection(db, `users/${currentUser.id}/chatHistory`);
+            await addDoc(chatHistoryCollection, {
+                messages,
+                timestamp: new Date(),
+                // Add other metadata if needed, e.g., userId: currentUser.id
+            });
+            console.log('Chat history saved successfully!');
+        } catch (error) {
+            console.error('Error saving chat history:', error);
+            // Handle error appropriately, e.g., display an error message to the user
+        }
+    };
+
   const handleStartNewChat = () => {
     toast.info("Starting a new conversation", {
       description: "Your previous conversation has been saved to your history."
     });
-    
+
+    saveChatHistory(messages); // Call the save function here
+
     setMessages([
       {
         id: '1',
@@ -224,6 +296,16 @@ const ChatInterface = () => {
       }
     ]);
     setSuggestions(SUGGESTIONS.anxiety);
+  };
+
+
+  const handleAttachDocument = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileSelected = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) setInput((prevInput) => prevInput + ` Attached file: ${file.name}`);
   };
 
   return (
@@ -303,7 +385,7 @@ const ChatInterface = () => {
         <div className="flex items-end gap-2 w-full">
           <div className="flex-grow relative">
             <Textarea
-              placeholder="Type your message..."
+              placeholder="Type your message or attach a file..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
               className="pr-12 min-h-[60px] max-h-[120px] resize-none"
@@ -314,27 +396,38 @@ const ChatInterface = () => {
                 }
               }}
             />
-            <div className="absolute right-3 bottom-2 flex gap-2">
-              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
-                <Smile size={16} />
-              </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+            <div className="absolute right-3 bottom-2 flex items-center gap-2">
+              <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
+                onChange={handleFileSelected}
+              />
+              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" onClick={handleAttachDocument}>
                 <Paperclip size={16} />
               </Button>
-            </div>
+              {showEmojis && (
+                <div className="absolute bottom-12 right-0 bg-white border rounded-md shadow-md p-2 flex flex-wrap w-40">
+                  {emojis.map((emoji, index) => (
+                    <span key={index} className="text-2xl p-1 cursor-pointer hover:bg-gray-100 rounded-md" onClick={() => handleEmojiClick(emoji)}>{emoji}</span>
+                  ))}
+                </div>
+              )}
+              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" onClick={toggleEmojis}>
+                <Smile size={16} />
+              </Button>
+              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" onClick={handleVoiceInput}>
+                <Mic size={20} />
+              </Button>
           </div>
-          <div className="flex gap-2">
-            <Button variant="ghost" size="icon" className="h-[60px] w-10 rounded-full">
-              <Mic size={20} />
-            </Button>
-            <Button size="icon" className="h-[60px] w-10 rounded-full" onClick={handleSend}>
-              <Send size={20} />
-            </Button>
           </div>
+          <Button size="icon" className="h-[60px] w-10 rounded-full" onClick={handleSend}>
+            <Send size={20} />
+          </Button>
         </div>
-      </CardFooter>
-    </Card>
-  );
-};
+       </CardFooter>
+     </Card>
+   );
+ };
 
-export default ChatInterface;
+ export default ChatInterface;
