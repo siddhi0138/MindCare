@@ -33,6 +33,7 @@ const JournalPage = () => {
     if (currentUser) {
       const q = query(
         collection(db, 'journalEntries'),
+        where('userId', '==', currentUser.id),
         orderBy('timestamp', 'desc')
       );
 
