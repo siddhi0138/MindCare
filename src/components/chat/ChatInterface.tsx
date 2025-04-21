@@ -131,6 +131,7 @@ const ChatInterface = () => {
   };
 
   const handleVoiceInput = () => {
+    // TODO: Check for user permission before starting
     if (typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       const recognition = new SpeechRecognition();
@@ -167,6 +168,7 @@ const ChatInterface = () => {
     };
 
     setMessages((prev) => [...prev, userMessage]);    
+    setInput(''); // Clear the input field
     setIsTyping(true);    
 
     // Find if there's a specific response for this message
