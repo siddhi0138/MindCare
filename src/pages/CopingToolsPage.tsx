@@ -1,4 +1,3 @@
-
 import MainLayout from "@/components/layout/MainLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import GuidedBreathingExercise from "@/components/coping/GuidedBreathingExercise";
@@ -10,7 +9,7 @@ import { Link, useNavigate } from "react-router-dom";
 
 const CopingToolsPage = () => {
   return (
-      <MainLayout>
+    <MainLayout>
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold mb-6">Coping Tools & Self-Help</h1>
         <p className="text-muted-foreground mb-8">
@@ -82,13 +81,13 @@ const CopingToolsPage = () => {
           <TabsContent value="games">
             <h2 className="text-2xl font-semibold mb-6">Mood-Boosting Games</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <GameCard
-              title="Memory Game"
-              description="Boost your focus and memory while relieving stress."
-              link="/games/memory"
-            />
-            <GameCard
-              title="Word Zen"
+              <GameCard
+                title="Memory Game"
+                description="Boost your focus and memory while relieving stress."
+                link="/games/memory"
+              />
+              <GameCard 
+                title="Word Zen"
                 description="Find hidden words in this calming puzzle to achieve zen."
                 link="/games/word-zen"
               />
@@ -98,27 +97,13 @@ const CopingToolsPage = () => {
                 link="/games/coloring"
               />
               <GameCard
-                title="Circle Click Game"
-                description="Test your reflexes and have fun clicking circles!"
-                link="/games/circle-click"
-              />
-              <GameCard
                 title="Find the Ball"
-                description="Test your intuition and find the hidden ball!"
+                description="Test your concentration by following the moving ball."
                 link="/games/find-the-ball"
               />
             </div>
           </TabsContent>
 
-  
-          {/* Add more games as needed, following the same Card structure */}
-          {/* Example for another game:
-              <GameCard
-                title="Game Title"
-                description="Brief game description."
-                link="/games/game-route"
-              /> */}
-  
           <TabsContent value="grounding">
             <div className="grid grid-cols-1 gap-6">
               <Card className="border-primary/10 overflow-hidden">
@@ -184,8 +169,7 @@ const CopingToolsPage = () => {
       </div>
     </MainLayout>
   );
-
-}; 
+};
 
 interface GameCardProps {
   title: string;
