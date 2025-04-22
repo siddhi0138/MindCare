@@ -161,6 +161,15 @@ const AnalysisPageUpdated = () => {
         }
         .chart-box {
           width: 48%;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+        .chart-title {
+          margin-top: 10px;
+          font-weight: bold;
+          text-align: center;
+          font-size: 16px;
         }
         @media (max-width: 768px) {
           .chart-box {
@@ -171,110 +180,131 @@ const AnalysisPageUpdated = () => {
       <div className="dashboard">
         <h1 className="text-3xl font-bold mb-6"></h1>
         <div className="chart-container">
-          <Plot
-            className="chart-box"
-            data={[
-              {
-                x: [
-                  'Relationship Issues',
-                  'Financial Stress',
-                  'Work > 45 hrs',
-                  'Sleep < 6 hrs',
-                  'Exercise < 3',
-                ],
-                y: [
-                  sampleData.filter((d) => d.Relationship_Issues === 'Yes')
-                    .length,
-                  sampleData.filter((d) => d.Financial_Stress === 'Yes')
-                    .length,
-                  sampleData.filter((d) => d.Work_Hours > 45).length,
-                  sampleData.filter((d) => d.Sleep_Duration < 6).length,
-                  sampleData.filter((d) => d.Exercise_Frequency < 3).length,
-                ],
-                type: 'bar',
-                marker: { color: 'teal' },
-              },
-            ]}
-            layout={{ title: 'Major Causes of Stress', margin: { t: 50 } }}
-          />
-          <Plot
-            className="chart-box"
-            data={[
-              {
-                x: sampleData.map((d) => d.Age),
-                y: sampleData.map((d) => d.Stress_Level),
-                type: 'scatter',
-                mode: 'lines+markers',
-                line: { color: 'purple' },
-              },
-            ]}
-            layout={{ title: 'Stress Level by Age', margin: { t: 50 } }}
-          />
-          <Plot
-            className="chart-box"
-            data={[
-              {
-                x: sampleData.map((d) => d.Sleep_Duration),
-                y: sampleData.map((d) => d.Stress_Level),
-                mode: 'markers',
-                marker: {
-                  size: sampleData.map((d) => d.Anxiety_Level * 4),
-                  color: sampleData.map((d) => d.Depression_Level),
-                  colorscale: 'Portland',
-                  showscale: true,
+          <div className="chart-box">
+            <Plot
+              style={{ width: '100%' }}
+              data={[
+                {
+                  x: [
+                    'Relationship Issues',
+                    'Financial Stress',
+                    'Work > 45 hrs',
+                    'Sleep < 6 hrs',
+                    'Exercise < 3',
+                  ],
+                  y: [
+                    sampleData.filter((d) => d.Relationship_Issues === 'Yes')
+                      .length,
+                    sampleData.filter((d) => d.Financial_Stress === 'Yes')
+                      .length,
+                    sampleData.filter((d) => d.Work_Hours > 45).length,
+                    sampleData.filter((d) => d.Sleep_Duration < 6).length,
+                    sampleData.filter((d) => d.Exercise_Frequency < 3).length,
+                  ],
+                  type: 'bar',
+                  marker: { color: 'teal' },
                 },
-              },
-            ]}
-            layout={{
-              title: 'Stress vs Sleep Duration (Bubble Chart)',
-              xaxis: { title: 'Sleep Duration' },
-              yaxis: { title: 'Stress Level' },
-              margin: { t: 50 },
-            }}
-          />
-          <Plot
-            className="chart-box"
-            data={[
-              {
-                type: 'pie',
-                labels: Object.keys(regionCounts),
-                values: Object.values(regionCounts),
-                textinfo: "label+percent",
-                hole: 0.4,
-              },
-            ]}
-            layout={{ title: 'Stress Distribution by Region', margin: { t: 50 } }}
-          />
-          <Plot
-            className="chart-box"
-            data={[
-              {
-                y: sampleData.map((d) => d.Stress_Level),
-                x: sampleData.map((d) => d.Exercise_Frequency),
-                type: 'box',
-                marker: { color: 'green' },
-              },
-            ]}
-            layout={{
-              title: 'Exercise Frequency vs Stress Level',
-              xaxis: { title: 'Exercise Frequency' },
-              yaxis: { title: 'Stress Level' },
-              margin: { t: 50 },
-            }}
-          />
-          <Plot
-            className="chart-box"
-            data={[
-              {
-                z: sampleData.map((d) => [d.Anxiety_Level, d.Depression_Level]),
-                x: ['Anxiety', 'Depression'],
-                y: sampleData.map((_, i) => `User ${i + 1}`),
-                type: 'heatmap',
-                colorscale: 'YlOrRd',
-              },
-            ]}
-            layout={{ title: 'Social Media Users: Anxiety & Depression Heatmap', margin: { t: 50 } }}
-          />
+              ]}
+              layout={{ margin: { t: 30, b: 30 } }}
+            />
+            <div className="chart-title">Major Causes of Stress</div>
+          </div>
+          
+          <div className="chart-box">
+            <Plot
+              style={{ width: '100%' }}
+              data={[
+                {
+                  x: sampleData.map((d) => d.Age),
+                  y: sampleData.map((d) => d.Stress_Level),
+                  type: 'scatter',
+                  mode: 'lines+markers',
+                  line: { color: 'purple' },
+                },
+              ]}
+              layout={{ margin: { t: 30, b: 30 } }}
+            />
+            <div className="chart-title">Stress Level by Age</div>
+          </div>
+          
+          <div className="chart-box">
+            <Plot
+              style={{ width: '100%' }}
+              data={[
+                {
+                  x: sampleData.map((d) => d.Sleep_Duration),
+                  y: sampleData.map((d) => d.Stress_Level),
+                  mode: 'markers',
+                  marker: {
+                    size: sampleData.map((d) => d.Anxiety_Level * 4),
+                    color: sampleData.map((d) => d.Depression_Level),
+                    colorscale: 'Portland',
+                    showscale: true,
+                  },
+                },
+              ]}
+              layout={{
+                xaxis: { title: 'Sleep Duration' },
+                yaxis: { title: 'Stress Level' },
+                margin: { t: 30, b: 30 },
+              }}
+            />
+            <div className="chart-title">Stress vs Sleep Duration (Bubble Chart)</div>
+          </div>
+          
+          <div className="chart-box">
+            <Plot
+              style={{ width: '100%' }}
+              data={[
+                {
+                  type: 'pie',
+                  labels: Object.keys(regionCounts),
+                  values: Object.values(regionCounts),
+                  textinfo: "label+percent",
+                  hole: 0.4,
+                },
+              ]}
+              layout={{ margin: { t: 30, b: 30 } }}
+            />
+            <div className="chart-title">Stress Distribution by Region</div>
+          </div>
+          
+          <div className="chart-box">
+            <Plot
+              style={{ width: '100%' }}
+              data={[
+                {
+                  y: sampleData.map((d) => d.Stress_Level),
+                  x: sampleData.map((d) => d.Exercise_Frequency),
+                  type: 'box',
+                  marker: { color: 'green' },
+                },
+              ]}
+              layout={{
+                xaxis: { title: 'Exercise Frequency' },
+                yaxis: { title: 'Stress Level' },
+                margin: { t: 30, b: 30 },
+              }}
+            />
+            <div className="chart-title">Exercise Frequency vs Stress Level</div>
+          </div>
+          
+          <div className="chart-box">
+            <Plot
+              style={{ width: '100%' }}
+              data={[
+                {
+                  z: sampleData.map((d) => [d.Anxiety_Level, d.Depression_Level]),
+                  x: ['Anxiety', 'Depression'],
+                  y: sampleData.map((_, i) => `User ${i + 1}`),
+                  type: 'heatmap',
+                  colorscale: 'YlOrRd',
+                },
+              ]}
+              layout={{ margin: { t: 30, b: 30 } }}
+            />
+            <div className="chart-title">Social Media Users: Anxiety & Depression Heatmap</div>
+          </div>
         </div>
       </div>
     </MainLayout>
