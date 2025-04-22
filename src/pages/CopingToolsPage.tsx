@@ -1,11 +1,12 @@
-import MainLayout from "@/components/layout/MainLayout";
+import MainLayout from '@/components/layout/MainLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import GuidedBreathingExercise from "@/components/coping/GuidedBreathingExercise";
-import AffirmationCards from "@/components/coping/AffirmationCards";
-import { Gamepad2, Heart, Sparkles, Wind } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Link, useNavigate } from "react-router-dom";
+import GuidedBreathingExercise from '@/components/coping/GuidedBreathingExercise';
+import AffirmationCards from '@/components/coping/AffirmationCards';
+import { Gamepad2, Heart, Sparkles, Wind } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 
 const CopingToolsPage = () => {
   return (
@@ -16,7 +17,7 @@ const CopingToolsPage = () => {
           Discover interactive tools to help manage stress, anxiety, and improve your mental wellbeing.
           Practice these techniques regularly for best results.
         </p>
-        
+
         <Tabs defaultValue="breathing" className="w-full">
           <TabsList className="grid grid-cols-4 mb-8">
             <TabsTrigger value="breathing" className="flex items-center gap-2">
@@ -36,7 +37,7 @@ const CopingToolsPage = () => {
               <span>Grounding</span>
             </TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="breathing">
             <h2 className="text-2xl font-semibold mb-6">Breathing Exercises</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -47,9 +48,7 @@ const CopingToolsPage = () => {
                     <p className="text-sm text-muted-foreground mb-4">
                       Reduces anxiety and helps with sleep by regulating your breathing pattern.
                     </p>
-                    <Link to="/interactive-tools">
-                      <Button>Start Exercise</Button>
-                    </Link>
+                    <StartExerciseButton exerciseType="4-7-8" />
                   </div>
                 </CardContent>
               </Card>
@@ -59,21 +58,15 @@ const CopingToolsPage = () => {
                   <div className="bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-950/20 dark:to-green-950/20 p-6">
                     <h3 className="text-xl font-medium mb-3">Box Breathing</h3>
                     <p className="text-sm text-muted-foreground mb-4">
-                    A technique used by Navy SEALs to reduce stress and improve concentration.
-                  </p>
-                    <Link to="/interactive-tools">
-                      <Button>Start Exercise</Button>
-                    </Link>
+                      A technique used by Navy SEALs to reduce stress and improve concentration.
+                    </p>
+                    <StartExerciseButton exerciseType="box" />
                   </div>
                 </CardContent>
               </Card>
             </div>
-
-            <div className="mt-8">
-              <GuidedBreathingExercise />
-            </div> 
           </TabsContent>
-          
+
           <TabsContent value="affirmations">
             <AffirmationCards />
           </TabsContent>
@@ -83,24 +76,20 @@ const CopingToolsPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <GameCard
                 title="Memory Game"
-                description="Boost your focus and memory while relieving stress."
-                link="/games/memory"
-              />
-              <GameCard 
+                description="Boost your focus and memory while relieving stress." 
+                link="/games/memory"/>
+              <GameCard
                 title="Word Zen"
-                description="Find hidden words in this calming puzzle to achieve zen."
-                link="/games/word-zen"
-              />
+                description="Find hidden words in this calming puzzle to achieve zen." 
+                link="/games/word-zen"/>
               <GameCard
                 title="Coloring Game"
-                description="Express creativity and relieve stress with digital coloring."
-                link="/games/coloring"
-              />
+                description="Express creativity and relieve stress with digital coloring." 
+                link="/games/coloring"/>
               <GameCard
                 title="Find the Ball"
-                description="Test your concentration by following the moving ball."
-                link="/games/find-the-ball"
-              />
+                description="Test your concentration by following the moving ball." 
+                link="/games/find-the-ball"/>
             </div>
           </TabsContent>
 
@@ -113,7 +102,7 @@ const CopingToolsPage = () => {
                     <p className="mb-6">
                       This grounding exercise helps bring your attention to the present moment when feeling overwhelmed.
                     </p>
-                    
+
                     <div className="space-y-4 mb-8">
                       <div className="flex items-start gap-4">
                         <div className="bg-white dark:bg-white/10 h-8 w-8 rounded-full flex items-center justify-center text-primary font-medium shrink-0">
@@ -156,14 +145,14 @@ const CopingToolsPage = () => {
                         </div>
                       </div>
                     </div>
-  
-                    <Link to="/interactive-tools?tab=grounding">
-                      <Button>Start Guided Exercise</Button>
+
+                    <Link to="/interactive-tools/grounding">
+                      <Button>Start Exercise</Button>
                     </Link>
                   </div>
                 </CardContent>
               </Card>
-            </div> 
+            </div>
           </TabsContent>
         </Tabs>
       </div>
@@ -171,21 +160,61 @@ const CopingToolsPage = () => {
   );
 };
 
+interface StartExerciseButtonProps {
+  exerciseType: "4-7-8" | "box";
+}
+
+const StartExerciseButton: React.FC<StartExerciseButtonProps> = ({ exerciseType }) => {
+  const [activeExercise, setActiveExercise] = useState<"4-7-8" | "box" | null>(null);
+  const [isPaused, setIsPaused] = useState(false);
+  const [inhaleDuration, setInhaleDuration] = useState(exerciseType === "4-7-8" ? 4 : 4);
+  const [holdDuration, setHoldDuration] = useState(exerciseType === "4-7-8" ? 7 : 4);
+  const [exhaleDuration, setExhaleDuration] = useState(exerciseType === "4-7-8" ? 8 : 4);
+
+  const handleStartExercise = () => {
+    setIsPaused(false);
+    setActiveExercise(exerciseType);
+  };
+
+  const handlePauseExercise = () => {
+    setIsPaused(true);
+  };
+
+  return (
+    <>
+      {activeExercise !== exerciseType ? (
+        <Button onClick={handleStartExercise}>Start Exercise</Button>
+      ) : (
+        <Button onClick={handlePauseExercise} variant="secondary">
+          Pause Exercise
+        </Button>
+      )}
+      {activeExercise === exerciseType && !isPaused && (
+        <GuidedBreathingExercise
+          inhaleDuration={inhaleDuration}
+          holdDuration={holdDuration}
+          exhaleDuration={exhaleDuration}
+        />
+      )}
+    </>
+  );
+};
+
 interface GameCardProps {
   title: string;
   description: string;
   link: string;
-} 
+}
 
 const GameCard: React.FC<GameCardProps> = ({ title, description, link }) => {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    navigate(link); 
+    navigate(link);
   };
 
   return (
-      <Card className="border-primary/10 overflow-hidden cursor-pointer hover:shadow-md transition-shadow">
+    <Card className="border-primary/10 overflow-hidden cursor-pointer hover:shadow-md transition-shadow">
       <CardContent className="p-6">
         <h3 className="text-lg font-medium mb-2">{title}</h3>
         <p className="text-sm text-muted-foreground mb-4">{description}</p>
@@ -193,6 +222,6 @@ const GameCard: React.FC<GameCardProps> = ({ title, description, link }) => {
       </CardContent>
     </Card>
   );
-}; 
+};
 
 export default CopingToolsPage;

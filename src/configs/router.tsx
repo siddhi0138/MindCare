@@ -21,7 +21,6 @@ import AssessmentPage from '@/pages/AssessmentPage';
 import TherapistPage from '@/pages/TherapistPage';
 import CopingToolsPage from '@/pages/CopingToolsPage';
 import ProfilePage from '@/pages/ProfilePage';
-import ExercisesPage from '@/pages/ExercisesPage';
 import AnalysisPage from '@/pages/AnalysisPage';
 
 import MemoryGamePage from '@/pages/MemoryGamePage';
@@ -29,6 +28,8 @@ import WordZenPage from '@/pages/WordZenPage';
 import ColoringGamePage from '@/pages/ColoringGamePage';
 import FindTheBallPage from '@/pages/FindTheBallPage';
 
+import GroundingExercisePage from '@/pages/GroundingExercisePage';
+import ExercisesPage from '@/pages/ExercisesPage';
 // --- Protected Route Component ---
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -74,6 +75,7 @@ const AppRouter = () => {
       <Route path="/therapists" element={<ProtectedRoute><TherapistPage /></ProtectedRoute>} />
       <Route path="/coping-tools" element={<ProtectedRoute><CopingToolsPage /></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+      <Route path="/interactive-tools/grounding" element={<ProtectedRoute><GroundingExercisePage /></ProtectedRoute>} />
       <Route path="/exercises" element={<ProtectedRoute><ExercisesPage /></ProtectedRoute>} />
       <Route path="/analysis" element={<ProtectedRoute><AnalysisPage /></ProtectedRoute>} />
 
