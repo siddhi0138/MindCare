@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Circle } from 'lucide-react';
+import { Cup } from 'lucide-react';
 import { toast } from 'sonner';
 
 const FindTheBall = () => {
@@ -12,6 +11,7 @@ const FindTheBall = () => {
   const [score, setScore] = useState(0);
   const [gameStarted, setGameStarted] = useState(false);
   const [shuffleSpeed, setShuffleSpeed] = useState(1000);
+  const [hoveredCup, setHoveredCup] = useState<number | null>(null);
 
   const startGame = () => {
     const randomPosition = Math.floor(Math.random() * 3);
@@ -77,32 +77,49 @@ const FindTheBall = () => {
     <div className="max-w-2xl mx-auto p-4">
       <div className="text-center mb-6">
         <h2 className="text-2xl font-bold mb-2">Find the Ball Game</h2>
-        <p className="mb-4">Score: {score}</p>
+        <p className="mb-4 text-lg">Score: {score}</p>
         {!gameStarted && (
-          <Button onClick={startGame} className="mb-4">
+          <Button onClick={startGame} className="mb-4 text-lg px-8">
             Start Game
           </Button>
         )}
       </div>
 
-      <div className="grid grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-3 gap-8 mb-6">
         {cups.map((cup, index) => (
           <Card
             key={index}
             className={`
-              p-8 cursor-pointer transition-transform duration-300
+              relative p-8 cursor-pointer transition-all duration-300 transform
               ${isPlaying ? 'hover:cursor-not-allowed' : 'hover:scale-105'}
               ${!gameStarted ? 'opacity-50' : ''}
+              ${hoveredCup === index ? 'shadow-xl' : 'shadow-md'}
+              bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900
             `}
             onClick={() => handleCupClick(index)}
+            onMouseEnter={() => !isPlaying && setHoveredCup(index)}
+            onMouseLeave={() => setHoveredCup(null)}
           >
-            <div className="flex justify-center items-center h-24">
+            <div className="flex justify-center items-center h-32">
               {!isPlaying && !gameStarted ? (
-                <Circle className="w-8 h-8" />
+                <div className="relative">
+                  <Cup className="w-20 h-20 text-primary/80" strokeWidth={1.5} />
+                  {index === 1 && (
+                    <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-primary rounded-full animate-bounce" />
+                  )}
+                </div>
               ) : (
-                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
+                <div className="relative">
+                  <Cup 
+                    className={`w-20 h-20 ${
+                      cup === 1 && !isPlaying 
+                        ? 'text-primary animate-pulse' 
+                        : 'text-primary/80'
+                    }`}
+                    strokeWidth={1.5}
+                  />
                   {cup === 1 && !isPlaying && (
-                    <Circle className="w-8 h-8 text-primary animate-pulse" />
+                    <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-primary rounded-full animate-bounce" />
                   )}
                 </div>
               )}
@@ -111,13 +128,13 @@ const FindTheBall = () => {
         ))}
       </div>
 
-      <div className="text-center text-sm text-muted-foreground">
+      <div className="text-center text-lg text-muted-foreground">
         {isPlaying ? (
-          "Watch carefully..."
+          <p className="animate-pulse">Watch carefully...</p>
         ) : gameStarted ? (
-          "Click on the cup where you think the ball is!"
+          <p>Click on the cup hiding the ball!</p>
         ) : (
-          "Click Start Game to begin"
+          <p>Click Start Game to begin</p>
         )}
       </div>
     </div>
