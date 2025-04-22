@@ -1,6 +1,5 @@
 import React from 'react';
 import Plot from 'react-plotly.js';
-import '../../Analysis.css';
 import MainLayout from '@/components/layout/MainLayout';
 
 interface DataPoint {
@@ -145,13 +144,30 @@ const sampleData: DataPoint[] = [
     Relationship_Issues: 'Yes',
   },
 ];
-const AnalysisPage = () => {
+const AnalysisPageUpdated = () => {
   const regionCounts: { [key: string]: number } = {};
   sampleData.forEach((d) => {
     regionCounts[d.Region] = (regionCounts[d.Region] || 0) + d.Stress_Level;
   });
   return (
     <MainLayout>
+      <style>{`
+        .chart-container {
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: space-between;
+          padding: 60px;
+          gap: 25px;
+        }
+        .chart-box {
+          width: 48%;
+        }
+        @media (max-width: 768px) {
+          .chart-box {
+            width: 100%;
+          }
+        }
+      `}</style>
       <div className="dashboard">
         <h1 className="text-3xl font-bold mb-6"></h1>
         <div className="chart-container">
@@ -179,7 +195,7 @@ const AnalysisPage = () => {
                 marker: { color: 'teal' },
               },
             ]}
-            layout={{ title: 'Major Causes of Stress' }}
+            layout={{ title: 'Major Causes of Stress', margin: { t: 50 } }}
           />
           <Plot
             className="chart-box"
@@ -192,7 +208,7 @@ const AnalysisPage = () => {
                 line: { color: 'purple' },
               },
             ]}
-            layout={{ title: 'Stress Level by Age' }}
+            layout={{ title: 'Stress Level by Age', margin: { t: 50 } }}
           />
           <Plot
             className="chart-box"
@@ -213,6 +229,7 @@ const AnalysisPage = () => {
               title: 'Stress vs Sleep Duration (Bubble Chart)',
               xaxis: { title: 'Sleep Duration' },
               yaxis: { title: 'Stress Level' },
+              margin: { t: 50 },
             }}
           />
           <Plot
@@ -226,7 +243,7 @@ const AnalysisPage = () => {
                 hole: 0.4,
               },
             ]}
-            layout={{ title: 'Stress Distribution by Region' }}
+            layout={{ title: 'Stress Distribution by Region', margin: { t: 50 } }}
           />
           <Plot
             className="chart-box"
@@ -242,6 +259,7 @@ const AnalysisPage = () => {
               title: 'Exercise Frequency vs Stress Level',
               xaxis: { title: 'Exercise Frequency' },
               yaxis: { title: 'Stress Level' },
+              margin: { t: 50 },
             }}
           />
           <Plot
@@ -255,11 +273,11 @@ const AnalysisPage = () => {
                 colorscale: 'YlOrRd',
               },
             ]}
-            layout={{ title: 'Social Media Users: Anxiety & Depression Heatmap' }}
+            layout={{ title: 'Social Media Users: Anxiety & Depression Heatmap', margin: { t: 50 } }}
           />
         </div>
       </div>
     </MainLayout>
   );
 };
-export default AnalysisPage;
+export default AnalysisPageUpdated;
