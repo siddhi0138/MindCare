@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -6,10 +5,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Play, Pause, RotateCcw } from 'lucide-react';
 
 interface BreathingExerciseProps {
-  inhaleDuration?: number;
-  holdDuration?: number;
-  exhaleDuration?: number;
+  inhaleDuration: number;
+  holdDuration: number;
+  exhaleDuration: number;
   cycles?: number;
+  onComplete?: () => void;
+  onReset?: () => void;
 }
 
 enum BreathState {
@@ -21,10 +22,12 @@ enum BreathState {
 }
 
 const GuidedBreathingExercise = ({
-  inhaleDuration = 4,
-  holdDuration = 4,
-  exhaleDuration = 6,
-  cycles = 5
+  inhaleDuration,
+  holdDuration,
+  exhaleDuration,
+  cycles = 5,
+  onComplete,
+  onReset
 }: BreathingExerciseProps) => {
   const [isActive, setIsActive] = useState(false);
   const [currentState, setCurrentState] = useState<BreathState>(BreathState.PAUSED);
@@ -36,8 +39,8 @@ const GuidedBreathingExercise = ({
   const totalCycleDuration = inhaleDuration + holdDuration + exhaleDuration;
 
   const handleStart = () => {
+    setIsActive(!isActive);
     if (!isActive) {
-      setIsActive(true);
       setCurrentState(BreathState.INHALE);
       setTimeRemaining(inhaleDuration);
       setAnimation('scale-150 transition-transform duration-4000');
@@ -56,6 +59,7 @@ const GuidedBreathingExercise = ({
     setProgress(0);
     setTimeRemaining(inhaleDuration);
     setAnimation('scale-100');
+    onReset?.();
   };
 
   useEffect(() => {
@@ -86,6 +90,7 @@ const GuidedBreathingExercise = ({
               if (newCycleCount >= cycles) {
                 setCurrentState(BreathState.COMPLETE);
                 setIsActive(false);
+                onComplete?.();
                 return 0;
               } else {
                 setCurrentState(BreathState.INHALE);
@@ -104,7 +109,7 @@ const GuidedBreathingExercise = ({
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [isActive, currentState, cycleCount, inhaleDuration, holdDuration, exhaleDuration, cycles]);
+  }, [isActive, currentState, cycleCount, inhaleDuration, holdDuration, exhaleDuration, cycles, onComplete, onReset]);
 
   return (
     <Card className="border-primary/10">
