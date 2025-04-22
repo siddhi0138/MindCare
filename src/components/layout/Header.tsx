@@ -74,14 +74,34 @@ const Header = () => {
         <nav className="hidden md:flex space-x-6">
           {isAuthenticated && (
             <>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center gap-1.5">
-                    <FileText className="h-4 w-4" />
-                    <Link to="/journal" className="w-full">Journal</Link>
+
+               <Button variant="ghost" className="flex items-center gap-1.5">
+                  <FileText className="h-4 w-4" />
+                  <Link to="/assessment" className="w-full">Assessments</Link>
                   </Button>
-                </DropdownMenuTrigger>
-              </DropdownMenu>
+
+               <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="flex items-center gap-1.5">
+                      <Brain className="h-4 w-4" />
+                      <span>Tools</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem asChild>
+                      <Link to="/coping-tools" className="w-full">Coping Tools</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/exercises" className="w-full">Exercises</Link>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                 <Button variant="ghost" className="flex items-center gap-1.5">
+                  <FileText className="h-4 w-4" />
+                  <Link to="/journal" className="w-full">Journal</Link>
+                  </Button>
+                
               
               <Button variant="ghost" asChild>
                 <Link to="/meditation" className="flex items-center gap-1.5">
@@ -96,26 +116,7 @@ const Header = () => {
                   <span>Chat</span>
                 </Link>
               </Button>
-              
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center gap-1.5">
-                    <Brain className="h-4 w-4" />
-                    <span>Tools</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem asChild>
-                    <Link to="/coping-tools" className="w-full">Coping Tools</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/assessment" className="w-full">Assessments</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/exercises" className="w-full">Exercises</Link>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+
               
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
