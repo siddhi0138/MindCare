@@ -22,6 +22,7 @@ import TherapistPage from '@/pages/TherapistPage';
 import CopingToolsPage from '@/pages/CopingToolsPage';
 import ProfilePage from '@/pages/ProfilePage';
 import ExercisesPage from '@/pages/ExercisesPage';
+import AnalysisPage from '@/pages/AnalysisPage';
 
 import MemoryGamePage from '@/pages/MemoryGamePage';
 import WordZenPage from '@/pages/WordZenPage';
@@ -74,6 +75,7 @@ const AppRouter = () => {
       <Route path="/coping-tools" element={<ProtectedRoute><CopingToolsPage /></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
       <Route path="/exercises" element={<ProtectedRoute><ExercisesPage /></ProtectedRoute>} />
+      <Route path="/analysis" element={<ProtectedRoute><AnalysisPage /></ProtectedRoute>} />
 
       {/* Nested protected routes for games */}
       <Route path="/games">

@@ -15,15 +15,16 @@ import {
   X,
   BookOpen,
   MessageCircle,
-  Activity,
+  Activity,  // Assuming this icon represents "analysis"
   Users,
   Moon,
   FileText,
   User,
   LogOut,
-  Brain,
+  Brain, // Assuming this represents coping tools
+  Dumbbell, // Assuming this represents tools generally
   Heart,
-  Sun
+  Sun, BarChart,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 
@@ -76,14 +77,13 @@ const Header = () => {
             <>
 
                <Button variant="ghost" className="flex items-center gap-1.5">
-                  <FileText className="h-4 w-4" />
-                  <Link to="/assessment" className="w-full">Assessments</Link>
+                  <Activity className="h-4 w-4" />  {/* Using Activity for Assessments */}
+                  <Link to="/assessment">Assessments</Link>
                   </Button>
-
                <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="flex items-center gap-1.5">
-                      <Brain className="h-4 w-4" />
+                    <Button variant="ghost" className="flex items-center gap-1.5"> 
+                      <Dumbbell className="h-4 w-4" />
                       <span>Tools</span>
                     </Button>
                   </DropdownMenuTrigger>
@@ -98,7 +98,7 @@ const Header = () => {
                 </DropdownMenu>
 
                  <Button variant="ghost" className="flex items-center gap-1.5">
-                  <FileText className="h-4 w-4" />
+                  <BookOpen className="h-4 w-4" />
                   <Link to="/journal" className="w-full">Journal</Link>
                   </Button>
                 
@@ -137,6 +137,10 @@ const Header = () => {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
+              <Button variant="ghost" className="flex items-center gap-1.5">
+                    <BarChart className="h-4 w-4"/>
+                    <Link to="/analysis" className="w-full">Analysis</Link>
+                  </Button> 
             </>
           )}
         </nav>
@@ -286,91 +290,56 @@ const Header = () => {
                     </Button>
                   </div>
                 </div>
-                
-                <div className="space-y-1 py-2">
-                  <p className="text-sm font-medium text-muted-foreground px-2 py-1">
-                    Journal
-                  </p>
-                  <Link
-                    to="/journal"
-                    className="flex items-center gap-3 px-2 py-1.5 text-sm rounded-md hover:bg-muted"
-                    onClick={toggleMobileMenu}
-                  >
-                    <FileText className="h-4 w-4" />
-                    Thought Journal
-                  </Link>
-                  <Link
-                    to="/mood-journal"
-                    className="flex items-center gap-3 px-2 py-1.5 text-sm rounded-md hover:bg-muted"
-                    onClick={toggleMobileMenu}
-                  >
-                    <Activity className="h-4 w-4" />
-                    Mood Journal
-                  </Link>
-                </div>
-                
-                <Link
-                  to="/meditation"
-                  className="flex items-center gap-3 px-2 py-1.5 text-sm rounded-md hover:bg-muted"
-                  onClick={toggleMobileMenu}
-                >
-                  <Moon className="h-4 w-4" />
-                  Meditation
+
+                <Link to="/assessment" className="flex items-center gap-3 px-2 py-1.5 text-sm rounded-md hover:bg-muted mb-2" onClick={toggleMobileMenu}>
+                  <Activity className="h-4 w-4" />
+                  Assessments
                 </Link>
                 
-                <Link
-                  to="/chat"
-                  className="flex items-center gap-3 px-2 py-1.5 text-sm rounded-md hover:bg-muted"
-                  onClick={toggleMobileMenu}
-                >
-                  <MessageCircle className="h-4 w-4" />
-                  Chat
-                </Link>
-                
+
                 <div className="space-y-1 py-2">
-                  <p className="text-sm font-medium text-muted-foreground px-2 py-1">
-                    Tools
-                  </p>
-                  <Link
-                    to="/coping-tools"
-                    className="flex items-center gap-3 px-2 py-1.5 text-sm rounded-md hover:bg-muted"
-                    onClick={toggleMobileMenu}
-                  >
+                  
+
+                  <Link to="/coping-tools" className="flex items-center gap-3 px-2 py-1.5 text-sm rounded-md hover:bg-muted" onClick={toggleMobileMenu}>
                     <Brain className="h-4 w-4" />
                     Coping Tools
                   </Link>
-                  <Link
-                    to="/assessment"
-                    className="flex items-center gap-3 px-2 py-1.5 text-sm rounded-md hover:bg-muted"
-                    onClick={toggleMobileMenu}
-                  >
-                    <Activity className="h-4 w-4" />
-                    Assessments
 
-                  </Link>
-                  <Link
-                    to="/exercises"
-                    className="flex items-center gap-3 px-2 py-1.5 text-sm rounded-md hover:bg-muted"
-                    onClick={toggleMobileMenu}
-                  >
+                  <Link to="/exercises" className="flex items-center gap-3 px-2 py-1.5 text-sm rounded-md hover:bg-muted mb-2 " onClick={toggleMobileMenu}>
+                    <Dumbbell className="h-4 w-4" /> 
                     Exercises
-
                   </Link>
 
                 </div>
-                
+
+                <Link to="/journal" className="flex items-center gap-3 px-2 py-1.5 text-sm rounded-md hover:bg-muted" onClick={toggleMobileMenu}>
+                  <FileText className="h-4 w-4" />
+                  Journal
+                </Link>
+
+                <Link to="/meditation" className="flex items-center gap-3 px-2 py-1.5 text-sm rounded-md hover:bg-muted" onClick={toggleMobileMenu}>
+                  <Moon className="h-4 w-4" />
+                  Meditation
+                </Link>
+
+                <Link to="/chat" className="flex items-center gap-3 px-2 py-1.5 text-sm rounded-md hover:bg-muted" onClick={toggleMobileMenu}>
+                  <MessageCircle className="h-4 w-4" />
+                  Chat
+                </Link>
+
                 <div className="space-y-1 py-2">
-                  <p className="text-sm font-medium text-muted-foreground px-2 py-1">
-                    Resources
-                  </p>
-                  <Link
-                    to="/resources"
-                    className="flex items-center gap-3 px-2 py-1.5 text-sm rounded-md hover:bg-muted"
-                    onClick={toggleMobileMenu}
-                  >
+                  
+
+                  <Link to="/resources" className="flex items-center gap-3 px-2 py-1.5 text-sm rounded-md hover:bg-muted" onClick={toggleMobileMenu}>
                     <BookOpen className="h-4 w-4" />
                     Library
                   </Link>
+
+                  <Link to="/analysis" className="flex items-center gap-3 px-2 py-1.5 text-sm rounded-md hover:bg-muted" onClick={toggleMobileMenu}>
+                    <BarChart className="h-4 w-4" />
+                    Analysis
+                  </Link>
+
                   <Link
                     to="/therapists"
                     className="flex items-center gap-3 px-2 py-1.5 text-sm rounded-md hover:bg-muted"
@@ -378,18 +347,17 @@ const Header = () => {
                   >
                     <User className="h-4 w-4" />
                     Find Therapists
-                  </Link>
-
-                  <Link
-                    to="/community"
-                    className="flex items-center gap-3 px-2 py-1.5 text-sm rounded-md hover:bg-muted"
-                    onClick={toggleMobileMenu}
-                  >
-                    <Users className="h-4 w-4" />
-                    Community
-                  </Link>
+                  </Link> 
 
                 </div>
+
+                <Link to="/community" className="flex items-center gap-3 px-2 py-1.5 text-sm rounded-md hover:bg-muted" onClick={toggleMobileMenu}>
+                  <Users className="h-4 w-4" />
+                  Community
+                </Link>
+
+
+
               </>
             ) : (
               <div className="pt-4 flex flex-col space-y-3">
