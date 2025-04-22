@@ -97,6 +97,16 @@ const CopingToolsPage = () => {
                 description="Express creativity and relieve stress with digital coloring."
                 link="/games/coloring"
               />
+              <GameCard
+                title="Circle Click Game"
+                description="Test your reflexes and have fun clicking circles!"
+                link="/games/circle-click"
+              />
+              <GameCard
+                title="Find the Ball"
+                description="Test your intuition and find the hidden ball!"
+                link="/games/find-the-ball"
+              />
             </div>
           </TabsContent>
 

@@ -26,6 +26,8 @@ import ExercisesPage from '@/pages/ExercisesPage';
 import MemoryGamePage from '@/pages/MemoryGamePage';
 import WordZenPage from '@/pages/WordZenPage';
 import ColoringGamePage from '@/pages/ColoringGamePage';
+import CircleClickGame from '@/components/coping/games/CircleClickGame';
+import FindTheBallGamePage from '@/pages/FindTheBallGamePage';
 
 // --- Protected Route Component ---
 interface ProtectedRouteProps {
@@ -79,6 +81,8 @@ const AppRouter = () => {
         <Route path="memory" element={<ProtectedRoute><MemoryGamePage /></ProtectedRoute>} />
         <Route path="word-zen" element={<ProtectedRoute><WordZenPage /></ProtectedRoute>} />
         <Route path="coloring" element={<ProtectedRoute><ColoringGamePage /></ProtectedRoute>} />
+        <Route path="circle-click" element={<ProtectedRoute><CircleClickGame /></ProtectedRoute>} />
+        <Route path="find-the-ball" element={<ProtectedRoute><FindTheBallGamePage /></ProtectedRoute>} />
       </Route>
 
       {/* 404 route */}
