@@ -17,11 +17,12 @@ const ResourcesPage = () => {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [savedResources, setSavedResources] = useState<string[]>([]);
 
-  const filteredResources = resourceData.filter(resource => {
+  const filteredResources = (resourceType: string) => resourceData.filter(resource => {
     const matchesSearch = resource.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
                          resource.description.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === "All" || resource.category === selectedCategory;
-    return matchesSearch && matchesCategory;
+    const matchesResourceType = resource.resourceType === resourceType
+    return matchesSearch && matchesCategory && matchesResourceType;
   });
 
   const toggleBookmark = (id: string) => {
@@ -70,8 +71,8 @@ const ResourcesPage = () => {
           </TabsList>
           
           <TabsContent value="articles" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredResources.length > 0 ? (
-              filteredResources.map((resource) => (
+            {filteredResources("article").length > 0 ? (
+              filteredResources("article").map((resource) => (
                 <ResourceCard 
                   key={resource.id}
                   id={resource.id}
@@ -95,65 +96,49 @@ const ResourcesPage = () => {
           
           <TabsContent value="podcasts">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <ResourceCard 
-                id="podcast1"
-                title="Managing Anxiety in Uncertain Times"
-                description="A calming discussion on practical ways to manage anxiety during periods of uncertainty and change."
-                imageUrl="https://images.unsplash.com/photo-1581368087049-7034ed0d1e6f?ixlib=rb-4.0.3"
-                category="Anxiety"
-                readTime="45 min listen"
-                author="Dr. Emma Watson"
-              />
-              <ResourceCard 
-                id="podcast2"
-                title="Sleep Better Tonight: A Guided Journey"
-                description="Learn evidence-based techniques to improve your sleep quality and establish healthy sleep routines."
-                imageUrl="https://images.unsplash.com/photo-1541199249251-f713e6145474?ixlib=rb-4.0.3"
-                category="Sleep"
-                readTime="32 min listen"
-                author="Sleep Specialist Mark Johnson"
-              />
-              <ResourceCard 
-                id="podcast3"
-                title="Mindfulness for Beginners"
-                description="Start your mindfulness journey with this beginner-friendly introduction to mindfulness practices."
-                imageUrl="https://images.unsplash.com/photo-1506126613408-eca07ce68773?ixlib=rb-4.0.3"
-                category="Mindfulness"
-                readTime="28 min listen"
-                author="Meditation Coach Sarah Lee"
-              />
+              {filteredResources("podcast").length > 0 ?( filteredResources("podcast").map((resource) => (
+                <ResourceCard
+                        key={resource.id}
+                        id={resource.id}
+                        title={resource.title}
+                        description={resource.description}
+                        imageUrl={resource.imageUrl}
+                        category={resource.category}
+                        readTime={resource.readTime}
+                        author={resource.author}
+                        isSaved={savedResources.includes(resource.id)}
+                        onBookmarkToggle={() => toggleBookmark(resource.id)}
+                    />
+                ))):(
+              <div className="col-span-3 py-12 text-center">
+                <h3 className="text-xl font-medium mb-2">No resources found</h3>
+                <p className="text-muted-foreground">Try adjusting your search or filter criteria</p>
+              </div>
+            )}
             </div>
           </TabsContent>
           
           <TabsContent value="videos">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <ResourceCard 
-                id="video1"
-                title="5-Minute Anxiety Relief Exercise"
-                description="A quick guided exercise to help reduce anxiety symptoms in just five minutes."
-                imageUrl="https://images.unsplash.com/photo-1545205597-3d9d02c29597?ixlib=rb-4.0.3"
-                category="Anxiety"
-                readTime="5 min video"
-                author="Therapist Anna Garcia"
-              />
-              <ResourceCard 
-                id="video2"
-                title="Understanding Depression: Signs and Support"
-                description="Learn to recognize signs of depression and how to support yourself or loved ones."
-                imageUrl="https://images.unsplash.com/photo-1514845505178-849cebf1a91d?ixlib=rb-4.0.3"
-                category="Depression"
-                readTime="18 min video"
-                author="Dr. Michael Chen"
-              />
-              <ResourceCard 
-                id="video3"
-                title="Guided Evening Meditation for Better Sleep"
-                description="Wind down your day with this calming guided meditation designed to prepare your mind and body for restful sleep."
-                imageUrl="https://images.unsplash.com/photo-1508672019048-805c876b67e2?ixlib=rb-4.0.3"
-                category="Sleep"
-                readTime="15 min video"
-                author="Sleep Coach Rebecca Taylor"
-              />
+               {filteredResources("video").length > 0 ? (filteredResources("video").map((resource) => (
+                <ResourceCard
+                  key={resource.id}
+                  id={resource.id}
+                  title={resource.title}
+                  description={resource.description}
+                  imageUrl={resource.imageUrl}
+                  category={resource.category}
+                  readTime={resource.readTime}
+                  author={resource.author}
+                  isSaved={savedResources.includes(resource.id)}
+                  onBookmarkToggle={() => toggleBookmark(resource.id)}
+                />
+              ))):(
+                <div className="col-span-3 py-12 text-center">
+                <h3 className="text-xl font-medium mb-2">No resources found</h3>
+                <p className="text-muted-foreground">Try adjusting your search or filter criteria</p>
+              </div>
+              )}
             </div>
           </TabsContent>
         </Tabs>
