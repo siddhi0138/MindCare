@@ -68,7 +68,7 @@ const Header = () => {
       <div className="container flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
           <Link to="/" className="flex items-center justify-start gap-2">
             <Heart className="h-6 w-6 text-serenity-purple" />
-            <span className="text-xl font-bold">Serenity</span>
+            <span className="text-xl font-bold">MINDCARE</span>
           </Link>
 
         {/* Desktop Navigation */}

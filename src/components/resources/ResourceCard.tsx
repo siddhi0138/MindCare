@@ -1,4 +1,3 @@
-
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +13,7 @@ interface ResourceCardProps {
   readTime: string;
   author: string;
   isSaved?: boolean;
+  onBookmarkToggle?: () => void;
 }
 
 const ResourceCard = ({
@@ -25,6 +25,7 @@ const ResourceCard = ({
   readTime,
   author,
   isSaved = false,
+  onBookmarkToggle,
 }: ResourceCardProps) => {
   return (
     <Card className="overflow-hidden h-full flex flex-col border-primary/10 card-hover">
@@ -38,7 +39,12 @@ const ResourceCard = ({
           <Badge variant="secondary" className="mb-2">
             {category}
           </Badge>
-          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-8 w-8 rounded-full"
+            onClick={onBookmarkToggle}
+          >
             <Bookmark className={`h-4 w-4 ${isSaved ? 'fill-current' : ''}`} />
           </Button>
         </div>

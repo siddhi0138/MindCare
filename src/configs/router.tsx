@@ -16,6 +16,7 @@ import JournalPage from '@/pages/JournalPage';
 import MeditationPage from '@/pages/MeditationPage';
 import ChatPage from '@/pages/ChatPage';
 import ResourcesPage from '@/pages/ResourcesPage';
+import ResourceDetailPage from '@/pages/ResourceDetailPage';
 import CommunityPage from '@/pages/CommunityPage';
 import AssessmentPage from '@/pages/AssessmentPage';
 import TherapistPage from '@/pages/TherapistPage';
@@ -70,6 +71,7 @@ const AppRouter = () => {
       <Route path="/meditation" element={<ProtectedRoute><MeditationPage /></ProtectedRoute>} />
       <Route path="/chat" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
       <Route path="/resources" element={<ProtectedRoute><ResourcesPage /></ProtectedRoute>} />
+      <Route path="/resources/:id" element={<ProtectedRoute><ResourceDetailPage /></ProtectedRoute>} />
       <Route path="/community" element={<ProtectedRoute><CommunityPage /></ProtectedRoute>} />
       <Route path="/assessment" element={<ProtectedRoute><AssessmentPage /></ProtectedRoute>} />
       <Route path="/therapists" element={<ProtectedRoute><TherapistPage /></ProtectedRoute>} />
