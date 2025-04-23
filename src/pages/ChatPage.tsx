@@ -1,8 +1,27 @@
-
+import { useAuth } from "@/contexts/AuthContext";
 import MainLayout from "@/components/layout/MainLayout";
 import ChatInterface from "@/components/chat/ChatInterface";
+import { useEffect } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 const ChatPage = () => {
+  const { recordActivity } = useToast();
+  const { currentUser } = useAuth();
+
+  useEffect(() => {
+    const recordVisit = async () => {
+      if (currentUser) {
+         try {
+          await recordActivity("visit-chat-page", "Visit Chat Page", "ChatPage");
+        } catch (error) {
+          console.error("Failed to record visit:", error);
+        }
+      }
+    };
+
+    recordVisit();
+  }, [currentUser, recordActivity]);
+
   return (
     <MainLayout>
       <div className="max-w-3xl mx-auto">

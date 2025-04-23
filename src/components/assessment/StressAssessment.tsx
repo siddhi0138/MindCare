@@ -106,7 +106,7 @@ const StressAssessment = ({ onComplete }: StressAssessmentProps) => {
     
     return (
       <AssessmentResult
-        title="PSS-10 Stress Assessment Results"
+        title="Stress Assessment Results"
         score={score}
         maxScore={40}
         level={interpretation?.severity || "Unknown"}
@@ -126,7 +126,7 @@ const StressAssessment = ({ onComplete }: StressAssessmentProps) => {
   return (
     <Card className="border-primary/10">
       <CardHeader>
-        <CardTitle>PSS-10 Perceived Stress Scale</CardTitle>
+        <CardTitle>Perceived Stress Scale</CardTitle>
         <CardDescription>
           The questions in this scale ask you about your feelings and thoughts during the last month.
         </CardDescription>

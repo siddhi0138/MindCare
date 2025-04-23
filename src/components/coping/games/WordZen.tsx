@@ -310,6 +310,14 @@ const WordZenGame = () => {
           <p className="text-muted-foreground">
             Find hidden words to improve mindfulness and vocabulary
           </p>
+          {!gameCompleted && (
+            <div className="flex justify-start">
+              <Button variant="outline" onClick={initializeGame}>
+                <RefreshCcw className="mr-2 h-4 w-4" />
+                Restart Game
+              </Button>
+            </div>
+          )}
         </div>
         {gameStarted && (
           <div className="flex items-center gap-4">
@@ -457,15 +465,6 @@ const WordZenGame = () => {
               <Button onClick={initializeGame}>
                 <RefreshCcw className="mr-2 h-4 w-4" />
                 Play Again
-              </Button>
-            </div>
-          )}
-
-          {!gameCompleted && (
-            <div className="flex justify-end">
-              <Button variant="outline" onClick={initializeGame}>
-                <RefreshCcw className="mr-2 h-4 w-4" />
-                Restart Game
               </Button>
             </div>
           )}

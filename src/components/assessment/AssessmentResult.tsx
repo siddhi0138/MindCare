@@ -64,9 +64,9 @@ export const AssessmentResult = ({
     if (title) return title;
     
     switch(type) {
-      case "anxiety": return "Anxiety Assessment (GAD-7)";
-      case "depression": return "Depression Assessment (PHQ-9)";
-      case "stress": return "Stress Assessment (PSS-10)";
+      case "anxiety": return "Anxiety Assessment";
+      case "depression": return "Depression Assessment";
+      case "stress": return "Stress Assessment";
       default: return "Assessment Result";
     }
   };
@@ -92,16 +92,16 @@ export const AssessmentResult = ({
   };
 
   const serviceButtons = [
-    { label: "Breathing Exercises", path: "/home/user/serenity-wellbeing-hub/src/components/coping/GuidedBreathingExercise.tsx" },
-        { label: "Affirmations", path: "//home/user/serenity-wellbeing-hub/src/components/coping/AffirmationCards.tsx" },
-        { label: "Games", path: "/home/user/serenity-wellbeing-hub/src/pages/CopingToolsPage.tsx" },
-        { label: "Grounding Activities", path: "/home/user/serenity-wellbeing-hub/src/components/coping/GroundingExercise.tsx" },
-        { label: "Journaling", path: "/home/user/serenity-wellbeing-hub/src/pages/JournalPage.tsx" },
-        { label: "Meditation", path: "/home/user/serenity-wellbeing-hub/src/pages/MeditationPage.tsx" },
-        { label: "AI Help", path: "/home/user/serenity-wellbeing-hub/src/pages/ChatPage.tsx" },
-        { label: "Mental Health Resources", path: "/home/user/serenity-wellbeing-hub/src/pages/ResourcesPage.tsx" },
-        { label: "Therapists", path: "/home/user/serenity-wellbeing-hub/src/pages/TherapistPage.tsx" },
-        { label: "Community", path: "/home/user/serenity-wellbeing-hub/src/pages/CommunityPage.tsx" },
+    { label: "Breathing Exercises", path: "/interactive-tools/grounding" },
+    { label: "Affirmations", path: "/affirmations" },
+    { label: "Games", path: "/coping-tools?defaultTab=games" },
+    { label: "Grounding Activities", path: "/interactive-tools/grounding" },
+    { label: "Journaling", path: "/journal" },
+    { label: "Meditation", path: "/meditation" },
+    { label: "AI Help", path: "/chat" },
+    { label: "Mental Health Resources", path: "/resources" },
+    { label: "Therapists", path: "/therapists" },
+    { label: "Community", path: "/community" },
     ];
 
   return (

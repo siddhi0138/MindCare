@@ -6,8 +6,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
 import { Calendar as CalendarIcon, List, FileText, PlusCircle } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 import { collection, query, where, orderBy, onSnapshot } from 'firebase/firestore';
-import { firestore, saveUserActivity } from '../configs/firebase';
+import { firestore, saveUserActivity } from '@/configs/firebase';
 import { Calendar } from '../components/ui/calendar';
 import { format } from 'date-fns';
 import { DayProps } from 'react-day-picker';
@@ -41,13 +42,16 @@ const JournalPage = () => {
   const [selectedEntry, setSelectedEntry] = useState<JournalEntry | undefined>(undefined);
   const [editorKey, setEditorKey] = useState(0);
   const { currentUser } = useAuth();
+  const { toast, recordActivity } = useToast();
 
   useEffect(() => {
+    recordActivity('View', 'Visit Journal Page', 'JournalPage');
     if (currentUser) {
-      const q = query(
+       const q = query(
         collection(firestore, 'journalEntries'),
         where('userId', '==', currentUser.id),
         orderBy('timestamp', 'desc')
+
       );
 
       const unsubscribe = onSnapshot(q, (querySnapshot) => {
