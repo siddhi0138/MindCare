@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import MainLayout from "@/components/layout/MainLayout";
 import ResourceCard from "@/components/resources/ResourceCard";
@@ -6,64 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Search, Filter } from "lucide-react";
-
-const resourceData = [
-  {
-    id: "1",
-    title: "Understanding Anxiety: Causes and Management Techniques",
-    description: "Learn about the root causes of anxiety and discover effective techniques to manage anxiety symptoms in your daily life.",
-    imageUrl: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-4.0.3",
-    category: "Anxiety",
-    readTime: "8 min read",
-    author: "Dr. Lisa Chen",
-  },
-  {
-    id: "2",
-    title: "Mindfulness Practices for Better Sleep",
-    description: "Discover mindfulness techniques that can help you fall asleep faster and improve your overall sleep quality.",
-    imageUrl: "https://images.unsplash.com/photo-1541199249251-f713e6145474?ixlib=rb-4.0.3",
-    category: "Sleep",
-    readTime: "5 min read",
-    author: "Michael Torres",
-  },
-  {
-    id: "3",
-    title: "Depression: Signs, Symptoms, and Seeking Help",
-    description: "Understanding the signs of depression and knowing when and how to seek professional help for yourself or a loved one.",
-    imageUrl: "https://images.unsplash.com/photo-1514845505178-849cebf1a91d?ixlib=rb-4.0.3",
-    category: "Depression",
-    readTime: "10 min read",
-    author: "Dr. James Wilson",
-  },
-  {
-    id: "4",
-    title: "Building Resilience: Bouncing Back from Setbacks",
-    description: "Learn practical strategies for developing emotional resilience and improving your ability to cope with life's challenges.",
-    imageUrl: "https://images.unsplash.com/photo-1513745405825-efaf9a49315f?ixlib=rb-4.0.3",
-    category: "Resilience",
-    readTime: "7 min read",
-    author: "Sarah Johnson",
-  },
-  {
-    id: "5",
-    title: "Nutrition and Mental Health: The Food-Mood Connection",
-    description: "Explore the important relationship between what you eat and how you feel, with tips for a brain-healthy diet.",
-    imageUrl: "https://images.unsplash.com/photo-1498837167922-ddd27525d352?ixlib=rb-4.0.3",
-    category: "Nutrition",
-    readTime: "6 min read",
-    author: "Emma Rodriguez, RD",
-  },
-  {
-    id: "6",
-    title: "Digital Detox: Reducing Screen Time for Better Mental Health",
-    description: "Practical strategies to reduce your dependency on digital devices and create a healthier relationship with technology.",
-    imageUrl: "https://images.unsplash.com/photo-1565803974275-dccd2f933cbb?ixlib=rb-4.0.3",
-    category: "Digital Wellness",
-    readTime: "5 min read",
-    author: "Alex Thompson",
-  },
-];
+import { Search } from "lucide-react";
+import { resourceData } from "@/data/resources";
 
 const categories = [
   "All", "Anxiety", "Depression", "Sleep", "Stress", "Relationships", "Mindfulness", "Self-Care"
@@ -72,13 +15,20 @@ const categories = [
 const ResourcesPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
-  
+  const [savedResources, setSavedResources] = useState<string[]>([]);
+
   const filteredResources = resourceData.filter(resource => {
     const matchesSearch = resource.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
                          resource.description.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === "All" || resource.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
+
+  const toggleBookmark = (id: string) => {
+    setSavedResources(prev => 
+      prev.includes(id) ? prev.filter(savedId => savedId !== id) : [...prev, id]
+    );
+  };
 
   return (
     <MainLayout>
@@ -132,6 +82,8 @@ const ResourcesPage = () => {
                   category={resource.category}
                   readTime={resource.readTime}
                   author={resource.author}
+                  isSaved={savedResources.includes(resource.id)}
+                  onBookmarkToggle={() => toggleBookmark(resource.id)}
                 />
               ))
             ) : (
@@ -202,38 +154,6 @@ const ResourcesPage = () => {
                 category="Sleep"
                 readTime="15 min video"
                 author="Sleep Coach Rebecca Taylor"
-              />
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="exercises">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <ResourceCard 
-                id="exercise1"
-                title="Progressive Muscle Relaxation"
-                description="Follow along with this exercise to release tension throughout your body by systematically tensing and relaxing muscle groups."
-                imageUrl="https://images.unsplash.com/photo-1518611012118-696072aa579a?ixlib=rb-4.0.3"
-                category="Stress"
-                readTime="10 min exercise"
-                author="Physical Therapist David Wilson"
-              />
-              <ResourceCard 
-                id="exercise2"
-                title="Gratitude Journal Practice"
-                description="An interactive exercise to help you establish a regular gratitude practice to improve mental wellbeing."
-                imageUrl="https://images.unsplash.com/photo-1506784983877-45594efa4cbe?ixlib=rb-4.0.3"
-                category="Self-Care"
-                readTime="5 min exercise"
-                author="Wellness Coach Jamie Rodriguez"
-              />
-              <ResourceCard 
-                id="exercise3"
-                title="5-4-3-2-1 Grounding Technique"
-                description="A simple but effective sensory awareness exercise to help manage overwhelming feelings and anxiety."
-                imageUrl="https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?ixlib=rb-4.0.3"
-                category="Anxiety"
-                readTime="3 min exercise"
-                author="Anxiety Specialist Lisa Parker"
               />
             </div>
           </TabsContent>

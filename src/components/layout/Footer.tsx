@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Heart, Phone } from 'lucide-react';
 
+
 const Footer = () => {
   return (
     <footer className="bg-background border-t py-10 px-6">
@@ -47,8 +48,10 @@ const Footer = () => {
             <p className="text-muted-foreground text-sm mb-4">
               If you're in crisis or need urgent help:
             </p>
-            <Button className="w-full mb-2 bg-destructive hover:bg-destructive/90 flex items-center gap-2">
-              <Phone size={16} /> Crisis Hotline
+            <Button asChild className="w-full mb-2 bg-destructive hover:bg-destructive/90 flex items-center gap-2">
+            <a href="https://www.thelivelovelaughfoundation.org/helpline" target="_blank" rel="noopener noreferrer">
+              <Phone size={16} /> Call To Action
+            </a>
             </Button>
             <p className="text-xs text-muted-foreground mt-3">
               Always seek professional help for mental health emergencies.
