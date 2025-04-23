@@ -3,8 +3,7 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Gamepad2, Heart, Sparkles } from "lucide-react";
 import MemoryGame from "./games/MemoryGame";
-import GratitudeGame from "./games/GratitudeGame";
-import PositiveGame from "./games/PositiveGame";
+
 
 type GameType = "memory" | "gratitude" | "positive";
 
@@ -28,7 +27,7 @@ const MoodBoostGames = () => {
             </CardHeader>
           </Card>
           
-          <Card 
+          <Card
             className="border-primary/10 hover:shadow-md transition-all duration-300 transform hover:scale-105 cursor-pointer" 
             onClick={() => setActiveGame("gratitude")}
           >
@@ -41,7 +40,7 @@ const MoodBoostGames = () => {
             </CardHeader>
           </Card>
           
-          <Card 
+          <Card
             className="border-primary/10 hover:shadow-md transition-all duration-300 transform hover:scale-105 cursor-pointer" 
             onClick={() => setActiveGame("positive")}
           >
@@ -54,15 +53,10 @@ const MoodBoostGames = () => {
             </CardHeader>
           </Card>
         </div>
-      ) : activeGame === "memory" ? (
+      ) : (
         <MemoryGame onBack={() => setActiveGame(null)} />
-      ) : activeGame === "gratitude" ? (
-        <GratitudeGame onBack={() => setActiveGame(null)} />
-      ) : activeGame === "positive" ? (
-        <PositiveGame onBack={() => setActiveGame(null)} />
-      ) : null}
+      )}
     </div>
   );
 };
-
 export default MoodBoostGames;

@@ -1,4 +1,4 @@
-import app, { db } from "./firebase/init";
+import { app, db } from "./src/firebase/firebase-init";
 
 import { collection, addDoc } from "firebase/firestore";
 

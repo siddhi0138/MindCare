@@ -14,13 +14,14 @@ export interface AssessmentData {
 export interface AssessmentHistoryChartProps {
   assessmentType: string;
   assessmentData: AssessmentData[];
+  userId: string;
 }
 
-const AssessmentHistoryChart = ({ assessmentType, assessmentData }: AssessmentHistoryChartProps) => {
+const AssessmentHistoryChart = ({ assessmentType, assessmentData, userId }: AssessmentHistoryChartProps) => {
   const filteredData = assessmentData
-    .filter(data => data.type === assessmentType)
+    .filter(data => data.type === assessmentType && data.userId === userId)
     .map(data => ({
-      timestamp: data.timestamp.toDate().toLocaleDateString(),
+      timestamp: data.timestamp.toLocaleDateString(),
       score: data.score,
     }))
     .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());

@@ -1,48 +1,41 @@
-
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { AssessmentType } from "./AssessmentHub";
-import { getAssessmentResults } from '@/configs/firebase';
-import { useAuth } from '@/contexts/AuthContext';
 import AssessmentHistoryChart from '@/components/assessment/AssessmentHistoryChart';
-
 interface AssessmentHistoryEntry {
-  id: string;
   userId: string;
+  id: string;
   type: AssessmentType;
   score: number;
   level: string;
   recommendations: string[];
-  timestamp: any; // or use Timestamp type from firebase/firestore if needed
+  timestamp: string;
 }
 
 interface AssessmentHistoryProps {
   onSelectAssessment: (type: AssessmentType) => void;
 }
 
-const AssessmentHistory = ({ onSelectAssessment, }: AssessmentHistoryProps) => {
-  const { currentUser } = useAuth();
+const AssessmentHistory = ({ onSelectAssessment }: AssessmentHistoryProps) => {
   const [history, setHistory] = useState<AssessmentHistoryEntry[]>([]);
 
   useEffect(() => {
-    const fetchAssessmentHistory = async () => {
-      if (currentUser?.id) {
-        const results = await getAssessmentResults(currentUser.id);
-        setHistory(results as AssessmentHistoryEntry[]);
-      }
-    };
-
-    fetchAssessmentHistory();
-  }, [currentUser]);
+    const storedHistory = localStorage.getItem("assessmentHistory");
+    if (storedHistory) {
+      setHistory(JSON.parse(storedHistory));
+    }
+  }, []);
 
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold">Assessment History</h2>
       {history.length === 0 ? (
         <p className="text-muted-foreground">No assessment history yet.</p>
-      ) : (
+      ) :
+       (
+
         <div className="space-y-4">
           {history.map((entry, index) => (
             <Card key={index} className="border-primary/10">
@@ -73,9 +66,14 @@ const AssessmentHistory = ({ onSelectAssessment, }: AssessmentHistoryProps) => {
                 </div>
 
                 <p className="text-muted-foreground">
-                  Timestamp: {entry.timestamp.toDate().toLocaleString()}
+                  Timestamp: {new Date(entry.timestamp).toLocaleString()}
                 </p>
-                <AssessmentHistoryChart assessmentType={entry.type} assessmentData={history} />
+                <AssessmentHistoryChart
+                  assessmentType={entry.type}
+                  assessmentData={history.filter(histEntry => histEntry.type === entry.type).map(histEntry => ({
+                    ...histEntry, timestamp: new Date(histEntry.timestamp),
+                  }))}
+                  userId={entry.userId} />
               </CardContent>
             </Card>
           ))}

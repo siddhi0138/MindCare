@@ -6,8 +6,8 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "@/components/ui/sonner";
-import AssessmentResult from "./AssessmentResult";
-import { AnxietyAssessmentProps } from "./AnxietyAssessment.d";
+import { AssessmentResult } from "./AssessmentResult";
+import type { AnxietyAssessmentProps } from "./AnxietyAssessment.d";
 
 // GAD-7 questions
 const questions = [
