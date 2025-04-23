@@ -1,38 +1,35 @@
 import MainLayout from '@/components/layout/MainLayout';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"; // Corrected path
 import GuidedBreathingExercise from '@/components/coping/GuidedBreathingExercise';
 import AffirmationCards from '@/components/coping/AffirmationCards';
 import { Gamepad2, Heart, Sparkles, Wind } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from "@/components/ui/card";
+
 import { Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { saveUserActivity } from '@/configs/firebase';
+import { useToast, recordActivity } from '@/hooks/use-toast';
+import GroundingExercise from '@/components/coping/GroundingExercise';
 
 const CopingToolsPage = () => {
   const { currentUser } = useAuth();
-
+  const { } = useToast();
+  useEffect(() => {
+    const recordVisit = async () => {
+      currentUser &&
+        (await recordActivity('view', 'Visited Coping Tools', 'Coping Page '));
+    };
+    recordVisit();
+  }, [currentUser]);
   const handleGameClick = async (gameName: string) => {
-    if (currentUser) {
-      const activityData = {
-        userId: currentUser.id,
-        timestamp: new Date().toISOString(),
-        activityType: "game-started",
-        activityName: gameName,
-        pageName: "CopingTools",
-      };
-
-      console.log("Saving user activity:", {
-        ...activityData,
-      });
-
-
-      await saveUserActivity(activityData);
-    }
-    // If no user is logged in, the activity is not saved.  Consider showing a message.
+    currentUser &&
+      (await recordActivity(
+        'game-started',
+        'GamePage',
+        gameName
+      ));
   };
-
   return (
     <MainLayout>
       <div className="max-w-4xl mx-auto">
@@ -174,10 +171,17 @@ const CopingToolsPage = () => {
                       </div>
                     </div>
 
-                    <Link to="/interactive-tools/grounding" onClick={async () => {
-                      if (currentUser) {
-                        await handleGameClick("Grounding Exercise");
-                      }}}>
+                    <Link
+                      to="/interactive-tools/grounding"
+                      onClick={async () => {
+                        currentUser &&
+                          (await recordActivity(
+                            'Start Exercise',
+                            'Grounding Exercise',
+                            'Grounding Exercise Page'
+                          ));
+                      }}
+                    >
                       <Button>Start Exercise</Button>
                     </Link>
                   </div>
@@ -202,7 +206,7 @@ const StartExerciseButton: React.FC<StartExerciseButtonProps> = ({
   const [isPaused, setIsPaused] = useState(false);
   const [inhaleDuration, setInhaleDuration] = useState(exerciseType === "4-7-8" ? 4 : 4,);
   const [holdDuration, setHoldDuration] = useState(exerciseType === "4-7-8" ? 7 : 4,);
-  const [exhaleDuration, setExhaleDuration] = useState(exerciseType === "4-7-8" ? 8 : 4);
+  const [exhaleDuration, setExhaleDuration] = useState(exerciseType === "4-7-8" ? 8 : 4);  
 
   const handleStartExercise = () => {
     setIsPaused(false);
@@ -257,7 +261,7 @@ const GameCard: React.FC<GameCardProps> = ({
     <Card className="border-primary/10 overflow-hidden cursor-pointer hover:shadow-md transition-shadow">
       <CardContent className="p-6">
         <h3 className="text-lg font-medium mb-2">{ title }</h3>
-        <p className="text-sm text-muted-foreground mb-4">{description}</p>
+        <p className="text-sm text-muted-foreground mb-4">{ description }</p>
         <Button onClick={handleClick}>Play</Button>
       </CardContent>
     </Card>

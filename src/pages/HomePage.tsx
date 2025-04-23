@@ -1,19 +1,51 @@
-
 import MainLayout from "@/components/layout/MainLayout";
 import HeroSection from "@/components/home/HeroSection";
 import FeaturesSection from "@/components/home/FeaturesSection";
 import MoodTracker from "@/components/home/MoodTracker";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
+import { useEffect } from "react";
+import { recordActivity } from "@/firebase/firebase-init";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react"; 
 
 const HomePage = () => {
+  const { currentUser } = useAuth();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const recordVisit = async () => {
+      currentUser && (await recordActivity('visit', 'visit-home-page', 'HomePage'));
+    };
+    recordVisit();
+  }, [currentUser]);
+
+  const handleQuickJournalClick = async () => {
+    if (currentUser) {
+      await recordActivity('click', 'quick-journal', 'HomePage');
+    }
+  };
+
+  const handleTalkToAIClick = async () => {
+    if (currentUser) {
+      await recordActivity('click', 'talk-to-ai', 'HomePage');
+    }
+  };
+
+  const handleGuidedMeditationClick = async () => {
+    if (currentUser) {
+      await recordActivity('click', 'guided-meditation', 'HomePage');
+    }
+  };
+
   return (
     <MainLayout>
       <HeroSection />
+
       <FeaturesSection />
-      
+
       <section className="py-16 md:py-20">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           <div className="md:col-span-2">
@@ -22,7 +54,7 @@ const HomePage = () => {
             </h2>
             <MoodTracker />
           </div>
-          
+
           <div className="flex flex-col gap-6">
             <Card className="border-primary/10 overflow-hidden">
               <CardContent className="p-0">
@@ -31,7 +63,7 @@ const HomePage = () => {
                   <p className="text-white/80 mb-4">
                     Document your thoughts and track your mental wellbeing journey.
                   </p>
-                  <Button variant="secondary" asChild>
+                  <Button variant="secondary" asChild onClick={handleQuickJournalClick}>
                     <Link to="/journal" className="flex items-center gap-1">
                       Start Writing <ArrowRight size={16} />
                     </Link>
@@ -39,7 +71,7 @@ const HomePage = () => {
                 </div>
               </CardContent>
             </Card>
-            
+
             <Card className="border-primary/10 overflow-hidden">
               <CardContent className="p-0">
                 <div className="bg-gradient-to-br from-serenity-blue to-blue-400 p-6 text-white">
@@ -47,7 +79,7 @@ const HomePage = () => {
                   <p className="text-white/80 mb-4">
                     Get support anytime with our AI wellness companion.
                   </p>
-                  <Button variant="secondary" asChild>
+                  <Button variant="secondary" asChild onClick={handleTalkToAIClick}>
                     <Link to="/chat" className="flex items-center gap-1">
                       Start Chatting <ArrowRight size={16} />
                     </Link>
@@ -55,7 +87,7 @@ const HomePage = () => {
                 </div>
               </CardContent>
             </Card>
-            
+
             <Card className="border-primary/10 overflow-hidden">
               <CardContent className="p-0">
                 <div className="bg-gradient-to-br from-green-400 to-teal-500 p-6 text-white">
@@ -63,7 +95,7 @@ const HomePage = () => {
                   <p className="text-white/80 mb-4">
                     Reduce stress with guided breathing and meditation exercises.
                   </p>
-                  <Button variant="secondary" asChild>
+                  <Button variant="secondary" asChild onClick={handleGuidedMeditationClick}>
                     <Link to="/meditation" className="flex items-center gap-1">
                       Start Meditating <ArrowRight size={16} />
                     </Link>

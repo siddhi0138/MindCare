@@ -12,10 +12,10 @@ const Footer = () => {
           <div className="col-span-1 md:col-span-1">
             <Link to="/" className="flex items-center gap-2 mb-4">
               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-serenity-purple-dark flex items-center justify-center">
-                <span className="text-white font-bold">S</span>
+                <span className="text-white font-bold">M</span>
               </div>
               <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-serenity-purple-dark">
-                Serenity
+                MINDCARE
               </span>
             </Link>
             <p className="text-muted-foreground text-sm mt-2">
@@ -61,12 +61,12 @@ const Footer = () => {
         
         <div className="border-t mt-10 pt-6 flex flex-col md:flex-row justify-between items-center">
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} Serenity. All rights reserved.
+            © {new Date().getFullYear()} MINDCARE. All rights reserved.
           </p>
           <div className="flex items-center gap-2 mt-4 md:mt-0">
             <span className="text-sm text-muted-foreground">Made with</span>
             <Heart size={14} className="text-red-500" />
-            <span className="text-sm text-muted-foreground">for mental wellbeing</span>
+            <span className="text-sm text-muted-foreground">for Mental Wellbeing</span>
           </div>
         </div>
       </div>

@@ -96,7 +96,7 @@ const AffirmationCards = () => {
           timestamp,
           activityType: "affirmation-added-to-favorites",
           activityName: currentAffirmation.text,
-          pageName: "CopingTools",
+          pageName: "Affirmation",
         };
 
         await saveUserActivity(activityData);

@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, addDoc, query, where, getDocs, orderBy } from "firebase/firestore";
+import { getFirestore, collection, addDoc, query, where, getDocs, orderBy, updateDoc, doc } from "firebase/firestore";
 import { Timestamp } from 'firebase/firestore';
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
@@ -95,10 +95,10 @@ const getAssessmentResults = async (userId: string) => {
 const saveUserActivity = async (activity: { userId: string; timestamp: string; activityType: string; activityName: string; pageName: string }) => {
   try {
     console.log("saveUserActivity called");
-    console.log("Saving user activity:", activity);
+    console.log("Saving user activity:", activity)
     const docRef = await addDoc(collection(firestore, "userActivity"), {
       ...activity,
-      timestamp: Timestamp.fromDate(new Date(activity.timestamp)) // Convert string timestamp to Firebase Timestamp
+      timestamp: Timestamp.fromDate(new Date(activity.timestamp))
     });
     console.log("User activity saved with ID: ", docRef.id);
     return { success: true, id: docRef.id };
@@ -108,4 +108,16 @@ const saveUserActivity = async (activity: { userId: string; timestamp: string; a
   }
 };
 
-export { app, auth, firestore, googleProvider, saveJournalEntry, getJournalEntries, saveAssessmentResult, getAssessmentResults, saveUserActivity };
+
+// Function to update the user's therapist phone number in Firestore
+const updateUserTherapistNumber = async (userId: string, newPhoneNumber: string) => {
+  try {
+    const userDocRef = doc(firestore, "users", userId); // Assuming you have a "users" collection
+    await updateDoc(userDocRef, { therapistPhoneNumber: newPhoneNumber });
+    console.log(`Therapist number updated for user: ${userId}`);
+  } catch (e) {
+    console.error(`Error updating therapist number for user: ${userId}`, e);
+  }
+};
+
+export { app, auth, firestore, googleProvider, saveJournalEntry, getJournalEntries, saveAssessmentResult, getAssessmentResults, saveUserActivity, updateUserTherapistNumber };

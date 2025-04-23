@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { saveUserActivity } from "@/configs/firebase";
+import {  saveUserActivity } from "@/configs/firebase";
 import MainLayout from "@/components/layout/MainLayout";
+import { useToast } from "@/hooks/use-toast";
 import MeditationPlayer from "@/components/meditation/MeditationPlayer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -64,21 +65,25 @@ const MeditationPage = () => {
   const [filteredMeditations, setFilteredMeditations] = useState(meditationData);
 
   useEffect(() => {
+   recordActivity('view ','Visit Meditation Page','MeditationPage')
+  }, [])
+
+    const { recordActivity } = useToast();
+
+  useEffect(() => {
     setCurrentMeditation(meditationData[currentIndex]);
   }, [currentIndex]);
 
   useEffect(() => {
     setFilteredMeditations(
       meditationData.filter(
-        (meditation) =>
-          meditation.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          meditation.description.toLowerCase().includes(searchTerm.toLowerCase())
+        (meditation) => meditation.title.toLowerCase().includes(searchTerm.toLowerCase()) || meditation.description.toLowerCase().includes(searchTerm.toLowerCase())
       )
     );
   }, [searchTerm]);
 
   const { currentUser } = useAuth();
-  const userId = currentUser?.id
+  
   const handlePlayMeditation = (meditation,userId) => {
     const timestamp = new Date().toISOString();
     const activityData = {
@@ -87,10 +92,11 @@ const MeditationPage = () => {
       activityType: "play-meditation",
       activityName: meditation.title,
       pageName: "MeditationPage",
+
     };
     saveUserActivity(activityData);
     setCurrentMeditation(meditation);
-    
+
   };
 
   return (
@@ -149,7 +155,7 @@ const MeditationPage = () => {
                 <CardContent className="p-4">
                   <h3 className="font-medium text-lg">{meditation.title}</h3>
                   <p className="text-muted-foreground text-sm">{meditation.description}</p>
-                  <Button className="w-full mt-4" onClick={() => handlePlayMeditation(meditation, userId)}>
+                  <Button className="w-full mt-4" onClick={() => handlePlayMeditation(meditation, currentUser?.id)}>
                     Play Meditation
                   </Button>
                 </CardContent>
@@ -177,7 +183,7 @@ const MeditationPage = () => {
                       <CardContent className="p-4">
                         <h3 className="font-medium text-lg">{meditation.title}</h3>
                         <p className="text-muted-foreground text-sm">{meditation.description}</p>
-                        <Button className="w-full mt-4" onClick={() => handlePlayMeditation(meditation, userId)}>
+                        <Button className="w-full mt-4" onClick={() => handlePlayMeditation(meditation, currentUser?.id)}>
                           Play Meditation
                         </Button>
                       </CardContent>

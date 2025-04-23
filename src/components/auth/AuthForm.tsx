@@ -77,7 +77,7 @@ const AuthForm = ({ defaultTab = 'login' }: AuthFormProps) => {
   return (
     <Card className="w-full max-w-md mx-auto shadow-lg border-primary/10">
       <CardHeader className="space-y-1 text-center flex flex-col items-center">
-        <CardTitle className="text-2xl font-bold">Welcome to Serenity</CardTitle>
+        <CardTitle className="text-2xl font-bold">WELCOME TO MINDCARE</CardTitle>
         <CardDescription>
           Your journey to mental wellbeing starts here
         </CardDescription>
@@ -144,7 +144,6 @@ const AuthForm = ({ defaultTab = 'login' }: AuthFormProps) => {
               </Button>
               
               <div className="text-center text-sm text-muted-foreground mt-2">
-                <p>Demo account: demo@example.com / password</p>
               </div>
             </form>
           </TabsContent>

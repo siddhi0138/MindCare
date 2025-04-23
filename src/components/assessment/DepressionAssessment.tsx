@@ -100,7 +100,7 @@ const DepressionAssessment = ({ onComplete }: DepressionAssessmentProps) => {
     
     return (
       <AssessmentResult
-        title="PHQ-9 Depression Assessment Results"
+        title="Depression Assessment Results"
         score={score}
         maxScore={27}
         level={interpretation?.severity || "Unknown"}
@@ -120,7 +120,7 @@ const DepressionAssessment = ({ onComplete }: DepressionAssessmentProps) => {
   return (
     <Card className="border-primary/10">
       <CardHeader>
-        <CardTitle>PHQ-9 Depression Assessment</CardTitle>
+        <CardTitle>Depression Assessment</CardTitle>
         <CardDescription>
           Over the last 2 weeks, how often have you been bothered by any of the following problems?
         </CardDescription>

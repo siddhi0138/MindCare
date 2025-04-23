@@ -90,7 +90,7 @@ const AnxietyAssessmentFixed = ({ onComplete }: AnxietyAssessmentProps) => {
 
     return (
       <AssessmentResult
-        title="GAD-7 Anxiety Assessment Results"
+        title=" Anxiety Assessment Results"
         score={score}
         maxScore={21}
         level={interpretation?.severity || "Unknown"}
@@ -110,7 +110,7 @@ const AnxietyAssessmentFixed = ({ onComplete }: AnxietyAssessmentProps) => {
   return (
     <Card className="border-primary/10">
       <CardHeader>
-        <CardTitle>GAD-7 Anxiety Assessment</CardTitle>
+        <CardTitle>Anxiety Assessment</CardTitle>
         <CardDescription>
           Over the last 2 weeks, how often have you been bothered by any of the following problems?
         </CardDescription>

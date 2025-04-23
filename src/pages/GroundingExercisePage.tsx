@@ -1,10 +1,11 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'; 
 import MainLayout from "@/components/layout/MainLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from 'react-router-dom';
-
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast, recordActivity } from "@/hooks/use-toast";
+ 
 const GroundingExercisePage: React.FC = () => {
     return (
     <MainLayout>
@@ -12,6 +13,13 @@ const GroundingExercisePage: React.FC = () => {
     </MainLayout>
   );
 };
+
+
+
+
+
+
+
 
 const GroundingExerciseContent = () => {
   const [exerciseStarted, setExerciseStarted] = useState(false);
@@ -26,6 +34,21 @@ const GroundingExerciseContent = () => {
     { label: "Smell", description: "Identify 2 smells." },
     { label: "Taste", description: "Notice 1 thing you can taste." },
   ];
+  const { currentUser } = useAuth();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const recordPageVisit = async () => {
+      if (currentUser) {
+        await recordActivity("view", "visit-grounding-exercise-page", "GroundingExercisePage");
+      } else {
+        toast({ title: "User not authenticated", description: "Unable to record visit activity." });
+      }
+    };
+
+    recordPageVisit();
+  }, [currentUser, toast]);
+
 
   useEffect(() => {
     let interval: NodeJS.Timeout;

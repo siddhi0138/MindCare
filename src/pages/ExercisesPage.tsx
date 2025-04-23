@@ -1,26 +1,30 @@
 import React, { useEffect } from 'react';
 import MainLayout from "@/components/layout/MainLayout";
 import { useAuth } from '@/contexts/AuthContext';
-import { saveUserActivity } from '@/configs/firebase';
+import { saveUserActivity } from '@/configs/firebase'
+import { useToast } from '@/hooks/use-toast';
+
 
 const ExercisesPage: React.FC = () => {
   const { currentUser } = useAuth();
+  const { recordActivity } = useToast();
 
   useEffect(() => {
-    const userId = currentUser?.id;
-    if (userId) {
-      const timestamp = new Date().toISOString();
+    const recordVisit = async () => {
+    if (currentUser) {
+      
       const activityData = {
-        userId,
-        timestamp,
-        activityType: "visit-exercises-page",
-        activityName: "",
-        pageName: "ExercisesPage",
+        userId:currentUser.id,
+        timestamp:new Date().toISOString(),
+        activityType:"visit-exercises-page",
+        activityName: "Exercise Page",
+        pageName: "Exercises Page",
       };
-      saveUserActivity(activityData);
+      await recordActivity("ExercisesPage","visit-exercises-page", "ExercisesPage")
+      await saveUserActivity(activityData); 
     }
-  }, [currentUser]);
-
+  }
+  recordVisit() }, [currentUser]);
   return (
     <MainLayout>
       <div className="container mx-auto p-4 space-y-6">

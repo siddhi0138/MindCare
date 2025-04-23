@@ -1,8 +1,11 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Gamepad2, RefreshCcw } from "lucide-react";
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from "@/hooks/use-toast";
+import { recordActivity } from "@/hooks/use-toast";
 
 interface Card {
   id: number;
@@ -16,6 +19,8 @@ const emojis = ["🌟", "🌈", "🌺", "🦋", "🌙", "🌞", "🌍", "🌸"];
 const MemoryGame: React.FC<GameProps> = ({ onBack }) => {
   const [cards, setCards] = useState<Card[]>([]);
   const [flippedCards, setFlippedCards] = useState<number[]>([]);
+  const { currentUser } = useAuth();
+  const { toast } = useToast();
   const [moves, setMoves] = useState(0);
   const [matches, setMatches] = useState(0);
 
@@ -69,6 +74,19 @@ const MemoryGame: React.FC<GameProps> = ({ onBack }) => {
     }
   };
 
+  const handleGameCompletion = useCallback(async () => {
+    if (matches === emojis.length) {
+      toast({title:`Congratulations! You completed the game in ${moves} moves!`});
+      if (currentUser) {
+          await recordActivity("game-completed", "Memory Game", "MemoryGamePage");
+      }
+    }
+  }, [matches, emojis.length, moves, currentUser, toast]);
+
+  useEffect(() => {
+    handleGameCompletion();
+  }, [handleGameCompletion]);
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -114,7 +132,7 @@ const MemoryGame: React.FC<GameProps> = ({ onBack }) => {
 
       {matches === emojis.length && (
         <div className="text-center p-4 bg-primary/10 rounded-lg">
-          <h3 className="text-xl font-semibold">Congratulations! 🎉</h3>
+           <h3 className="text-xl font-semibold">Congratulations! 🎉</h3>
           <p>You completed the game in {moves} moves!</p>
           <Button onClick={initializeGame} className="mt-4">
             <Gamepad2 className="mr-2 h-4 w-4" />

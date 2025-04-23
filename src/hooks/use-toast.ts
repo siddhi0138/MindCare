@@ -1,5 +1,6 @@
 import * as React from "react"
-
+import { auth } from "../configs/firebase";
+import { saveUserActivity } from "../configs/firebase";
 import type {
   ToastActionElement,
   ToastProps,
@@ -168,6 +169,15 @@ function toast({ ...props }: Toast) {
   }
 }
 
+export async function recordActivity(activityType: string, activityName: string, pageName: string): Promise<void> { 
+    const now = new Date();
+    const formattedTimestamp = now.toISOString();
+    const user = auth.currentUser;
+    if (user) {
+      const activity = { userId: user.uid, timestamp: formattedTimestamp, activityType: activityType, activityName: activityName, pageName: pageName };
+      await saveUserActivity(activity);
+    }
+  }
 function useToast() {
   const [state, setState] = React.useState<State>(memoryState)
 
@@ -184,8 +194,9 @@ function useToast() {
   return {
     ...state,
     toast,
+    recordActivity,
     dismiss: (toastId?: string) => dispatch({ type: "DISMISS_TOAST", toastId }),
   }
 }
 
-export { useToast, toast }
+export { useToast, toast, }

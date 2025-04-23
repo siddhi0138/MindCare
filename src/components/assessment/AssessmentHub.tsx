@@ -112,7 +112,7 @@ const AssessmentHub = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle>Anxiety Assessment (GAD-7)</CardTitle>
+                <CardTitle>Anxiety Assessment</CardTitle>
                 <CardDescription>
                   Evaluate symptoms of generalized anxiety disorder
                 </CardDescription>
@@ -135,7 +135,7 @@ const AssessmentHub = () => {
             
             <Card>
               <CardHeader>
-                <CardTitle>Depression Assessment (PHQ-9)</CardTitle>
+                <CardTitle>Depression Assessment</CardTitle>
                 <CardDescription>
                   Screen for depression and monitor treatment
                 </CardDescription>
@@ -158,7 +158,7 @@ const AssessmentHub = () => {
             
             <Card>
               <CardHeader>
-                <CardTitle>Stress Assessment (PSS-10)</CardTitle>
+                <CardTitle>Stress Assessment </CardTitle>
                 <CardDescription>
                   Measure your perception of stress
                 </CardDescription>
@@ -206,7 +206,7 @@ const AssessmentHub = () => {
                       userId,
                       timestamp,
                       activityType: 'view-assessment-history',
-                      activityName: '',
+                      activityName: 'Assessment History',
                       pageName: 'AssessmentPage',
                     };
                     saveUserActivity(activityData);
@@ -226,9 +226,9 @@ const AssessmentHub = () => {
         <Card>
           <CardHeader>
             <CardTitle>
-              {activeTab === 'anxiety' && 'Anxiety Assessment (GAD-7)'}
-              {activeTab === 'depression' && 'Depression Assessment (PHQ-9)'}
-              {activeTab === 'stress' && 'Stress Assessment (PSS-10)'}
+              {activeTab === 'anxiety' && 'Anxiety Assessment'}
+              {activeTab === 'depression' && 'Depression Assessment '}
+              {activeTab === 'stress' && 'Stress Assessment'}
             </CardTitle>
             <CardDescription>
               Answer each question based on how you've felt over the past two weeks.

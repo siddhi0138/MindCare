@@ -22,6 +22,7 @@ interface User {
   firstName: string;
   lastName: string;
   profileImage?: string;
+  therapistNumber?: string;
   // Add any other custom fields you store in Firestore
 }
 
@@ -68,6 +69,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         firstName: data.firstName || '',
         lastName: data.lastName || '',
         profileImage: data.profileImage || firebaseUser.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${firebaseUser.uid}`, // Fallback profile image
+        therapistNumber: data.therapistNumber,
         // Add other fields if needed
       };
     } else {
@@ -77,7 +79,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         email: firebaseUser.email,
         firstName: firebaseUser.displayName?.split(' ')[0] || 'User',
         lastName: firebaseUser.displayName?.split(' ')[1] || '',
-        profileImage: firebaseUser.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${firebaseUser.uid}`
+        profileImage: firebaseUser.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${firebaseUser.uid}`,
+        
       };
       await setDoc(userRef, basicProfile, { merge: true });
              return basicProfile;
