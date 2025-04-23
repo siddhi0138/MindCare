@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { saveUserActivity } from "@/configs/firebase";
 import MainLayout from "@/components/layout/MainLayout";
 import MeditationPlayer from "@/components/meditation/MeditationPlayer";
 import { Button } from "@/components/ui/button";
@@ -75,8 +77,20 @@ const MeditationPage = () => {
     );
   }, [searchTerm]);
 
-  const handlePlayMeditation = (meditation) => {
+  const { currentUser } = useAuth();
+  const userId = currentUser?.id
+  const handlePlayMeditation = (meditation,userId) => {
+    const timestamp = new Date().toISOString();
+    const activityData = {
+      userId,
+      timestamp,
+      activityType: "play-meditation",
+      activityName: meditation.title,
+      pageName: "MeditationPage",
+    };
+    saveUserActivity(activityData);
     setCurrentMeditation(meditation);
+    
   };
 
   return (
@@ -135,7 +149,7 @@ const MeditationPage = () => {
                 <CardContent className="p-4">
                   <h3 className="font-medium text-lg">{meditation.title}</h3>
                   <p className="text-muted-foreground text-sm">{meditation.description}</p>
-                  <Button className="w-full mt-4" onClick={() => handlePlayMeditation(meditation)}>
+                  <Button className="w-full mt-4" onClick={() => handlePlayMeditation(meditation, userId)}>
                     Play Meditation
                   </Button>
                 </CardContent>
@@ -163,7 +177,7 @@ const MeditationPage = () => {
                       <CardContent className="p-4">
                         <h3 className="font-medium text-lg">{meditation.title}</h3>
                         <p className="text-muted-foreground text-sm">{meditation.description}</p>
-                        <Button className="w-full mt-4" onClick={() => handlePlayMeditation(meditation)}>
+                        <Button className="w-full mt-4" onClick={() => handlePlayMeditation(meditation, userId)}>
                           Play Meditation
                         </Button>
                       </CardContent>

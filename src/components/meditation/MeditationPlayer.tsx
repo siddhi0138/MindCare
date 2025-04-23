@@ -4,6 +4,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
 import { Play, Pause, SkipBack, SkipForward, Volume2 } from 'lucide-react';
+import { useAuth } from "@/contexts/AuthContext";
 
 interface MeditationPlayerProps {
   currentMeditation: {
@@ -23,6 +24,7 @@ const MeditationPlayer: React.FC<MeditationPlayerProps> = (props) => {
   const [progress, setProgress] = useState(0);
   const [volume, setVolume] = useState(70);
   const [durationInSeconds, setDurationInSeconds] = useState(0);
+  const { currentUser } = useAuth();
   const audioRef = useRef<HTMLAudioElement>(null);
   const togglePlayPause = () => {
     setIsPlaying(!isPlaying);
@@ -145,7 +147,7 @@ const MeditationPlayer: React.FC<MeditationPlayerProps> = (props) => {
               <SkipBack size={20} />
             </Button>
             
-            <Button 
+            <Button
               onClick={togglePlayPause} 
               className="h-12 w-12 rounded-full"
               variant={isPlaying ? "secondary" : "default"}
@@ -153,7 +155,8 @@ const MeditationPlayer: React.FC<MeditationPlayerProps> = (props) => {
               {isPlaying ? <Pause size={24} /> : <Play size={24} />}
             </Button>
             
-            <Button variant="ghost" size="icon" onClick={props.onNext} className="rounded-full">
+            <Button variant="ghost" size="icon"  className="rounded-full" onClick={props.onNext} >
+              
               <SkipForward size={20} />
             </Button>
           </div>
