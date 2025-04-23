@@ -1,9 +1,11 @@
 
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from '@/components/ui/card';
-import { Sparkles, ArrowRight, ArrowLeft, Heart } from 'lucide-react';
-import { toast } from '@/components/ui/sonner';
+import { Sparkles, ArrowRight, ArrowLeft, Heart } from "lucide-react";
+import { toast } from "@/components/ui/sonner";
+import { useAuth } from "@/contexts/AuthContext";
+import { saveUserActivity } from "@/configs/firebase";
 
 const affirmations = [
   {
@@ -59,8 +61,9 @@ const affirmations = [
 ];
 
 const AffirmationCards = () => {
-  const [currentIndex, setCurrentIndex] = useState(0);
   const [favorites, setFavorites] = useState<number[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const { currentUser } = useAuth()
   
   const currentAffirmation = affirmations[currentIndex];
   
@@ -76,13 +79,30 @@ const AffirmationCards = () => {
     );
   };
   
-  const toggleFavorite = (id: number) => {
-    if (favorites.includes(id)) {
-      setFavorites(favorites.filter(favId => favId !== id));
-      toast.info("Removed from favorites");
+  const toggleFavorite = async (id: number) => {
+    const userId = currentUser?.id;
+    const timestamp = new Date().toISOString();
+
+    if (userId) {
+      if (favorites.includes(id)) {
+        setFavorites(favorites.filter(favId => favId !== id));
+        toast.info("Removed from favorites");
+      } else {
+        setFavorites([...favorites, id]);
+        toast.success("Added to favorites");
+
+        const activityData = {
+          userId,
+          timestamp,
+          activityType: "affirmation-added-to-favorites",
+          activityName: currentAffirmation.text,
+          pageName: "CopingTools",
+        };
+
+        await saveUserActivity(activityData);
+      }
     } else {
-      setFavorites([...favorites, id]);
-      toast.success("Added to favorites");
+      toast.error("You must be logged in to add favorites.");
     }
   };
   
