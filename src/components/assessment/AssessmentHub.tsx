@@ -3,14 +3,13 @@ import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Activity, LineChart, AlertCircle, ArrowRight } from 'lucide-react';
+import * as Icons from 'lucide-react';
 import AnxietyAssessment from './AnxietyAssessment';
 import DepressionAssessment from './DepressionAssessment';
 import StressAssessment from './StressAssessment';
 import AssessmentHistory from './AssessmentHistory';
 import { AssessmentResult } from './AssessmentResult';
 import { useAuth } from '@/contexts/AuthContext';
-import { saveAssessmentResult } from '@/configs/firebase';
 export type AssessmentType = 'anxiety' | 'depression' | 'stress';
 
 const AssessmentHub = () => {
@@ -66,18 +65,6 @@ const AssessmentHub = () => {
     setIsAssessing(false);
   };
 
-  // Function to handle saving results
-  const handleSaveResults = async () => {
-    console.log("handleSaveResults called");
-    if (result && currentUser) {
-      console.log("result:", result);
-      console.log("currentUser.uid:", currentUser.id);
-      console.log("activeTab:", activeTab);
-      await saveAssessmentResult(currentUser.id, activeTab, result.score, result.level, result.recommendations);
-      console.log("Results saved to Firestore");
-    }
-  };
-
 
 
 
@@ -112,7 +99,7 @@ const AssessmentHub = () => {
                   onClick={() => startAssessment('anxiety')}
                   className="w-full flex items-center justify-center gap-2"
                 >
-                  <Activity className="h-4 w-4" />
+                  <Icons.Activity className="h-4 w-4" />
                   Start Assessment
                 </Button>
               </CardFooter>
@@ -135,7 +122,7 @@ const AssessmentHub = () => {
                   onClick={() => startAssessment('depression')}
                   className="w-full flex items-center justify-center gap-2"
                 >
-                  <Activity className="h-4 w-4" />
+                  <Icons.Activity className="h-4 w-4" />
                   Start Assessment
                 </Button>
               </CardFooter>
@@ -158,7 +145,7 @@ const AssessmentHub = () => {
                   onClick={() => startAssessment('stress')}
                   className="w-full flex items-center justify-center gap-2"
                 >
-                  <Activity className="h-4 w-4" />
+                  <Icons.Activity className="h-4 w-4" />
                   Start Assessment
                 </Button>
               </CardFooter>
@@ -168,7 +155,7 @@ const AssessmentHub = () => {
           <Card className="bg-muted/50 border-dashed">
             <CardContent className="p-4">
               <div className="flex items-start gap-4">
-                <AlertCircle className="h-5 w-5 text-muted-foreground mt-0.5" />
+                <Icons.AlertCircle className="h-5 w-5 text-muted-foreground mt-0.5" />
                 <div>
                   <h3 className="font-medium mb-1">Important Note</h3>
                   <p className="text-sm text-muted-foreground">
@@ -186,7 +173,7 @@ const AssessmentHub = () => {
                 onClick={() => setActiveTab('history')} 
                 className="flex items-center gap-2"
               >
-                <LineChart className="h-4 w-4" />
+                <Icons.LineChart className="h-4 w-4" />
                 View History
               </Button>
             </div>
@@ -227,7 +214,6 @@ const AssessmentHub = () => {
           level={result.level}
           recommendations={result.recommendations}
           onRestart={handleRestartAssessment}
-          onSaveResults={handleSaveResults}
         />
       )}
       

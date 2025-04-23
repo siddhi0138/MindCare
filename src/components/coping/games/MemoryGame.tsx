@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Gamepad2, RefreshCcw } from "lucide-react";
@@ -13,13 +13,13 @@ interface Card {
 
 const emojis = ["🌟", "🌈", "🌺", "🦋", "🌙", "🌞", "🌍", "🌸"];
 
-const MemoryGame = () => {
+const MemoryGame: React.FC<GameProps> = ({ onBack }) => {
   const [cards, setCards] = useState<Card[]>([]);
   const [flippedCards, setFlippedCards] = useState<number[]>([]);
   const [moves, setMoves] = useState(0);
   const [matches, setMatches] = useState(0);
 
-  const initializeGame = () => {
+  const initializeGame = (): void => {
     const shuffledEmojis = [...emojis, ...emojis]
       .sort(() => Math.random() - 0.5)
       .map((emoji, index) => ({
@@ -76,9 +76,9 @@ const MemoryGame = () => {
           <h2 className="text-2xl font-semibold">Memory Match</h2>
           <p className="text-muted-foreground">Match pairs of cards to win!</p>
         </div>
-        <Button variant="outline" onClick={initializeGame}>
+        <Button variant="outline" onClick={initializeGame} >
           <RefreshCcw className="mr-2 h-4 w-4" />
-          Restart
+          Restart Memory Game
         </Button>
       </div>
 
@@ -124,6 +124,10 @@ const MemoryGame = () => {
       )}
     </div>
   );
+};
+
+export type GameProps = {
+  onBack: () => void;
 };
 
 export default MemoryGame;
