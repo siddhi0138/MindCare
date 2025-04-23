@@ -20,10 +20,15 @@ const firestore = getFirestore(app);
 const googleProvider = new GoogleAuthProvider();
 
 // Function to save a new journal entry to Firestore
-const saveJournalEntry = async (entry: { userId: string; mood: string; entryText: string; gratitude?: string }) => {
+const saveJournalEntry = async (entry: { mood: string; entryText: string; gratitude?: string }) => {
     try {
+        const user = auth.currentUser;
+        if (!user) {
+           throw new Error("No user is currently logged in.");
+        }
+        const userId = user.uid;
         const docRef = await addDoc(collection(firestore, "journalEntries"), {
-            ...entry,
+            ...entry, userId: userId,
             timestamp: Timestamp.now()
         });
         console.log("Document written with ID: ", docRef.id);
@@ -51,16 +56,15 @@ const getJournalEntries = async (userId: string) => {
 };
 
 // Function to save a new assessment result to Firestore
-const saveAssessmentResult = async (result: {
-  userId: string;
-    type: string;
-    score: number;
-    level: string;
-    recommendations: string[];
-}) => {
+const saveAssessmentResult = async (result: { type: string; score: number; level: string; recommendations: string[]; }) => {
   try {
+    const user = auth.currentUser;
+    if (!user) {
+       throw new Error("No user is currently logged in.");
+    }
+    const userId = user.uid;
     const docRef = await addDoc(collection(firestore, "assessmentResults"), {
-      ...result,
+      ...result, userId: userId,
       timestamp: Timestamp.now()
     });
     console.log("Assessment result saved with ID: ", docRef.id);

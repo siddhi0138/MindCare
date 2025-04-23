@@ -64,33 +64,6 @@ const DepressionAssessment = ({ onComplete }: DepressionAssessmentProps) => {
         return;
       }
       
-      const newResult = {
-        userId: currentUser.id,
-        type: "depression",
-        score: totalScore,
-        level: getInterpretation(totalScore),
-        recommendations: [
-          "Reach out to a mental health professional",
-          "Establish a consistent daily routine",
-          "Regular physical activity",
-          "Connect with supportive friends and family"
-        ],
-        timestamp: new Date(),
-      };
-      
-      try {
-        const response = await saveAssessmentResult(newResult);
-        if (response.success) {
-          toast.success("Assessment completed", {
-            description: "Your results have been saved to your history."
-          });
-        } else {
-          toast.error("Failed to save assessment result.");
-        }
-      } catch (error) {
-        toast.error("Error saving assessment result.");
-      }
-      
       if (onComplete) {
         onComplete(totalScore);
       }
