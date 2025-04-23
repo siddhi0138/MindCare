@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { saveUserActivity } from '@/configs/firebase';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,12 +16,23 @@ export type AssessmentType = 'anxiety' | 'depression' | 'stress';
 
 const AssessmentHub = () => {
   const { isAuthenticated, currentUser } = useAuth();
+  const userId = currentUser?.id;
   const [activeTab, setActiveTab] = useState<AssessmentType | 'history'>('anxiety');
   const [isAssessing, setIsAssessing] = useState(false);
   const [result, setResult] = useState<{score: number, level: string, recommendations: string[]} | null>(null);
   
   const startAssessment = (type: AssessmentType) => {
     setActiveTab(type);
+    const timestamp = new Date().toISOString();
+    if(userId){
+    const activityData = {
+      userId,
+      timestamp,
+      activityType: "start-assessment",
+      activityName: type,
+      pageName: "AssessmentPage",
+    };
+    saveUserActivity(activityData);}
     setIsAssessing(true);
     setResult(null);
   };
@@ -185,8 +197,21 @@ const AssessmentHub = () => {
           {isAuthenticated && (
             <div className="flex justify-end">
               <Button 
-                variant="outline" 
-                onClick={() => setActiveTab('history')} 
+                variant="outline"
+                onClick={() => {
+                  setActiveTab('history');
+                  const timestamp = new Date().toISOString();
+                  if (userId) {
+                    const activityData = {
+                      userId,
+                      timestamp,
+                      activityType: 'view-assessment-history',
+                      activityName: '',
+                      pageName: 'AssessmentPage',
+                    };
+                    saveUserActivity(activityData);
+                  }
+                }}
                 className="flex items-center gap-2"
               >
                 <Icons.LineChart className="h-4 w-4" />
