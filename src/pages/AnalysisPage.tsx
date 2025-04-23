@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Plot from 'react-plotly.js';
+import { useAuth } from '@/contexts/AuthContext';
+import { saveUserActivity } from '@/configs/firebase';
 import MainLayout from '@/components/layout/MainLayout';
 
 interface DataPoint {
@@ -145,6 +147,24 @@ const sampleData: DataPoint[] = [
   },
 ];
 const AnalysisPageUpdated = () => {
+  const { currentUser } = useAuth();
+
+  useEffect(() => {
+    const recordVisit = async () => {
+      if (currentUser) {
+        const timestamp = new Date().toISOString();
+        const activityData = {
+          userId: currentUser.id,
+          timestamp,
+          activityType: "visit-analysis-page",
+          activityName: "",
+          pageName: "AnalysisPage",
+        };
+        await saveUserActivity(activityData);
+      }
+    };
+    recordVisit();
+  }, [currentUser]);
   const regionCounts: { [key: string]: number } = {};
   sampleData.forEach((d) => {
     regionCounts[d.Region] = (regionCounts[d.Region] || 0) + d.Stress_Level;
