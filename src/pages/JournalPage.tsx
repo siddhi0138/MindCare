@@ -7,7 +7,7 @@ import { Calendar as CalendarIcon, List, FileText, PlusCircle } from 'lucide-rea
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { collection, query, where, orderBy, onSnapshot } from 'firebase/firestore';
-import { db } from '@/configs/firebase';
+import { firestore } from '@/configs/firebase';
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { DayProps } from 'react-day-picker';
@@ -45,7 +45,7 @@ const JournalPage = () => {
   useEffect(() => {
     if (currentUser) {
       const q = query(
-        collection(db, 'journalEntries'),
+        collection(firestore, 'journalEntries'),
         where('userId', '==', currentUser.id),
         orderBy('timestamp', 'desc')
       );

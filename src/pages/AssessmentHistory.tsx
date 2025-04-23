@@ -1,54 +1,68 @@
-
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
-import { AssessmentType, assessments } from "@/components/ui/AssessmentHub";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { useNavigate } from "react-router-dom"; import * as firebaseAuth from 'firebase/auth'; import { collection, where, orderBy, onSnapshot, query } from 'firebase/firestore';
+import { AssessmentType, assessments } from "../components/ui/AssessmentHub";
+import { useAuth } from "../contexts/AuthContext";
+import { firestore } from "@/configs/firebase"; import { Timestamp } from 'firebase/firestore'; 
 
-export interface AssessmentResultProps {
+interface AssessmentResult {
   id: string;
-  type: AssessmentType;
-  name: string;
+  userId: string;
+  type: string;
   score: number;
-  date: string;
-  interpretation: string;
+  timestamp: Date;
+  level: string;
 }
 
-const AssessmentHistory = () => {
-  const [assessmentHistory, setAssessmentHistory] = useState<AssessmentResultProps[]>([]);
+const AssessmentHistoryPage = () => {
+  const [loading, setLoading] = useState(true);
+  const { currentUser } = useAuth();
   const navigate = useNavigate();
+  const [assessmentHistory, setAssessmentHistory] = useState<AssessmentResult[]>([]);
 
   useEffect(() => {
-    const history = JSON.parse(localStorage.getItem('assessmentHistory') || '[]');
-    setAssessmentHistory(history);
-  }, []);
+    setLoading(true);
+    if (!currentUser) {
+      setAssessmentHistory([]);
+      setLoading(false);
+      return;
+    }
 
-  const handleGoToAssessments = () => {
-    navigate("/home/user/serenity-wellbeing-hub/src/pages/AssessmentsPage.tsx");
-  };
-
+    const q = query(
+      collection(firestore, 'assessmentResults'),
+      where('userId', '==', currentUser.id),
+      orderBy('timestamp', 'desc')
+    );
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const history = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return { id: doc.id, userId: data.userId, type: data.type, score: data.score, timestamp: (data.timestamp as Timestamp).toDate(), level: "-" } as AssessmentResult;
+      });
+      setAssessmentHistory(history);
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, [currentUser]);
+  
   return (
     <Card>
       <CardHeader className="space-y-1">
         <CardTitle className="text-2xl">Assessment History</CardTitle>
         <CardDescription>View your previous assessment results.</CardDescription>
       </CardHeader>
-      <CardContent className="grid gap-4">
-        {assessmentHistory.length > 0 ? (
-          assessmentHistory.map((result) => {
-            const assessment = assessments.find((a) => a.type === result.type);
-            return (
-              <div key={result.id} className="border rounded-md p-4 space-y-2">
-                <h4 className="text-lg font-medium">
-                  {assessment?.name || result.name} - {result.date}
-                </h4>
-                <p className="text-sm">Score: {result.score} - {result.interpretation}</p>
-                <Button className="mt-4" onClick={handleGoToAssessments}>
-                  Back to Assessments
-                </Button>
-              </div>
-            );
-          })
+
+      <CardContent>
+        {loading ? (
+          <p>Loading assessment history...</p>
+        ) : assessmentHistory.length > 0 ? (
+          <ul>
+            {assessmentHistory.map((result) => (
+              <li key={result.id}>
+                {assessments.find(a => a.type === result.type)?.name || result.type} - {result.timestamp.toLocaleDateString()} - Score: {result.score} - Level: {result.level}
+              </li>
+            ))}
+          </ul>
         ) : (
           <p>No assessment history found.</p>
         )}
@@ -57,4 +71,4 @@ const AssessmentHistory = () => {
   );
 };
 
-export default AssessmentHistory;
+export default AssessmentHistoryPage;

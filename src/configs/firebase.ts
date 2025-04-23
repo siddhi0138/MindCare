@@ -16,15 +16,15 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db = getFirestore(app);
+const firestore = getFirestore(app);
 const googleProvider = new GoogleAuthProvider();
 
 // Function to save a new journal entry to Firestore
 const saveJournalEntry = async (entry: { userId: string; mood: string; entryText: string; gratitude?: string }) => {
     try {
-        const docRef = await addDoc(collection(db, "journalEntries"), {
+        const docRef = await addDoc(collection(firestore, "journalEntries"), {
             ...entry,
-            timestamp: Timestamp.now(),
+            timestamp: Timestamp.now()
         });
         console.log("Document written with ID: ", docRef.id);
         return { success: true, id: docRef.id };
@@ -38,8 +38,8 @@ const saveJournalEntry = async (entry: { userId: string; mood: string; entryText
 const getJournalEntries = async (userId: string) => {
     try {
         const q = query(
-            collection(db, "journalEntries"),
-            where("userId", "==", userId),
+            collection(firestore, "journalEntries"),
+            where("userId", "==", userId ),
             orderBy("timestamp", "desc")
         );
         const querySnapshot = await getDocs(q);
@@ -50,5 +50,40 @@ const getJournalEntries = async (userId: string) => {
     }
 };
 
+// Function to save a new assessment result to Firestore
+const saveAssessmentResult = async (result: {
+  userId: string;
+    type: string;
+    score: number;
+    level: string;
+    recommendations: string[];
+}) => {
+  try {
+    const docRef = await addDoc(collection(firestore, "assessmentResults"), {
+      ...result,
+      timestamp: Timestamp.now()
+    });
+    console.log("Assessment result saved with ID: ", docRef.id);
+    return { success: true, id: docRef.id };
+  } catch (e) {
+    console.error("Error saving assessment result: ", e);
+    return { success: false, error: e }; 
+  }
+};
 
-export { app, auth, db, googleProvider, saveJournalEntry, getJournalEntries };
+// Function to retrieve assessment results for a specific user from Firestore
+const getAssessmentResults = async (userId: string) => {
+  try {
+    const q = query(
+      collection(firestore, "assessmentResults"),
+      where("userId", "==", userId),
+      orderBy("timestamp", "desc")
+    );
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  } catch (e) {
+    console.error("Error getting assessment results: ", e);
+    return [];
+  }
+};
+export { app, auth, firestore, googleProvider, saveJournalEntry, getJournalEntries, saveAssessmentResult, getAssessmentResults };

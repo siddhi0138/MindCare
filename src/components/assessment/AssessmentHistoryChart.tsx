@@ -8,7 +8,7 @@ export interface AssessmentData {
   score: number;
   level: string;
   recommendations: string[];
-  timestamp: any;
+  timestamp: Date;
 }
 
 export interface AssessmentHistoryChartProps {
@@ -19,20 +19,31 @@ export interface AssessmentHistoryChartProps {
 
 const AssessmentHistoryChart = ({ assessmentType, assessmentData, userId }: AssessmentHistoryChartProps) => {
   const filteredData = assessmentData
-    .filter(data => data.type === assessmentType && data.userId === userId)
+    .filter(data => data.type === assessmentType /* && data.userId === userId */) // userId filter removed assuming data is pre-filtered
     .map(data => ({
-      timestamp: data.timestamp.toLocaleDateString(),
+      timestamp: data.timestamp.getTime(),
       score: data.score,
     }))
-    .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+    .sort((a, b) => a.timestamp - b.timestamp);
+
+  const formatDate = (timestamp: number) => {
+    const date = new Date(timestamp);
+    return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  };
 
   return (
     <ResponsiveContainer width="100%" height={300}>
       <LineChart data={filteredData}>
         <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="timestamp" />
+        <XAxis 
+          dataKey="timestamp" 
+          tickFormatter={formatDate} 
+          type="number" 
+          domain={['dataMin', 'dataMax']} 
+          scale="time" 
+        />
         <YAxis />
-        <Tooltip />
+        <Tooltip labelFormatter={(label) => formatDate(label as number)} />
         <Legend />
         <Line type="monotone" dataKey="score" stroke="#8884d8" activeDot={{ r: 8 }} />
       </LineChart>

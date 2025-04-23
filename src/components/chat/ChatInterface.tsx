@@ -1,7 +1,7 @@
 
 import { useState, useRef, useContext } from 'react';
 import { toast } from '@/components/ui/sonner';
-import { db } from '@/configs/firebase'; // Assuming you have your Firebase config in this path
+import { firestore } from '@/configs/firebase'; // Assuming you have your Firebase config in this path
 import { doc, setDoc, collection, addDoc } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -268,7 +268,7 @@ const ChatInterface = () => {
             return;
         }
         try {
-            const chatHistoryCollection = collection(db, `users/${currentUser.id}/chatHistory`);
+            const chatHistoryCollection = collection(firestore, `users/${currentUser.id}/chatHistory`);
             await addDoc(chatHistoryCollection, {
                 messages,
                 timestamp: new Date(),

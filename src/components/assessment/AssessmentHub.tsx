@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -10,6 +9,8 @@ import StressAssessment from './StressAssessment';
 import AssessmentHistory from './AssessmentHistory';
 import { AssessmentResult } from './AssessmentResult';
 import { useAuth } from '@/contexts/AuthContext';
+import { saveAssessmentResult } from '@/configs/firebase';
+
 export type AssessmentType = 'anxiety' | 'depression' | 'stress';
 
 const AssessmentHub = () => {
@@ -65,8 +66,23 @@ const AssessmentHub = () => {
     setIsAssessing(false);
   };
 
-
-
+  // Function to save assessment result to Firestore
+  const handleSaveResults = async () => {
+    if (!currentUser || !result) return;
+    const saveResult = {
+      userId: currentUser.id,
+      type: activeTab,
+      score: result.score,
+      level: result.level,
+      recommendations: result.recommendations,
+    };
+    const response = await saveAssessmentResult(saveResult);
+    if (response.success) {
+      alert('Assessment result saved successfully.');
+    } else {
+      alert('Failed to save assessment result.');
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -214,6 +230,7 @@ const AssessmentHub = () => {
           level={result.level}
           recommendations={result.recommendations}
           onRestart={handleRestartAssessment}
+          onSaveResults={handleSaveResults}
         />
       )}
       
