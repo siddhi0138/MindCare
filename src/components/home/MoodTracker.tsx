@@ -12,6 +12,7 @@ const moodLabels = ['Very Low', 'Low', 'Neutral', 'Good', 'Great'];
 
 const MoodTracker = () => {
   const [moodLevel, setMoodLevel] = useState(2); // 0-4 index for the 5 mood levels
+  const [selectedEmoji, setSelectedEmoji] = useState(2); // Track selected emoji
   const [note, setNote] = useState('');
   const [submitted, setSubmitted] = useState(false);
 
@@ -23,7 +24,7 @@ const MoodTracker = () => {
     // Reset after a delay for demo purposes
     setTimeout(() => {
       setSubmitted(false);
-      setMoodLevel(2);
+      setSelectedEmoji(2);
       setNote('');
     }, 3000);
   };
@@ -63,13 +64,16 @@ const MoodTracker = () => {
                   {moodEmojis.map((emoji, index) => (
                     <div 
                       key={index}
-                      className={`flex flex-col items-center transition-all ${
-                        moodLevel === index ? 'scale-125' : 'opacity-70'
+                      className={`flex flex-col items-center transition-all cursor-pointer ${
+                        selectedEmoji === index ? 'scale-125' : 'opacity-70'
                       }`}
+                      onClick={() => {
+                        setSelectedEmoji(index);
+                        setMoodLevel(index);
+                      }}
                     >
                       <span className="text-4xl mb-2">{emoji}</span>
-                      <span className="text-xs font-medium text-muted-foreground">
-                        {moodLabels[index]}
+                      <span className="text-xs font-medium text-muted-foreground"> {moodLabels[index]}
                       </span>
                     </div>
                   ))}

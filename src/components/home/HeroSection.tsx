@@ -26,7 +26,7 @@ const HeroSection = () => {
               <Link to="/signup">Get Started</Link>
             </Button>
             <Button size="lg" variant="outline" className="text-md" asChild>
-              <Link to="/learn-more">Learn More</Link>
+              <Link to="/resources">Learn More</Link>
             </Button>
           </div>
         </motion.div>
