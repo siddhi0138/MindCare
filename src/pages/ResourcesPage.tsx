@@ -67,7 +67,6 @@ const ResourcesPage = () => {
             <TabsTrigger value="articles">Articles</TabsTrigger>
             <TabsTrigger value="podcasts">Podcasts</TabsTrigger>
             <TabsTrigger value="videos">Videos</TabsTrigger>
-            <TabsTrigger value="exercises">Exercises</TabsTrigger>
           </TabsList>
           
           <TabsContent value="articles" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
