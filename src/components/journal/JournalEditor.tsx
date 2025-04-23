@@ -14,7 +14,13 @@ import { firestore } from '@/configs/firebase';
 import { toast } from '@/components/ui/sonner';
 import { useAuth } from '@/contexts/AuthContext';
 
-const JournalEditor = () => {
+import React from 'react';
+
+interface JournalEditorProps {
+  onSave?: (entry: { title: string; content: string; mood: string }) => void;
+}
+
+const JournalEditor: React.FC<JournalEditorProps> = ({ onSave }) => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [date, setDate] = useState<Date>(new Date());
@@ -50,6 +56,9 @@ const JournalEditor = () => {
         timestamp: Timestamp.now(),
       });
       toast.success("Journal entry saved successfully!");
+      if (onSave) {
+        onSave({ title, content, mood });
+      }
       setTitle('');
       setContent('');
       setDate(new Date());
