@@ -1,11 +1,12 @@
 
 import React, { useState, useEffect } from 'react';
 import MainLayout from "@/components/layout/MainLayout";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Link, useNavigate } from 'react-router-dom';
 
-const GroundingExercisePage = () => {
-  return (
+const GroundingExercisePage: React.FC = () => {
+    return (
     <MainLayout>
         <GroundingExerciseContent />
     </MainLayout>
@@ -14,6 +15,7 @@ const GroundingExercisePage = () => {
 
 const GroundingExerciseContent = () => {
   const [exerciseStarted, setExerciseStarted] = useState(false);
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [timeLeft, setTimeLeft] = useState(10);
   const [exerciseCompleted, setExerciseCompleted] = useState(false);
@@ -31,7 +33,7 @@ const GroundingExerciseContent = () => {
         interval = setInterval(() => {
             setTimeLeft(prevTime => prevTime - 1);
         }, 1000);
-    } else if (exerciseStarted && timeLeft === 0) {        handleNextStep();
+    } else if (exerciseStarted && timeLeft === 0) { handleNextStep();
     } 
     return () => clearInterval(interval);
   }, [exerciseStarted, timeLeft, currentStep]);
@@ -99,10 +101,12 @@ const GroundingExerciseContent = () => {
         </CardHeader>
         <CardContent className="space-y-6">
           {renderExerciseStep()}
-        </CardContent>
+          <div className="flex gap-4 mt-4 justify-between">
+            <Button onClick={handleNextStep}>Next Step</Button>
+            <Link to="/coping-tools?defaultTab=games"><Button>Back to Games</Button></Link>
+          </div>
+        </CardContent>        
       </Card>
     </div>
-  );
-};
-
+  );};
 export default GroundingExercisePage;
