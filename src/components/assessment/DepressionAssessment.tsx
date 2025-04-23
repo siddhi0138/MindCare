@@ -1,12 +1,14 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
-import { Progress } from "@/components/ui/progress";
-import { toast } from "@/components/ui/sonner";
+import { Button } from "../ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../ui/card";
+import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
+import { Label } from "../ui/label";
+import { Progress } from "../ui/progress";
+import { toast } from "../ui/sonner";
 import { AssessmentResult } from "./AssessmentResult";
 import { DepressionAssessmentProps } from "./DepressionAssessment.d";
+import { saveAssessmentResult } from "../../configs/firebase";
+import { useAuth } from "../../contexts/AuthContext";
 
 // PHQ-9 questions
 const questions = [
@@ -39,12 +41,13 @@ const interpretations = [
 ];
 
 const DepressionAssessment = ({ onComplete }: DepressionAssessmentProps) => {
+  const { currentUser } = useAuth();
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<number[]>(Array(questions.length).fill(-1));
   const [completed, setCompleted] = useState(false);
   const [score, setScore] = useState(0);
 
-  const handleAnswer = (value: string) => {
+  const handleAnswer = async (value: string) => {
     const newAnswers = [...answers];
     newAnswers[currentQuestion] = parseInt(value);
     setAnswers(newAnswers);
@@ -56,21 +59,37 @@ const DepressionAssessment = ({ onComplete }: DepressionAssessmentProps) => {
       setScore(totalScore);
       setCompleted(true);
       
+      if (!currentUser) {
+        toast.error("User not authenticated. Cannot save assessment.");
+        return;
+      }
+      
       const newResult = {
-        id: Date.now().toString(),
+        userId: currentUser.id,
         type: "depression",
-        name: "PHQ-9",
         score: totalScore,
-        date: new Date().toISOString(),
-        interpretation: getInterpretation(totalScore)
+        level: getInterpretation(totalScore),
+        recommendations: [
+          "Reach out to a mental health professional",
+          "Establish a consistent daily routine",
+          "Regular physical activity",
+          "Connect with supportive friends and family"
+        ],
+        timestamp: new Date(),
       };
       
-      const history = JSON.parse(localStorage.getItem('assessmentHistory') || '[]');
-      localStorage.setItem('assessmentHistory', JSON.stringify([...history, newResult]));
-      
-      toast.success("Assessment completed", {
-        description: "Your results have been saved to your history."
-      });
+      try {
+        const response = await saveAssessmentResult(newResult);
+        if (response.success) {
+          toast.success("Assessment completed", {
+            description: "Your results have been saved to your history."
+          });
+        } else {
+          toast.error("Failed to save assessment result.");
+        }
+      } catch (error) {
+        toast.error("Error saving assessment result.");
+      }
       
       if (onComplete) {
         onComplete(totalScore);

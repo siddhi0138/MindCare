@@ -11,9 +11,9 @@ import {
   updateProfile as updateFirebaseProfile,
   User as FirebaseUser // Rename to avoid conflict with local User interface
 } from "firebase/auth";
-import { doc, setDoc, getDoc } from "firebase/firestore";
-import { auth, db, googleProvider } from '@/configs/firebase';
-// const appleProvider = new OAuthProvider('apple.com'); // Example for Apple
+import { doc, setDoc, getDoc, Firestore } from "firebase/firestore";
+import { auth, firestore as firestoreInstance, googleProvider } from '@/configs/firebase';
+
 
 // --- Interfaces ---
 interface User {
@@ -58,7 +58,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // --- Firestore Helper ---
   const getUserProfile = async (firebaseUser: FirebaseUser): Promise<User | null> => {
-    const userRef = doc(db, "users", firebaseUser.uid);
+    const userRef = doc(firestoreInstance, "users", firebaseUser.uid);
     const userSnap = await getDoc(userRef);
     if (userSnap.exists()) {
       const data = userSnap.data();
@@ -85,7 +85,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const createUserProfile = async (firebaseUser: FirebaseUser, firstName: string, lastName: string) => {
-    const userRef = doc(db, "users", firebaseUser.uid);
+    const userRef = doc(firestoreInstance, "users", firebaseUser.uid);
     await setDoc(userRef, {
       firstName,
       lastName,
@@ -119,7 +119,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
 
       } else {
-        setCurrentUser(null);
+        setCurrentUser(null);   
        }
       setIsLoading(false); // Finished initial auth check
     });
@@ -198,7 +198,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
       const firebaseUser = result.user;
-      const userRef = doc(db, "users", firebaseUser.uid);
+      const userRef = doc(firestoreInstance, "users", firebaseUser.uid);
       const userSnap = await getDoc(userRef);
 
       let profileData: User;
@@ -287,7 +287,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
      }
      setIsOperating(true);
      try {
-       const userRef = doc(db, "users", currentUser.id); // Use currentUser.id
+       const userRef = doc(firestoreInstance, "users", currentUser.id); // Use currentUser.id
        await setDoc(userRef, userData, { merge: true }); // Update Firestore
 
        // Optionally update Firebase Auth profile if name changed

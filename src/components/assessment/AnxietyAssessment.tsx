@@ -1,13 +1,13 @@
-
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
-import { Progress } from "@/components/ui/progress";
-import { toast } from "@/components/ui/sonner";
+import { Button } from "../ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../ui/card";
+import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
+import { Label } from "../ui/label";
+import { Progress } from "../ui/progress";
+import { toast } from "../ui/sonner";
 import { AssessmentResult } from "./AssessmentResult";
 import type { AnxietyAssessmentProps } from "./AnxietyAssessment.d";
+import { saveAssessmentResult } from "../../configs/firebase";
 
 // GAD-7 questions
 const questions = [
@@ -42,7 +42,7 @@ const AnxietyAssessment = ({ onComplete }: AnxietyAssessmentProps) => {
   const [completed, setCompleted] = useState(false);
   const [score, setScore] = useState(0);
 
-  const handleAnswer = (value: string) => {
+  const handleAnswer = async (value: string) => {
     const newAnswers = [...answers];
     newAnswers[currentQuestion] = parseInt(value);
     setAnswers(newAnswers);
@@ -55,23 +55,32 @@ const AnxietyAssessment = ({ onComplete }: AnxietyAssessmentProps) => {
       setScore(totalScore);
       setCompleted(true);
       
-      // Save result to history
+      // Save result to Firestore
       const newResult = {
-        id: Date.now().toString(),
         type: "anxiety",
-        name: "GAD-7",
         score: totalScore,
-        date: new Date().toISOString(),
-        interpretation: getInterpretation(totalScore)
+        level: getInterpretation(totalScore),
+        recommendations: [
+          "Practice deep breathing exercises",
+          "Consider talking to a mental health professional",
+          "Establish a regular sleep schedule",
+          "Limit caffeine and alcohol"
+        ],
+        timestamp: new Date(),
       };
       
-      // In a real app, this would send data to a server
-      const history = JSON.parse(localStorage.getItem('assessmentHistory') || '[]');
-      localStorage.setItem('assessmentHistory', JSON.stringify([...history, newResult]));
-      
-      toast.success("Assessment completed", {
-        description: "Your results have been saved to your history."
-      });
+      try {
+        const response = await saveAssessmentResult(newResult);
+        if (response.success) {
+          toast.success("Assessment completed", {
+            description: "Your results have been saved to your history."
+          });
+        } else {
+          toast.error("Failed to save assessment result.");
+        }
+      } catch (error) {
+        toast.error("Error saving assessment result.");
+      }
       
       // Pass the score to the parent component
       if (onComplete) {

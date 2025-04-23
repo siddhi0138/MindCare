@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { Calendar as CalendarIcon, Save, Lock, Cloud } from 'lucide-react';
 import { collection, addDoc, Timestamp } from 'firebase/firestore';
-import { db } from '@/configs/firebase';
+import { firestore } from '@/configs/firebase';
 import { toast } from '@/components/ui/sonner';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -41,7 +41,7 @@ const JournalEditor = () => {
     }
     setIsSaving(true);
     try {
-      await addDoc(collection(db, 'journalEntries'), {
+      await addDoc(collection(firestore, 'journalEntries'), {
         userId: currentUser.id,
         title,
         content,
