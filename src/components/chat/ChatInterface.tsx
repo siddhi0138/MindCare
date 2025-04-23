@@ -1,15 +1,15 @@
-
-import { useState, useRef, useContext } from 'react';
-import { toast } from '@/components/ui/sonner';
-import { firestore } from '@/configs/firebase'; // Assuming you have your Firebase config in this path
-import { doc, setDoc, collection, addDoc } from 'firebase/firestore';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardFooter, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { Send, Mic, Image, RefreshCcw, Smile, PlusCircle, RotateCw, Paperclip } from 'lucide-react';
+import { useState, useRef, useContext, useEffect } from 'react';
+import { toast } from '../ui/sonner';
+import { firestore, saveUserActivity } from '../../configs/firebase';
+import { collection, addDoc, getDocs, query, orderBy, deleteDoc, doc, getDoc, writeBatch } from 'firebase/firestore';
+import { Button } from '../ui/button';
+import { Textarea } from '../ui/textarea';
+import { Card, CardContent, CardHeader, CardFooter, CardTitle } from '../ui/card';
+import { Separator } from '../ui/separator';
+import { Send, Mic, Smile, RotateCw, Paperclip } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { AuthContext } from '@/contexts/AuthContext';
+import { AuthContext } from '../../contexts/AuthContext';
+import { v4 as uuidv4 } from 'uuid';
 
 declare global {
   interface Window {
@@ -18,7 +18,12 @@ declare global {
   }
 }
 
-interface Message {  id: string;  content: string;  sender: 'user' | 'bot';  timestamp: Date;  suggested?: boolean;
+interface Message {
+  id: string;
+  content: string;
+  sender: 'user' | 'bot';
+  timestamp: Date;
+  suggested?: boolean;
 }
 
 // AI suggestions based on different emotional states
@@ -92,22 +97,51 @@ Remember, even small steps forward are still progress. What's one small thing yo
 // Helper function to find matching AI response
 const findResponse = (message: string): string | null => {
   const lowerMessage = message.toLowerCase();
-  
+
   for (const item of AI_RESPONSES) {
     if (lowerMessage.includes(item.trigger)) {
       return item.response;
     }
   }
-  
+
   return null;
 };
 
+// Function to load chat history
+const loadChatHistory = async (userId: string): Promise<Message[]> => {
+  try {
+    const chatHistoryCollection = collection(firestore, `users/${userId}/chatHistory`);
+    const q = query(chatHistoryCollection, orderBy("timestamp"));
+    const querySnapshot = await getDocs(q);
+
+    // Map the documents to an array of Message objects
+    const messages: Message[] = [];
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      if (data.messages) {
+        data.messages.forEach((messageData: any) => {
+          messages.push({
+            id: messageData.id,
+            content: messageData.content,
+            sender: messageData.sender,
+            timestamp: messageData.timestamp.toDate(), // Convert Firebase timestamp to Date
+          });
+        });
+      }
+    });
+    return messages;
+  } catch (error) {
+    console.error('Error loading chat history:', error);
+    return []; // Return an empty array if there's an error
+  }
+};
+
 const ChatInterface = () => {
-  const { currentUser } = useContext(AuthContext) || {};
+  const authContext = useContext(AuthContext) as any;
 
   const [messages, setMessages] = useState<Message[]>([
     {
-      id: '1',
+      id: uuidv4(),
       content: "Hi there! I'm your AI wellness companion. How are you feeling today?",
       sender: 'bot',
       timestamp: new Date(),
@@ -118,6 +152,26 @@ const ChatInterface = () => {
   const [suggestions, setSuggestions] = useState<string[]>(SUGGESTIONS.anxiety);
   const [showEmojis, setShowEmojis] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [loadHistory, setLoadHistory] = useState<boolean>(true);
+
+  useEffect(() => {
+    if (authContext.currentUser?.id) {
+      const fetchChatHistory = async () => {
+        if (loadHistory) {
+          const loadedMessages = await loadChatHistory(authContext.currentUser.id);
+          if (loadedMessages.length > 0) {
+            setMessages(loadedMessages);
+          }
+        } else {
+          setMessages([]);
+        }
+      };
+
+      fetchChatHistory();
+    }
+  }, [authContext.currentUser?.id, loadHistory]);
+
+
 
   const emojis = ["😀", "😂", "😍", "🤔", "😊", "😎", "😢", "😠", "😴", "😋"];
 
@@ -161,43 +215,60 @@ const ChatInterface = () => {
 
     // Add user message
     const userMessage: Message = {
-      id: Date.now().toString(),
+      id: uuidv4(),
       content: input,
       sender: 'user',
       timestamp: new Date(),
     };
 
-    setMessages((prev) => [...prev, userMessage]);    
+    setMessages((prev) => [...prev, userMessage]);
     setInput(''); // Clear the input field
-    setIsTyping(true);    
+    setIsTyping(true);
+
+    const chatHistoryCollection = collection(firestore, `users/${authContext.currentUser.id}/chatHistory`);
+
+    if (authContext.currentUser?.id) {
+      saveUserActivity(
+        {
+          userId: authContext.currentUser.id,
+          timestamp: new Date().toISOString(),
+          activityType: 'send_message',
+          activityName: 'Send Message',
+          pageName: 'ChatPage',
+
+        });
+    }
 
     // Find if there's a specific response for this message
     const specificResponse = findResponse(input);
-    
+
     // Simulate AI response with intelligent response selection
     setTimeout(() => {
       const botMessage: Message = {
-        id: (Date.now() + 1).toString(),
+        id: uuidv4(),
         content: specificResponse || generateResponse(input),
         sender: 'bot',
         timestamp: new Date(),
       };
-      
+
       setMessages((prev) => [...prev, botMessage]);
       setIsTyping(false);
-      
+
+      // Save the updated messages after the bot's response
+      saveChatHistory(chatHistoryCollection, [...messages, userMessage, botMessage]);
+
       // Update suggestions based on conversation context
       updateSuggestions(input);
     }, 1500);
   };
-  
+
   // Generate contextual response based on user input
   const generateResponse = (userInput: string): string => {
     const input = userInput.toLowerCase();
-    
+
     if (input.includes("anxious") || input.includes("anxiety") || input.includes("nervous") || input.includes("worry")) {
       return "I understand anxiety can be really challenging. Many people find that combining breathing exercises with grounding techniques helps in the moment. Would you like to try a quick breathing exercise or learn about the 5-4-3-2-1 grounding technique?";
-    } 
+    }
     else if (input.includes("depress") || input.includes("sad") || input.includes("hopeless") || input.includes("unmotivated")) {
       return "I'm sorry you're feeling this way. Depression can make everyday activities feel much harder. Small steps are important - even getting out of bed or taking a shower is an achievement. Have you been able to talk to a mental health professional about how you're feeling?";
     }
@@ -214,14 +285,14 @@ const ChatInterface = () => {
       return "Thank you for sharing that with me. How are you feeling about it now? Is there a specific aspect of your wellbeing you'd like to focus on today?";
     }
   };
-  
+
   // Update suggestion prompts based on conversation context
   const updateSuggestions = (userInput: string) => {
     const input = userInput.toLowerCase();
-    
+
     if (input.includes("anxious") || input.includes("anxiety") || input.includes("panic")) {
       setSuggestions(SUGGESTIONS.anxiety);
-    } 
+    }
     else if (input.includes("depress") || input.includes("sad") || input.includes("hopeless")) {
       setSuggestions(SUGGESTIONS.depression);
     }
@@ -235,10 +306,23 @@ const ChatInterface = () => {
 
   const handleSuggestionClick = (suggestion: string) => {
     setInput(suggestion);
-    
+
+    const chatHistoryCollection = collection(firestore, `users/${authContext.currentUser.id}/chatHistory`);
+
+    if (authContext.currentUser?.id) {
+      saveUserActivity(
+        {
+          userId: authContext.currentUser.id,
+          timestamp: new Date().toISOString(),
+          activityType: 'click_suggestion',
+          activityName: 'Click Suggestion',
+          pageName: 'ChatPage',
+        });
+    }
+
     // Add as a message directly to improve UX flow
     const userMessage: Message = {
-      id: Date.now().toString(),
+      id: uuidv4(),
       content: suggestion,
       sender: 'user',
       timestamp: new Date(),
@@ -251,53 +335,87 @@ const ChatInterface = () => {
     // Simulate AI response
     setTimeout(() => {
       const botMessage: Message = {
-        id: (Date.now() + 1).toString(),
+        id: uuidv4(),
         content: findResponse(suggestion) || generateResponse(suggestion),
         sender: 'bot',
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, botMessage]);
       setIsTyping(false);
+
+      saveChatHistory(chatHistoryCollection, [...messages, userMessage, botMessage]);
     }, 1500);
   };
 
-    const saveChatHistory = async (messages: Message[]) => {
-        if (!currentUser?.id) {
-            console.error("User ID not found. Cannot save chat history.");
-            // Handle the case where the user ID is not available, e.g., display an error message
-            return;
-        }
-        try {
-            const chatHistoryCollection = collection(firestore, `users/${currentUser.id}/chatHistory`);
-            await addDoc(chatHistoryCollection, {
-                messages,
-                timestamp: new Date(),
+  const saveChatHistory = async (chatHistoryCollection, messages: Message[]) => {
+    if (!authContext.currentUser?.id) {
+      console.error("User ID not found. Cannot save chat history.");
+      // Handle the case where the user ID is not available, e.g., display an error message
+      return;
+    }
+    try {
+      const chatHistoryCollection = collection(firestore, `users/${authContext.currentUser.id}/chatHistory`);
+      await addDoc(chatHistoryCollection, {
+        messages,
+        timestamp: new Date(),
 
-                // Add other metadata if needed, e.g., userId: currentUser.id
-            });
-            console.log('Chat history saved successfully!');
-        } catch (error) {
-            console.error('Error saving chat history:', error);
-            // Handle error appropriately, e.g., display an error message to the user
-        }
-    };
+        chatId: (Date.now() + Math.random()).toString(),
+        chatName: "New Conversation",
 
-  const handleStartNewChat = () => {
+      });
+      console.log('Chat history saved successfully!');
+    } catch (error) {
+      console.error('Error saving chat history:', error);
+      // Handle error appropriately, e.g., display an error message to the user
+    }
+  };
+  const clearChatHistory = async () => {
+    if (!authContext.currentUser?.id) {
+      console.error("User ID not found. Cannot clear chat history.");
+      return;
+    }
+    try {
+      const chatHistoryCollection = collection(firestore, `users/${authContext.currentUser.id}/chatHistory`);
+      const querySnapshot = await getDocs(chatHistoryCollection);
+      const batch = writeBatch(firestore);
+      querySnapshot.forEach((doc) => {
+        batch.delete(doc.ref);
+      });
+      await batch.commit();
+      console.log('Chat history cleared successfully!');
+    } catch (error) {
+      console.error('Error clearing chat history:', error);
+    }
+  };
+  const handleStartNewChat = async () => {
     toast.info("Starting a new conversation", {
       description: "Your previous conversation has been saved to your history."
     });
 
-    saveChatHistory(messages); // Call the save function here
-
-    setMessages([
-      {
-        id: '1',
-        content: "Hi there! I'm your AI wellness companion. How are you feeling today?",
-        sender: 'bot',
-        timestamp: new Date(),
-      }
-    ]);
-    setSuggestions(SUGGESTIONS.anxiety);
+    if (authContext.currentUser?.id) {
+      saveUserActivity(
+        {
+          userId: authContext.currentUser.id,
+          timestamp: new Date().toISOString(),
+          activityType: 'start_new_chat',
+          activityName: 'Start New Chat',
+          pageName: 'ChatPage',
+        });
+        await clearChatHistory();
+      const chatHistoryCollection = collection(firestore, `users/${authContext.currentUser.id}/chatHistory`);
+      saveChatHistory(chatHistoryCollection, messages); // Call the save function here
+      setLoadHistory(false);
+      setMessages([
+        {
+          id: uuidv4(),
+          content: "Hi there! I'm your AI wellness companion. How are you feeling today?",
+          sender: 'bot',
+          timestamp: new Date(),
+        }
+      ]);
+      setSuggestions(SUGGESTIONS.anxiety);
+      setLoadHistory(true)
+    }
   };
 
 
@@ -318,9 +436,9 @@ const ChatInterface = () => {
             <div className="w-2 h-2 rounded-full bg-green-500"></div>
             AI Wellness Assistant
           </CardTitle>
-          <Button 
-            variant="ghost" 
-            size="icon" 
+          <Button
+            variant="ghost"
+            size="icon"
             className="h-8 w-8 rounded-full"
             onClick={handleStartNewChat}
           >
@@ -328,7 +446,7 @@ const ChatInterface = () => {
           </Button>
         </div>
       </CardHeader>
-      
+
       <CardContent className="flex-grow overflow-y-auto p-4 space-y-4">
         {messages.map((message) => (
           <motion.div
@@ -339,11 +457,10 @@ const ChatInterface = () => {
             className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             <div
-              className={`max-w-[80%] rounded-2xl px-4 py-2 ${
-                message.sender === 'user'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-muted'
-              }`}
+              className={`max-w-[80%] rounded-2xl px-4 py-2 ${message.sender === 'user'
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-muted'
+                }`}
             >
               <p className="text-sm whitespace-pre-line">{message.content}</p>
               <p className="text-xs text-right mt-1 opacity-70">
@@ -352,7 +469,7 @@ const ChatInterface = () => {
             </div>
           </motion.div>
         ))}
-        
+
         {isTyping && (
           <div className="flex justify-start">
             <div className="bg-muted rounded-2xl px-4 py-2">
@@ -365,15 +482,15 @@ const ChatInterface = () => {
           </div>
         )}
       </CardContent>
-      
+
       {/* Suggestion chips */}
       <div className="px-4 pb-2">
         <div className="flex flex-wrap gap-2">
-          {suggestions.map((suggestion, index) => (
-            <Button 
-              key={index} 
-              variant="outline" 
-              size="sm" 
+          {suggestions.map((suggestion) => (
+            <Button
+              key={suggestion}
+              variant="outline"
+              size="sm"
               className="rounded-full text-xs"
               onClick={() => handleSuggestionClick(suggestion)}
             >
@@ -382,7 +499,7 @@ const ChatInterface = () => {
           ))}
         </div>
       </div>
-      
+
       <CardFooter className="border-t p-4">
         <div className="flex items-end gap-2 w-full">
           <div className="flex-grow relative">
@@ -421,15 +538,15 @@ const ChatInterface = () => {
               <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" onClick={handleVoiceInput}>
                 <Mic size={20} />
               </Button>
-          </div>
+            </div>
           </div>
           <Button size="icon" className="h-[60px] w-10 rounded-full" onClick={handleSend}>
             <Send size={20} />
           </Button>
         </div>
-       </CardFooter>
-     </Card>
-   );
- };
+      </CardFooter>
+    </Card>
+  );
+};
 
- export default ChatInterface;
+export default ChatInterface;
