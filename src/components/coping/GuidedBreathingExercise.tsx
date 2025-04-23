@@ -3,6 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Card, CardContent } from '@/components/ui/card';
 import { Play, Pause, RotateCcw } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { saveUserActivity } from '@/configs/firebase';
 
 interface BreathingExerciseProps {
   inhaleDuration: number;
@@ -36,14 +38,27 @@ const GuidedBreathingExercise = ({
   const [timeRemaining, setTimeRemaining] = useState(inhaleDuration);
   const [animation, setAnimation] = useState('scale-100');
 
+  const { currentUser } = useAuth();
+
   const totalCycleDuration = inhaleDuration + holdDuration + exhaleDuration;
 
   const handleStart = () => {
     setIsActive(!isActive);
-    if (!isActive) {
+    if (!isActive && currentUser) {
       setCurrentState(BreathState.INHALE);
-      setTimeRemaining(inhaleDuration);
-      setAnimation('scale-150 transition-transform duration-4000');
+      if (currentUser) {
+        const timestamp = new Date().toISOString();
+        saveUserActivity({
+          userId: currentUser.id,
+            timestamp: timestamp,
+            activityType: "exercise-started",
+            activityName: "Guided Breathing",
+            pageName: "CopingTools",
+          });
+        }
+        setTimeRemaining(inhaleDuration);
+        setAnimation('scale-150 transition-transform duration-4000');
+        
     }
   };
 

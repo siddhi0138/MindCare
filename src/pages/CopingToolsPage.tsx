@@ -7,8 +7,32 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { saveUserActivity } from '@/configs/firebase';
 
 const CopingToolsPage = () => {
+  const { currentUser } = useAuth();
+
+  const handleGameClick = async (gameName: string) => {
+    if (currentUser) {
+      const activityData = {
+        userId: currentUser.id,
+        timestamp: new Date().toISOString(),
+        activityType: "game-started",
+        activityName: gameName,
+        pageName: "CopingTools",
+      };
+
+      console.log("Saving user activity:", {
+        ...activityData,
+      });
+
+
+      await saveUserActivity(activityData);
+    }
+    // If no user is logged in, the activity is not saved.  Consider showing a message.
+  };
+
   return (
     <MainLayout>
       <div className="max-w-4xl mx-auto">
@@ -77,19 +101,23 @@ const CopingToolsPage = () => {
               <GameCard
                 title="Memory Game"
                 description="Boost your focus and memory while relieving stress." 
-                link="/games/memory"/>
+                link="/games/memory"
+                onClick={() => handleGameClick("Memory Game")} />
               <GameCard
                 title="Word Zen"
                 description="Find hidden words in this calming puzzle to achieve zen." 
-                link="/games/word-zen"/>
+                link="/games/word-zen"
+                onClick={() => handleGameClick("Word Zen")} />
               <GameCard
                 title="Coloring Game"
                 description="Express creativity and relieve stress with digital coloring." 
-                link="/games/coloring"/>
+                link="/games/coloring"
+                onClick={() => handleGameClick("Coloring Game")} />
               <GameCard
                 title="Find the Ball"
                 description="Test your concentration by following the moving ball." 
-                link="/games/find-the-ball"/>
+                link="/games/find-the-ball"
+                onClick={() => handleGameClick("Find the Ball")} />
             </div>
           </TabsContent>
 
@@ -146,7 +174,10 @@ const CopingToolsPage = () => {
                       </div>
                     </div>
 
-                    <Link to="/interactive-tools/grounding">
+                    <Link to="/interactive-tools/grounding" onClick={async () => {
+                      if (currentUser) {
+                        await handleGameClick("Grounding Exercise");
+                      }}}>
                       <Button>Start Exercise</Button>
                     </Link>
                   </div>
@@ -164,11 +195,13 @@ interface StartExerciseButtonProps {
   exerciseType: "4-7-8" | "box";
 }
 
-const StartExerciseButton: React.FC<StartExerciseButtonProps> = ({ exerciseType }) => {
+const StartExerciseButton: React.FC<StartExerciseButtonProps> = ({
+  exerciseType,
+}) => {
   const [activeExercise, setActiveExercise] = useState<"4-7-8" | "box" | null>(null);
   const [isPaused, setIsPaused] = useState(false);
-  const [inhaleDuration, setInhaleDuration] = useState(exerciseType === "4-7-8" ? 4 : 4);
-  const [holdDuration, setHoldDuration] = useState(exerciseType === "4-7-8" ? 7 : 4);
+  const [inhaleDuration, setInhaleDuration] = useState(exerciseType === "4-7-8" ? 4 : 4,);
+  const [holdDuration, setHoldDuration] = useState(exerciseType === "4-7-8" ? 7 : 4,);
   const [exhaleDuration, setExhaleDuration] = useState(exerciseType === "4-7-8" ? 8 : 4);
 
   const handleStartExercise = () => {
@@ -204,19 +237,26 @@ interface GameCardProps {
   title: string;
   description: string;
   link: string;
+  onClick: () => void;
 }
 
-const GameCard: React.FC<GameCardProps> = ({ title, description, link }) => {
+const GameCard: React.FC<GameCardProps> = ({
+  title,
+  description,
+  link,
+  onClick,
+}) => {
   const navigate = useNavigate();
 
   const handleClick = () => {
     navigate(link);
+    onClick(); // Call the onClick function passed as a prop
   };
 
   return (
     <Card className="border-primary/10 overflow-hidden cursor-pointer hover:shadow-md transition-shadow">
       <CardContent className="p-6">
-        <h3 className="text-lg font-medium mb-2">{title}</h3>
+        <h3 className="text-lg font-medium mb-2">{ title }</h3>
         <p className="text-sm text-muted-foreground mb-4">{description}</p>
         <Button onClick={handleClick}>Play</Button>
       </CardContent>

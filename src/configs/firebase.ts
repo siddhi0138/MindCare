@@ -90,4 +90,22 @@ const getAssessmentResults = async (userId: string) => {
     return [];
   }
 };
-export { app, auth, firestore, googleProvider, saveJournalEntry, getJournalEntries, saveAssessmentResult, getAssessmentResults };
+
+// Function to save user activity to Firestore
+const saveUserActivity = async (activity: { userId: string; timestamp: string; activityType: string; activityName: string; pageName: string }) => {
+  try {
+    console.log("saveUserActivity called");
+    console.log("Saving user activity:", activity);
+    const docRef = await addDoc(collection(firestore, "userActivity"), {
+      ...activity,
+      timestamp: Timestamp.fromDate(new Date(activity.timestamp)) // Convert string timestamp to Firebase Timestamp
+    });
+    console.log("User activity saved with ID: ", docRef.id);
+    return { success: true, id: docRef.id };
+  } catch (e) {
+    console.error("Error saving user activity: ", e);
+    return { success: false, error: e };
+  }
+};
+
+export { app, auth, firestore, googleProvider, saveJournalEntry, getJournalEntries, saveAssessmentResult, getAssessmentResults, saveUserActivity };
