@@ -8,13 +8,13 @@ import AnxietyAssessment from './AnxietyAssessment';
 import DepressionAssessment from './DepressionAssessment';
 import StressAssessment from './StressAssessment';
 import AssessmentHistory from './AssessmentHistory';
-import AssessmentResult from './AssessmentResult';
+import { AssessmentResult } from './AssessmentResult';
 import { useAuth } from '@/contexts/AuthContext';
-
+import { saveAssessmentResult } from '@/configs/firebase';
 export type AssessmentType = 'anxiety' | 'depression' | 'stress';
 
 const AssessmentHub = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, currentUser } = useAuth();
   const [activeTab, setActiveTab] = useState<AssessmentType | 'history'>('anxiety');
   const [isAssessing, setIsAssessing] = useState(false);
   const [result, setResult] = useState<{score: number, level: string, recommendations: string[]} | null>(null);
@@ -60,22 +60,33 @@ const AssessmentHub = () => {
     setIsAssessing(false);
   };
 
+  // Function to reset the result to null
+  const handleRestartAssessment = () => {
+    setResult(null);
+    setIsAssessing(false);
+  };
+
+  // Function to handle saving results
+  const handleSaveResults = async () => {
+    console.log("handleSaveResults called");
+    if (result && currentUser) {
+      console.log("result:", result);
+      console.log("currentUser.uid:", currentUser.id);
+      console.log("activeTab:", activeTab);
+      await saveAssessmentResult(currentUser.id, activeTab, result.score, result.level, result.recommendations);
+      console.log("Results saved to Firestore");
+    }
+  };
+
+
+
+
   return (
     <div className="space-y-6">
       {!isAssessing && !result && (
         <>
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-bold">Mental Health Assessments</h2>
-            {isAuthenticated && (
-              <Button 
-                variant="outline" 
-                onClick={() => setActiveTab('history')} 
-                className="flex items-center gap-2"
-              >
-                <LineChart className="h-4 w-4" />
-                View History
-              </Button>
-            )}
           </div>
           
           <p className="text-muted-foreground">
@@ -168,6 +179,18 @@ const AssessmentHub = () => {
               </div>
             </CardContent>
           </Card>
+          {isAuthenticated && (
+            <div className="flex justify-end">
+              <Button 
+                variant="outline" 
+                onClick={() => setActiveTab('history')} 
+                className="flex items-center gap-2"
+              >
+                <LineChart className="h-4 w-4" />
+                View History
+              </Button>
+            </div>
+          )}
         </>
       )}
       
@@ -203,7 +226,8 @@ const AssessmentHub = () => {
           score={result.score}
           level={result.level}
           recommendations={result.recommendations}
-          onStartNew={() => setResult(null)}
+          onRestart={handleRestartAssessment}
+          onSaveResults={handleSaveResults}
         />
       )}
       
