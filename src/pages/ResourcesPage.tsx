@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import MainLayout from "@/components/layout/MainLayout";
 import ResourceCard from "@/components/resources/ResourceCard";
 import { Input } from "@/components/ui/input";
@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
 import { resourceData } from "@/data/resources";
+import { auth, saveUserActivity } from "@/configs/firebase";
 
 const categories = [
   "All", "Anxiety", "Depression", "Sleep", "Stress", "Relationships", "Mindfulness", "Self-Care"
@@ -16,6 +17,33 @@ const ResourcesPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [savedResources, setSavedResources] = useState<string[]>([]);
+  const [selectedTab, setSelectedTab] = useState("articles");
+
+  useEffect(() => {
+    console.log("Current user:", auth.currentUser);
+  }, []);
+
+  // Helper function to log user activity
+  const logUserActivity = async (activityType: string, activityName: string) => {
+    try {
+      const user = auth.currentUser;
+      console.log("Logging activity for user:", user?.uid, activityType, activityName);
+      if (!user) {
+        console.warn("No user logged in, skipping activity log");
+        return;
+      }
+      const result = await saveUserActivity({
+        userId: user.uid,
+        timestamp: new Date().toISOString(),
+        activityType,
+        activityName,
+        pageName: "ResourcesPage"
+      });
+      console.log("Activity log result:", result);
+    } catch (error) {
+      console.error("Failed to log user activity:", error);
+    }
+  };
 
   const filteredResources = (resourceType: string) => resourceData.filter(resource => {
     const matchesSearch = resource.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -29,6 +57,25 @@ const ResourcesPage = () => {
     setSavedResources(prev => 
       prev.includes(id) ? prev.filter(savedId => savedId !== id) : [...prev, id]
     );
+    logUserActivity("bookmark", "bookmarkToggled");
+  };
+
+  // Log search query changes
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    logUserActivity("search", "searchQueryChange");
+  };
+
+  // Log category selection changes
+  const handleCategorySelect = (category: string) => {
+    setSelectedCategory(category);
+    logUserActivity("category", "categorySelected");
+  };
+
+  // Log tab changes
+  const handleTabChange = (value: string) => {
+    setSelectedTab(value);
+    logUserActivity("tab", "tabChanged");
   };
 
   return (
@@ -42,7 +89,7 @@ const ResourcesPage = () => {
               placeholder="Search resources..." 
               className="pl-10 w-full md:w-1/2"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={handleSearchChange}
             />
           </div>
         </div>
@@ -55,7 +102,7 @@ const ResourcesPage = () => {
                 variant={category === selectedCategory ? "default" : "outline"} 
                 size="sm"
                 className="whitespace-nowrap"
-                onClick={() => setSelectedCategory(category)}
+                onClick={() => handleCategorySelect(category)}
               >
                 {category}
               </Button>
@@ -63,7 +110,7 @@ const ResourcesPage = () => {
           </div>
         </div>
         
-        <Tabs defaultValue="articles">
+        <Tabs defaultValue="articles" value={selectedTab} onValueChange={handleTabChange}>
           <TabsList className="mb-8">
             <TabsTrigger value="articles">Articles</TabsTrigger>
             <TabsTrigger value="podcasts">Podcasts</TabsTrigger>
