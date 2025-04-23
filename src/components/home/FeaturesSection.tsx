@@ -37,7 +37,7 @@ const features = [
     title: 'Community Support',
     description: 'Connect with others on similar journeys through moderated support groups.',
     icon: Users,
-    link: "/communitysupport",
+    link: "/community",
     color: 'from-violet-500 to-purple-500',
   },
   {
