@@ -4,10 +4,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { Label } from "../ui/label";
 import { Progress } from "../ui/progress";
-import { toast } from "../ui/sonner";
 import { AssessmentResult } from "./AssessmentResult";
 import type { AnxietyAssessmentProps } from "./AnxietyAssessment.d";
-import { saveAssessmentResult } from "../../configs/firebase";
 
 // GAD-7 questions
 const questions = [
@@ -36,17 +34,17 @@ const interpretations = [
   { range: [15, 21], severity: "Severe anxiety", description: "Your symptoms suggest severe anxiety." }
 ];
 
-const AnxietyAssessment = ({ onComplete }: AnxietyAssessmentProps) => {
+const AnxietyAssessmentFixed = ({ onComplete }: AnxietyAssessmentProps) => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<number[]>(Array(questions.length).fill(-1));
   const [completed, setCompleted] = useState(false);
   const [score, setScore] = useState(0);
 
-  const handleAnswer = async (value: string) => {
+  const handleAnswer = (value: string) => {
     const newAnswers = [...answers];
     newAnswers[currentQuestion] = parseInt(value);
     setAnswers(newAnswers);
-    
+
     // Move to next question or complete the assessment
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
@@ -54,34 +52,7 @@ const AnxietyAssessment = ({ onComplete }: AnxietyAssessmentProps) => {
       const totalScore = newAnswers.reduce((sum, value) => sum + value, 0);
       setScore(totalScore);
       setCompleted(true);
-      
-      // Save result to Firestore
-      const newResult = {
-        type: "anxiety",
-        score: totalScore,
-        level: getInterpretation(totalScore),
-        recommendations: [
-          "Practice deep breathing exercises",
-          "Consider talking to a mental health professional",
-          "Establish a regular sleep schedule",
-          "Limit caffeine and alcohol"
-        ],
-        timestamp: new Date(),
-      };
-      
-      try {
-        const response = await saveAssessmentResult(newResult);
-        if (response.success) {
-          toast.success("Assessment completed", {
-            description: "Your results have been saved to your history."
-          });
-        } else {
-          toast.error("Failed to save assessment result.");
-        }
-      } catch (error) {
-        toast.error("Error saving assessment result.");
-      }
-      
+
       // Pass the score to the parent component
       if (onComplete) {
         onComplete(totalScore);
@@ -94,13 +65,13 @@ const AnxietyAssessment = ({ onComplete }: AnxietyAssessmentProps) => {
       setCurrentQuestion(currentQuestion - 1);
     }
   };
-  
+
   const handleRestart = () => {
     setCurrentQuestion(0);
     setAnswers(Array(questions.length).fill(-1));
     setCompleted(false);
   };
-  
+
   const getInterpretation = (score: number) => {
     for (const item of interpretations) {
       if (score >= item.range[0] && score <= item.range[1]) {
@@ -109,14 +80,14 @@ const AnxietyAssessment = ({ onComplete }: AnxietyAssessmentProps) => {
     }
     return "Unknown";
   };
-  
+
   const progress = ((currentQuestion + 1) / questions.length) * 100;
 
   if (completed) {
     const interpretation = interpretations.find(
       item => score >= item.range[0] && score <= item.range[1]
     );
-    
+
     return (
       <AssessmentResult
         title="GAD-7 Anxiety Assessment Results"
@@ -144,7 +115,7 @@ const AnxietyAssessment = ({ onComplete }: AnxietyAssessmentProps) => {
           Over the last 2 weeks, how often have you been bothered by any of the following problems?
         </CardDescription>
       </CardHeader>
-      
+
       <CardContent>
         <div className="mb-6">
           <div className="flex justify-between text-sm mb-2">
@@ -153,15 +124,15 @@ const AnxietyAssessment = ({ onComplete }: AnxietyAssessmentProps) => {
           </div>
           <Progress value={progress} className="h-2" />
         </div>
-        
+
         <div className="py-4">
           <h3 className="text-lg font-medium mb-6">{questions[currentQuestion]}</h3>
-          
+
           <RadioGroup className="gap-4">
             {options.map((option) => (
               <div key={option.value} className="flex items-center space-x-2">
-                <RadioGroupItem 
-                  id={`q${currentQuestion}-${option.value}`} 
+                <RadioGroupItem
+                  id={`q${currentQuestion}-${option.value}`}
                   value={option.value}
                   onClick={() => handleAnswer(option.value)}
                 />
@@ -173,10 +144,10 @@ const AnxietyAssessment = ({ onComplete }: AnxietyAssessmentProps) => {
           </RadioGroup>
         </div>
       </CardContent>
-      
+
       <CardFooter className="flex justify-between">
-        <Button 
-          variant="outline" 
+        <Button
+          variant="outline"
           onClick={handlePrevious}
           disabled={currentQuestion === 0}
         >
@@ -190,4 +161,4 @@ const AnxietyAssessment = ({ onComplete }: AnxietyAssessmentProps) => {
   );
 };
 
-export default AnxietyAssessment;
+export default AnxietyAssessmentFixed;

@@ -70,38 +70,6 @@ const StressAssessment = ({ onComplete }: StressAssessmentProps) => {
       setScore(totalScore);
       setCompleted(true);
       
-      if (!currentUser) {
-        toast.error("User not authenticated. Cannot save assessment.");
-        return;
-      }
-      
-      const newResult = {
-        userId: currentUser.id,
-        type: "stress",
-        score: totalScore,
-        level: getInterpretation(totalScore),
-        recommendations: [
-          "Practice mindfulness meditation",
-          "Engage in regular physical activity",
-          "Prioritize and delegate tasks",
-          "Establish healthy boundaries"
-        ],
-        timestamp: new Date(),
-      };
-      
-      try {
-        const response = await saveAssessmentResult(newResult);
-        if (response.success) {
-          toast.success("Assessment completed", {
-            description: "Your results have been saved to your history."
-          });
-        } else {
-          toast.error("Failed to save assessment result.");
-        }
-      } catch (error) {
-        toast.error("Error saving assessment result.");
-      }
-      
       if (onComplete) {
         onComplete(totalScore);
       }
