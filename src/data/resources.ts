@@ -68,20 +68,22 @@ export const resourceData = [
     {
       id: "7",
       resourceType: "video",
-      title: "Guided Meditation for Stress Relief",
-      description: "This expertly crafted guided meditation video offers a deeply restorative mental refuge designed specifically for stress reduction and nervous system regulation. The session begins with an educational component that explains the physiological stress response, how chronic stress affects both mind and body, and the science behind how meditation counteracts these effects by activating the parasympathetic nervous system. The meditation guide uses a soothing, measured voice with professional audio quality to create an immersive experience free from jarring transitions or distractions. Gentle background sounds of flowing water and subtle ambient music enhance the calming atmosphere without overwhelming the guidance.\n\nThe meditation practice itself follows a carefully structured progression, beginning with diaphragmatic breathing exercises to slow the heart rate and oxygen consumption. Viewers are then guided through a systematic body scan to release physical tension, followed by visualization techniques that engage the senses to create a mental sanctuary of peace and safety. The session incorporates evidence-based mindfulness techniques for observing thoughts without attachment and returning attention to the present moment. Throughout the video, the guide offers modifications for different experience levels, from beginners to advanced practitioners. The meditation concludes with affirmations for carrying a sense of centeredness into daily activities and practical suggestions for integrating brief mindfulness moments throughout the day. This resource serves as both an immediate stress-relief tool and a training ground for developing greater resilience to stress over time.",
+      title: "Guided Meditation for Stress Relief",      
+      description: `This expertly crafted guided meditation video offers a deeply restorative mental refuge designed specifically for stress reduction and nervous system regulation. The session begins with an educational component that explains the physiological stress response, how chronic stress affects both mind and body, and the science behind how meditation counteracts these effects by activating the parasympathetic nervous system. The meditation guide uses a soothing, measured voice with professional audio quality to create an immersive experience free from jarring transitions or distractions.
+      
+      The meditation practice itself follows a carefully structured progression, beginning with diaphragmatic breathing exercises to slow the heart rate and oxygen consumption. Viewers are then guided through a systematic body scan to release physical tension, followed by visualization techniques that engage the senses to create a mental sanctuary of peace and safety. The session incorporates evidence-based mindfulness techniques for observing thoughts without attachment and returning attention to the present moment. Throughout the video, the guide offers modifications for different experience levels, from beginners to advanced practitioners. The meditation concludes with affirmations for carrying a sense of centeredness into daily activities and practical suggestions for integrating brief mindfulness moments throughout the day.`,
       imageUrl: "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?ixlib=rb-4.0.3",
       category: "Meditation",
       readTime: "15 min",
       author: "Mindful Living Channel",
       url: "https://www.placeholder.com/video/7",
-    },
+    },    
     {
       id: "8",
       resourceType: "podcast",
-      title: "The Power of Positive Thinking",
-      description: "This thought-provoking podcast episode explores the science and practice of positive thinking as a transformative force for psychological wellbeing. The hosts begin by distinguishing evidence-based positive psychology approaches from simplistic positive thinking platitudes, drawing on research from leading institutions on how cognitive patterns influence emotional regulation, stress resilience, and even physical health outcomes. The episode features an in-depth interview with a renowned positive psychology researcher who explains concepts like learned optimism, benefit-finding in adversity, and cognitive reframing. Compelling personal stories from individuals who overcame significant challenges through cultivating positive thought patterns provide real-world context for the scientific principles discussed, while addressing common criticisms and misconceptions about positive thinking approaches.\n\nThe second half of this comprehensive episode offers listeners practical frameworks for developing a more constructive thought life. These include specific cognitive restructuring techniques for identifying and challenging negative thought patterns, gratitude practices that can be implemented in just minutes daily, methods for cultivating realistic optimism even in difficult circumstances, and mindfulness approaches that create space between triggering events and emotional responses. The hosts discuss strategies for maintaining positive thinking during particularly challenging periods and how to avoid toxic positivity that invalidates genuine emotional experiences. Throughout the episode, emphasis is placed on gradual, sustainable shifts in perspective rather than forced happiness or denial of difficulties. The content is presented with both scientific rigor and accessible language, making complex psychological concepts understandable and applicable for listeners at any stage of their mental health journey.",
+      title: "The Power of Positive Thinking",      
       imageUrl: "https://images.unsplash.com/photo-1506784983877-45594efa4cbe?ixlib=rb-4.0.3",
+      description: "This thought-provoking podcast episode explores the science and practice of positive thinking as a transformative force for psychological wellbeing. The hosts begin by distinguishing evidence-based positive psychology approaches from simplistic positive thinking platitudes, drawing on research from leading institutions on how cognitive patterns influence emotional regulation, stress resilience, and even physical health outcomes. The episode features an in-depth interview with a renowned positive psychology researcher who explains concepts like learned optimism, benefit-finding in adversity, and cognitive reframing. Compelling personal stories from individuals who overcame significant challenges through cultivating positive thought patterns provide real-world context for the scientific principles discussed, while addressing common criticisms and misconceptions about positive thinking approaches.\n\nThe second half of this comprehensive episode offers listeners practical frameworks for developing a more constructive thought life. These include specific cognitive restructuring techniques for identifying and challenging negative thought patterns, gratitude practices that can be implemented in just minutes daily, methods for cultivating realistic optimism even in difficult circumstances, and mindfulness approaches that create space between triggering events and emotional responses. The hosts discuss strategies for maintaining positive thinking during particularly challenging periods and how to avoid toxic positivity that invalidates genuine emotional experiences. Throughout the episode, emphasis is placed on gradual, sustainable shifts in perspective rather than forced happiness or denial of difficulties. The content is presented with both scientific rigor and accessible language, making complex psychological concepts understandable and applicable for listeners at any stage of their mental health journey.",
       category: "Mental Wellness",
       readTime: "45 min",
       author: "Wellness Insights Podcast",
@@ -123,20 +125,22 @@ export const resourceData = [
     {
       id: "12",
       resourceType: "video",
-      title: "Yoga for Beginners: A Gentle Introduction",
-      description: "This expertly produced instructional yoga video offers newcomers an accessible entry point to the practice without assuming any prior experience or flexibility. The session begins with an informative introduction that explains yoga's holistic benefits for both physical and mental wellbeing, including stress reduction, improved flexibility, strengthened core muscles, better posture, and enhanced breath awareness. The instructor thoughtfully addresses common concerns beginners might have, such as not being flexible enough or uncertainty about proper alignment, emphasizing that yoga is a personal journey suitable for all body types and fitness levels. The video features clear explanations of basic yoga terminology and breathing techniques that provide a foundation for the practice.\n\nThe main portion of this comprehensive video guides viewers through a carefully sequenced yoga flow designed specifically for beginners. Each pose is demonstrated with multiple variations to accommodate different flexibility levels and physical limitations, with detailed attention to proper alignment and common mistakes to avoid. The instructor provides constant verbal cues about where participants should feel the stretch and how to modify poses if experiencing discomfort. The session progresses logically from gentle warm-ups to standing poses, seated stretches, and concludes with restorative postures and a guided relaxation. Throughout the video, emphasis is placed on connecting movement with breath, practicing non-judgment, and honoring one's body rather than striving for perfect poses. The calming setting, clear audio quality, and multiple camera angles make it easy to follow along at home. This resource serves as both an immediate stress-relief practice and the beginning of a sustainable yoga journey that participants can return to repeatedly as they build confidence in their practice.",
+      title: "Yoga for Beginners: A Gentle Introduction",      
+      description: `This expertly produced instructional yoga video offers newcomers an accessible entry point to the practice without assuming any prior experience or flexibility. The session begins with an informative introduction that explains yoga's holistic benefits for both physical and mental wellbeing, including stress reduction, improved flexibility, strengthened core muscles, better posture, and enhanced breath awareness. The instructor thoughtfully addresses common concerns beginners might have, such as not being flexible enough or uncertainty about proper alignment, emphasizing that yoga is a personal journey suitable for all body types and fitness levels. The video features clear explanations of basic yoga terminology and breathing techniques that provide a foundation for the practice.
+
+      The main portion of this comprehensive video guides viewers through a carefully sequenced yoga flow designed specifically for beginners. Each pose is demonstrated with multiple variations to accommodate different flexibility levels and physical limitations, with detailed attention to proper alignment and common mistakes to avoid. The instructor provides constant verbal cues about where participants should feel the stretch and how to modify poses if experiencing discomfort. The session progresses logically from gentle warm-ups to standing poses, seated stretches, and concludes with restorative postures and a guided relaxation.`,
       imageUrl: "https://images.unsplash.com/photo-1518611012118-696072aa579a?ixlib=rb-4.0.3",
       category: "Fitness",
       readTime: "30 min",
       author: "Yoga with Emily",
       url: "https://www.placeholder.com/video/12",
-    },
+    },    
     {
       id: "13",
       resourceType: "podcast",
-      title: "Stress-Busting Strategies: A Daily Guide",
-      description: "This information-rich podcast provides listeners with an evidence-based framework for understanding and managing daily stress effectively. The hosts begin by explaining the physiological stress response and distinguishing between beneficial eustress and harmful chronic stress, helping listeners recognize their personal stress signals across physical, emotional, cognitive, and behavioral domains. The episode explores how different personality types experience and respond to stressors differently, with insights into stress vulnerability factors like perfectionism, people-pleasing tendencies, and difficulty setting boundaries. Expert interviews feature neurologists, psychologists, and stress researchers who share cutting-edge findings about stress management, while practical segments break down complex concepts into actionable insights that listeners can apply immediately in their daily lives.\n\nThe second portion of this comprehensive podcast delivers a robust toolkit of stress management techniques organized into categories for immediate relief, daily practice, and long-term resilience building. Listeners learn specific breathing exercises like 4-7-8 breathing and box breathing that can calm the nervous system in minutes, alongside progressive muscle relaxation techniques for releasing physical tension. The hosts explore cognitive approaches for reframing stressful situations, time management strategies for preventing overwhelm, boundary-setting scripts for relationship stress, and mindfulness practices for developing greater presence. Physical stress management through exercise, nutrition, and sleep optimization receives substantial attention, with specific recommendations tailored to different lifestyle needs. Throughout the episode, the hosts emphasize creating personalized stress management plans rather than one-size-fits-all solutions, guiding listeners through a process of experimenting with different techniques and monitoring their effectiveness through simple tracking methods. The podcast concludes with strategies for building stress resilience over time through practices like gratitude, meaning-making, and social connection.",
+      title: "Stress-Busting Strategies: A Daily Guide",      
       imageUrl: "https://images.unsplash.com/photo-1514845505178-849cebf1a91d?ixlib=rb-4.0.3",
+      description: "This information-rich podcast provides listeners with an evidence-based framework for understanding and managing daily stress effectively. The hosts begin by explaining the physiological stress response and distinguishing between beneficial eustress and harmful chronic stress, helping listeners recognize their personal stress signals across physical, emotional, cognitive, and behavioral domains. The episode explores how different personality types experience and respond to stressors differently, with insights into stress vulnerability factors like perfectionism, people-pleasing tendencies, and difficulty setting boundaries. Expert interviews feature neurologists, psychologists, and stress researchers who share cutting-edge findings about stress management, while practical segments break down complex concepts into actionable insights that listeners can apply immediately in their daily lives.\n\nThe second portion of this comprehensive podcast delivers a robust toolkit of stress management techniques organized into categories for immediate relief, daily practice, and long-term resilience building. Listeners learn specific breathing exercises like 4-7-8 breathing and box breathing that can calm the nervous system in minutes, alongside progressive muscle relaxation techniques for releasing physical tension. The hosts explore cognitive approaches for reframing stressful situations, time management strategies for preventing overwhelm, boundary-setting scripts for relationship stress, and mindfulness practices for developing greater presence. Physical stress management through exercise, nutrition, and sleep optimization receives substantial attention, with specific recommendations tailored to different lifestyle needs. Throughout the episode, the hosts emphasize creating personalized stress management plans rather than one-size-fits-all solutions, guiding listeners through a process of experimenting with different techniques and monitoring their effectiveness through simple tracking methods. The podcast concludes with strategies for building stress resilience over time through practices like gratitude, meaning-making, and social connection.",
       category: "Stress Management",
       readTime: "20 min",
       author: "Mind Over Matter Podcast",
@@ -152,5 +156,83 @@ export const resourceData = [
       readTime: "9 min read",
       author: "Dr. Helen Parker",
       url: "https://www.placeholder.com/article/14",
+    },
+    {
+      id: "15",
+      resourceType: "podcast",
+      title: "Managing Anxiety in Uncertain Times",      
+      description: `In this calming discussion, Dr. Emma Watson delves into practical strategies for managing anxiety during times of uncertainty and change. The podcast explores the root causes of anxiety in response to unpredictability and provides a toolkit of techniques to help listeners navigate these challenging periods with greater resilience.
+      
+      Listeners will gain insights into how to recognize their personal anxiety triggers and how to apply mindfulness, breathing techniques, and cognitive reframing exercises to mitigate anxiety symptoms. The episode emphasizes the importance of building a supportive network and outlines various resources available for those seeking additional help.`,
+      imageUrl: "https://images.unsplash.com/photo-1581368087049-7034ed0d1e6f?ixlib=rb-4.0.3",
+      category: "Anxiety",
+      readTime: "45 min listen",
+      author: "Dr. Emma Watson",
+      url: "https://www.placeholder.com/podcast/15",
+    },    
+    {
+      id: "16",
+      resourceType: "podcast",
+      title: "Sleep Better Tonight: A Guided Journey",      
+      description: `Join Sleep Specialist Mark Johnson on a guided journey to better sleep. This episode dives into evidence-based techniques designed to significantly improve your sleep quality and help you establish healthy, sustainable sleep routines.
+      
+      Listeners will learn about the science of sleep, common sleep disruptors, and effective strategies for overcoming them. The podcast provides practical exercises and actionable advice, including the importance of sleep hygiene, environmental adjustments, and the power of pre-sleep rituals.`,
+      imageUrl: "https://images.unsplash.com/photo-1541199249251-f713e6145474?ixlib=rb-4.0.3",
+      category: "Sleep",
+      readTime: "32 min listen",
+      author: "Sleep Specialist Mark Johnson",
+      url: "https://www.placeholder.com/podcast/16",
+    },    
+    {
+      id: "17",
+      resourceType: "podcast",
+      title: "Mindfulness for Beginners",      
+      description: `Embark on your mindfulness journey with this beginner-friendly podcast hosted by Meditation Coach Sarah Lee. This episode serves as an accessible introduction to mindfulness practices, demystifying the concept and providing straightforward guidance for those new to meditation.
+      
+      Listeners will learn practical mindfulness techniques that can be easily integrated into daily life, helping to reduce stress, improve focus, and enhance overall well-being. The podcast also covers common misconceptions about mindfulness and answers frequently asked questions to ensure a smooth start to your practice.`,
+      imageUrl: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?ixlib=rb-4.0.3",
+      category: "Mindfulness",
+      readTime: "28 min listen",
+      author: "Meditation Coach Sarah Lee",
+      url: "https://www.placeholder.com/podcast/17",
+    },
+    {
+      id: "18",      
+      resourceType: "video",      
+      title: "5-Minute Anxiety Relief Exercise",      
+      description: `This quick and effective guided exercise, led by Therapist Anna Garcia, is designed to provide rapid relief from anxiety symptoms in just five minutes. The video demonstrates simple yet powerful techniques that anyone can easily implement, anywhere, anytime.
+      
+      Through a combination of deep breathing, gentle movement, and mental focusing techniques, viewers will learn how to quickly calm their nervous system and regain a sense of control when feeling anxious. This resource is perfect for those seeking immediate relief and a practical tool for their anxiety management toolkit.`,
+      imageUrl: "https://images.unsplash.com/photo-1545205597-3d9d02c29597?ixlib=rb-4.0.3",
+      category: "Anxiety",
+      readTime: "5 min video",
+      author: "Therapist Anna Garcia",
+      url: "https://www.placeholder.com/video/18",
+    },
+    {
+        id:"19",        
+        resourceType: "video",        
+        title: "Understanding Depression: Signs and Support",        
+        description: `Join Dr. Michael Chen as he guides you through a comprehensive exploration of depression, its signs, and effective support strategies. This video is designed to help viewers understand what depression is, how it can manifest in various ways, and how to seek or offer help.
+        
+        The content covers a range of topics, including the emotional, physical, and behavioral symptoms of depression. It also provides valuable insights into how to support yourself or loved ones who may be struggling with depression, emphasizing the importance of early recognition and appropriate action.`,
+        imageUrl: "https://images.unsplash.com/photo-1514845505178-849cebf1a91d?ixlib=rb-4.0.3",
+        category: "Depression",
+        readTime: "18 min video",
+        author: "Dr. Michael Chen",
+        url: "https://www.placeholder.com/video/19",
+      },
+    {
+      id: "20",      
+      resourceType: "video",      
+      title: "Guided Evening Meditation for Better Sleep",      
+      description: `Wind down your day with Sleep Coach Rebecca Taylor in this tranquil guided meditation, meticulously designed to prepare both your mind and body for restful, rejuvenating sleep. This video offers a serene escape from daily stresses, guiding you through calming techniques that promote relaxation and ease the transition to sleep.
+      
+      The session combines gentle breathing exercises with soothing visualizations, helping to quiet the mind and release physical tension. As you follow Rebecca's tranquil voice, you'll be guided through a sequence of practices that promote a deep sense of calm, setting the stage for a night of truly restful sleep.`,
+      imageUrl: "https://images.unsplash.com/photo-1508672019048-805c876b67e2?ixlib=rb-4.0.3",
+      category: "Sleep",
+      readTime: "15 min video",
+      author: "Sleep Coach Rebecca Taylor",
+      url: "https://www.placeholder.com/video/20",
     },
   ];

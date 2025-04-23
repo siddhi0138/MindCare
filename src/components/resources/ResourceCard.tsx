@@ -45,7 +45,7 @@ const ResourceCard = ({
             className="h-8 w-8 rounded-full"
             onClick={onBookmarkToggle}
           >
-            <Bookmark className={`h-4 w-4 ${isSaved ? 'fill-current' : ''}`} />
+            <Bookmark className={`h-4 w-4 ${isSaved ? 'fill-current text-primary' : ''}`}/>
           </Button>
         </div>
         <CardTitle className="line-clamp-2">{title}</CardTitle>
