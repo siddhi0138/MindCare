@@ -1,14 +1,14 @@
-import MainLayout from '@/components/layout/MainLayout';
-import JournalEditor from '@/components/journal/JournalEditor';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import MainLayout from '../components/layout/MainLayout';
+import JournalEditor from '../components/journal/JournalEditor';
+import { Button } from '../components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { Calendar as CalendarIcon, List, FileText, PlusCircle } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
 import { collection, query, where, orderBy, onSnapshot } from 'firebase/firestore';
-import { firestore } from '@/configs/firebase';
-import { Calendar } from '@/components/ui/calendar';
+import { firestore, saveUserActivity } from '../configs/firebase';
+import { Calendar } from '../components/ui/calendar';
 import { format } from 'date-fns';
 import { DayProps } from 'react-day-picker';
 
@@ -106,6 +106,15 @@ const JournalPage = () => {
             onClick={() => {
               setSelectedEntry(undefined);
               setEditorKey((prevKey) => prevKey + 1);
+              if (currentUser) {
+                saveUserActivity({
+                  userId: currentUser.id,
+                  timestamp: new Date().toISOString(),
+                  activityType: 'click',
+                  activityName: 'New Entry Button',
+                  pageName: 'JournalPage'
+                });
+              }
             }}
           >
             <PlusCircle className="mr-2 h-4 w-4" />
@@ -141,6 +150,15 @@ const JournalPage = () => {
                     onClick={() => {
                       setSelectedEntry(entry);
                       setEditorKey((prevKey) => prevKey + 1);
+                      if (currentUser) {
+                        saveUserActivity({
+                          userId: currentUser.id,
+                          timestamp: new Date().toISOString(),
+                          activityType: 'select',
+                          activityName: 'Journal Entry',
+                          pageName: 'JournalPage'
+                        });
+                      }
                     }}
                   >
                     <CardHeader className="pb-2">
@@ -165,7 +183,22 @@ const JournalPage = () => {
           </TabsContent>
 
           <TabsContent value="write">
-            <JournalEditor key={editorKey} />
+            <JournalEditor
+              key={editorKey}
+              onSave={(entry) => {
+                if (currentUser) {
+                  saveUserActivity({
+                    userId: currentUser.id,
+                    timestamp: new Date().toISOString(),
+                    activityType: 'save',
+                    activityName: 'Save Journal Entry',
+                    pageName: 'JournalPage',
+                    // Include details of what was saved
+                    details: JSON.stringify(entry),
+                  } as any);
+                }
+              }}
+            />
           </TabsContent>
 
           <TabsContent value="calendar">
