@@ -6,11 +6,9 @@ import './index.css';
 import { AuthProvider } from './contexts/AuthContext.tsx';
 
 createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <BrowserRouter> {/* Router wraps AuthProvider and App */}
-      <AuthProvider>
-        <App />
-      </AuthProvider>
-    </BrowserRouter>
-  </React.StrictMode>
+  <BrowserRouter> {/* Router wraps AuthProvider and App */}
+    <AuthProvider>
+      <App />
+    </AuthProvider>
+  </BrowserRouter>
 );
