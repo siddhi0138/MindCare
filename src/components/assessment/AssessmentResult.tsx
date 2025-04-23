@@ -13,6 +13,8 @@ import 'react-circular-progressbar/dist/styles.css';
 import { AlertTriangle, Info } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AssessmentType } from './AssessmentHub';
+import { useAuth } from '@/contexts/AuthContext';
+import { saveUserActivity } from '@/configs/firebase';
 import { useNavigate } from 'react-router-dom';
 
 export interface AssessmentResultProps {
@@ -41,7 +43,7 @@ export const AssessmentResult = ({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onRestart,
   onSaveResults,
-}: AssessmentResultProps) => {
+}: AssessmentResultProps) => {  const { currentUser } = useAuth();
   const percentage = (score / maxScore) * 100;
   
   // Determine color based on severity
@@ -73,6 +75,20 @@ export const AssessmentResult = ({
 
   const handleGoToAssessments = () => {
         onRestart?.();
+  };
+
+  const handleSaveResultsAndActivity = () => {
+    onSaveResults?.();
+    const timestamp = new Date().toISOString();
+    const userId = currentUser?.id;
+    const activityData = {
+      userId,
+      timestamp,
+      activityType: "submit-assessment",
+      activityName: type,
+      pageName: "AssessmentPage",
+    };
+    saveUserActivity(activityData);
   };
 
   const serviceButtons = [
@@ -171,7 +187,7 @@ export const AssessmentResult = ({
         </CardContent>
 
         <CardFooter className="flex justify-between">
-          {onSaveResults && <Button onClick={onSaveResults}>Save Results</Button>}
+          {onSaveResults && <Button onClick={handleSaveResultsAndActivity}>Save Results</Button>}
         </CardFooter>
       </Card>
         <div className="mt-6 space-y-4">
