@@ -1,4 +1,3 @@
-
 import { Navigate } from 'react-router-dom';
 
 // Redirect to the HomePage
