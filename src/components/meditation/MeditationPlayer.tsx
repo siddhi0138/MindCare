@@ -27,14 +27,17 @@ const MeditationPlayer: React.FC<MeditationPlayerProps> = (props) => {
   const { currentUser } = useAuth();
   const audioRef = useRef<HTMLAudioElement>(null);
   const togglePlayPause = () => {
-    setIsPlaying(!isPlaying);
-    if (audioRef.current) {
-      if (isPlaying) {
-        audioRef.current.pause();
-      } else {
-        audioRef.current.play();
+    setIsPlaying((prev) => {
+      const newIsPlaying = !prev;
+      if (audioRef.current) {
+        if (newIsPlaying) {
+          audioRef.current.play();
+        } else {
+          audioRef.current.pause();
+        }
       }
-    }
+      return newIsPlaying;
+    });
   };
 
   const handleProgressChange = (value: number[]) => {
