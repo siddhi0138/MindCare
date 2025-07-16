@@ -4,8 +4,6 @@ import {
   Line,
   BarChart,
   Bar,
-  XAxis,
-  YAxis,
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
@@ -13,6 +11,8 @@ import {
   Pie,
   Cell
 } from "recharts";
+import CustomXAxis from "@/components/assessment/CustomXAxis";
+import CustomYAxis from "@/components/assessment/CustomYAxis";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AchievementBadge from "@/components/common/AchievementBadge";
@@ -98,8 +98,8 @@ const ProgressDashboard = ({ userId }: ProgressDashboardProps) => {
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={moodData}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
-                  <YAxis domain={[0, 5]} />
+                  <CustomXAxis dataKey="date" />
+                  <CustomYAxis domain={[0, 5]} />
                   <Tooltip />
                   <Line 
                     type="monotone" 
@@ -154,8 +154,8 @@ const ProgressDashboard = ({ userId }: ProgressDashboardProps) => {
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={activityData}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
+                  <CustomXAxis dataKey="name" />
+                  <CustomYAxis />
                   <Tooltip />
                   <Bar dataKey="minutes" fill="#60a5fa" />
                 </BarChart>
@@ -208,7 +208,7 @@ const ProgressDashboard = ({ userId }: ProgressDashboardProps) => {
                 .map(achievement => (
                   <AchievementBadge 
                     key={achievement.id}
-                    icon={achievement.image.split('seed=')[1]} // Using the seed part as icon
+                    icon={achievement.image.split('seed=')[1]} 
                     title={achievement.title}
                     description={achievement.description}
                     unlocked={achievement.achieved}
@@ -222,11 +222,11 @@ const ProgressDashboard = ({ userId }: ProgressDashboardProps) => {
                 .map(achievement => (
                   <AchievementBadge
                     key={achievement.id}
-                    icon={achievement.image.split('seed=')[1]} // Using the seed part as icon
+                    icon={achievement.image.split('seed=')[1]} 
                     title={achievement.title}
                     description={achievement.description}
                     unlocked={achievement.achieved}
-                    progress={30} // Adding some progress for locked achievements
+                    progress={30} 
                   />
                 ))}
             </TabsContent>

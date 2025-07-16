@@ -1,5 +1,7 @@
 import React from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import CustomYAxis from './CustomYAxis';
+import CustomXAxis from './CustomXAxis';
 
 export interface AssessmentData {
   id: string;
@@ -19,7 +21,7 @@ export interface AssessmentHistoryChartProps {
 
 const AssessmentHistoryChart = ({ assessmentType, assessmentData, userId }: AssessmentHistoryChartProps) => {
   const filteredData = assessmentData
-    .filter(data => data.type === assessmentType /* && data.userId === userId */) // userId filter removed assuming data is pre-filtered
+    .filter(data => data.type === assessmentType) 
     .map(data => ({
       timestamp: data.timestamp.getTime(),
       score: data.score,
@@ -28,21 +30,21 @@ const AssessmentHistoryChart = ({ assessmentType, assessmentData, userId }: Asse
 
   const formatDate = (timestamp: number) => {
     const date = new Date(timestamp);
-    return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
   };
 
   return (
     <ResponsiveContainer width="100%" height={300}>
       <LineChart data={filteredData}>
         <CartesianGrid strokeDasharray="3 3" />
-        <XAxis 
+        <CustomXAxis 
           dataKey="timestamp" 
           tickFormatter={formatDate} 
           type="number" 
           domain={['dataMin', 'dataMax']} 
           scale="time" 
         />
-        <YAxis />
+        <CustomYAxis />
         <Tooltip labelFormatter={(label) => formatDate(label as number)} />
         <Legend />
         <Line type="monotone" dataKey="score" stroke="#8884d8" activeDot={{ r: 8 }} />
