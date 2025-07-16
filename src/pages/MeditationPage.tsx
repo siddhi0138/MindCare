@@ -59,16 +59,15 @@ const meditationData = [
 ];
 
 const MeditationPage = () => {
+  const { recordActivity } = useToast();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [currentMeditation, setCurrentMeditation] = useState(meditationData[currentIndex]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredMeditations, setFilteredMeditations] = useState(meditationData);
 
   useEffect(() => {
-   recordActivity('view ','Visit Meditation Page','MeditationPage')
-  }, [])
-
-    const { recordActivity } = useToast();
+   recordActivity('view', 'Visit Meditation Page', 'MeditationPage');
+  }, [recordActivity]);
 
   useEffect(() => {
     setCurrentMeditation(meditationData[currentIndex]);
@@ -133,65 +132,39 @@ const MeditationPage = () => {
               <Sparkles className="h-4 w-4" />
               <span>Focus</span>
             </TabsTrigger>
-            <TabsTrigger value="quick" className="flex items-center gap-1">
-              <Clock className="h-4 w-4" />
-              <span>Quick</span>
-            </TabsTrigger>
-          </TabsList>
+          <TabsTrigger value="quick" className="flex items-center gap-1">
+            <Clock className="h-4 w-4" />
+            <span>Quick</span>
+          </TabsTrigger>
+        </TabsList>
 
-          <TabsContent value="all" className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-            {filteredMeditations.map((meditation) => (
-              <Card key={meditation.id} className="border-primary/10 overflow-hidden cursor-pointer card-hover">
-                <div
-                  className="h-40 bg-cover bg-center"
-                  style={{ backgroundImage: `url(${meditation.imageUrl})` }}
-                >
-                  <div className="h-full flex items-end p-3">
-                    <span className="inline-block px-2 py-1 bg-primary/20 backdrop-blur-sm rounded-full text-xs">
-                      {meditation.duration}
-                    </span>
+        {["all", "sleep", "morning", "anxiety", "focus", "quick"].map((category) => (
+          <TabsContent key={category} value={category} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            {filteredMeditations
+              .filter((m) => category === "all" || m.category === category)
+              .map((meditation) => (
+                <Card key={meditation.id} className="border-primary/10 overflow-hidden cursor-pointer card-hover">
+                  <div
+                    className="h-40 bg-cover bg-center"
+                    style={{ backgroundImage: `url(${meditation.imageUrl})` }}
+                  >
+                    <div className="h-full flex items-end p-3">
+                      <span className="inline-block px-2 py-1 bg-primary/20 backdrop-blur-sm rounded-full text-xs">
+                        {meditation.duration}
+                      </span>
+                    </div>
                   </div>
-                </div>
-                <CardContent className="p-4">
-                  <h3 className="font-medium text-lg">{meditation.title}</h3>
-                  <p className="text-muted-foreground text-sm">{meditation.description}</p>
-                  <Button className="w-full mt-4" onClick={() => handlePlayMeditation(meditation, currentUser?.id)}>
-                    Play Meditation
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
+                  <CardContent className="p-4">
+                    <h3 className="font-medium text-lg">{meditation.title}</h3>
+                    <p className="text-muted-foreground text-sm">{meditation.description}</p>
+                    <Button className="w-full mt-4" onClick={() => handlePlayMeditation(meditation, currentUser?.id)}>
+                      Play Meditation
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
           </TabsContent>
-
-          {["sleep", "morning", "anxiety", "focus", "quick"].map((category) => (
-            <TabsContent key={category} value={category}>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                {filteredMeditations
-                  .filter((m) => m.category === category || category === "all")
-                  .map((meditation) => (
-                    <Card key={meditation.id} className="border-primary/10 overflow-hidden cursor-pointer card-hover">
-                      <div
-                        className="h-40 bg-cover bg-center"
-                        style={{ backgroundImage: `url(${meditation.imageUrl})` }}
-                      >
-                        <div className="h-full flex items-end p-3">
-                          <span className="inline-block px-2 py-1 bg-primary/20 backdrop-blur-sm rounded-full text-xs">
-                            {meditation.duration}
-                          </span>
-                        </div>
-                      </div>
-                      <CardContent className="p-4">
-                        <h3 className="font-medium text-lg">{meditation.title}</h3>
-                        <p className="text-muted-foreground text-sm">{meditation.description}</p>
-                        <Button className="w-full mt-4" onClick={() => handlePlayMeditation(meditation, currentUser?.id)}>
-                          Play Meditation
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  ))}
-              </div>
-            </TabsContent>
-          ))}
+        ))}
         </Tabs>
 
         <div className="mt-16 mb-12">
