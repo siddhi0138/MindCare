@@ -14,13 +14,6 @@ const GroundingExercisePage: React.FC = () => {
   );
 };
 
-
-
-
-
-
-
-
 const GroundingExerciseContent = () => {
   const [exerciseStarted, setExerciseStarted] = useState(false);
   const navigate = useNavigate();

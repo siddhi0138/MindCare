@@ -55,13 +55,12 @@ const StressAssessment = ({ onComplete }: StressAssessmentProps) => {
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
     } else {
-      // For PSS-10, items 4, 5, 7, and 8 are scored in reverse
-      const reversedItems = [3, 4, 6, 7]; // 0-indexed
+      const reversedItems = [3, 4, 6, 7]; 
       
       let totalScore = 0;
       for (let i = 0; i < newAnswers.length; i++) {
         if (reversedItems.includes(i)) {
-          totalScore += (4 - newAnswers[i]); // Reverse scoring
+          totalScore += (4 - newAnswers[i]); 
         } else {
           totalScore += newAnswers[i];
         }

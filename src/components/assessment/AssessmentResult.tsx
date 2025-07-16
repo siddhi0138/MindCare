@@ -31,7 +31,6 @@ export interface AssessmentResultProps {
 }
 
 export const AssessmentResult = ({
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   title,
   type,
   score,
@@ -40,7 +39,6 @@ export const AssessmentResult = ({
   interpretation = level,
   description = "",
   recommendations,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onRestart,
   onSaveResults,
 }: AssessmentResultProps) => {  const { currentUser } = useAuth();
@@ -49,11 +47,11 @@ export const AssessmentResult = ({
   // Determine color based on severity
   const getColor = () => {
     if (level.includes("Low") || level.includes("Minimal")) {
-      return "#10b981"; // green
+      return "#10b981"; 
     } else if (level.includes("Moderate") || level.includes("Mild")) {
-      return "#f59e0b"; // amber
+      return "#f59e0b"; 
     } else {
-      return "#ef4444"; // red
+      return "#ef4444";
     }
   };
 

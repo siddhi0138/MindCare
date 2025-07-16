@@ -254,7 +254,7 @@ const GameCard: React.FC<GameCardProps> = ({
 
   const handleClick = () => {
     navigate(link);
-    onClick(); // Call the onClick function passed as a prop
+    onClick(); 
   };
 
   return (

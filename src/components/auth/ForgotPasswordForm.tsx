@@ -4,57 +4,21 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Mail, ArrowLeft } from 'lucide-react';
-// toast is already imported
-// import { toast } from '@/components/ui/sonner';
-import { useAuth } from '@/contexts/AuthContext'; // Import useAuth
+import { useAuth } from '@/contexts/AuthContext';
 
 interface ForgotPasswordFormProps {
   onBack: () => void;
 }
 
 const ForgotPasswordForm = ({ onBack }: ForgotPasswordFormProps) => {
-  const { resetPassword, isLoading } = useAuth(); // Get resetPassword and isLoading from context
+  const { resetPassword, isLoading } = useAuth(); 
   const [email, setEmail] = useState('');
-  // const [isLoading, setIsLoading] = useState(false); // Remove local isLoading state
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // No need to set local isLoading as we use the one from context
-    // setIsLoading(true);
-
-    // Use the resetPassword function from context
     await resetPassword(email);
-
-    // Assuming resetPassword function handles toasts on success/error,
-    // we might only need to set the submitted state here on success.
-    // However, the context function likely navigates or shows global state,
-    // so maybe we just need to rely on its feedback. For now, let's
-    // assume resetPassword shows its own toasts and we just set local submitted state.
-    // Check your resetPassword implementation in AuthContext for exact behavior.
-    // A simple approach: always set submitted after calling (success message handled by context)
-    // Or only set submitted if the call *doesn't* throw an error (more complex error handling needed here).
-    // Let's keep the simple approach for now:
     setIsSubmitted(true);
-
-
-    // try {
-    //   // Replace simulation with actual call
-    //   await resetPassword(email);
-    //   setIsSubmitted(true);
-    //   // Toasts are likely handled within the resetPassword function in AuthContext
-    //   // toast.success('Reset email sent', {
-    //   //   description: `If an account exists for ${email}, you'll receive reset instructions.`
-    //   // });
-    // } catch (error) {
-    //   // Errors are likely handled within the resetPassword function too
-    //   // toast.error('Something went wrong', {
-    //   //   description: 'Please try again later.'
-    //   // });
-    // } finally {
-    //   // No need to set local isLoading
-    //   // setIsLoading(false);
-    // }
   };
 
   if (isSubmitted) {
@@ -109,11 +73,11 @@ const ForgotPasswordForm = ({ onBack }: ForgotPasswordFormProps) => {
                 className="pl-10"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                disabled={isLoading} // Use context isLoading
+                disabled={isLoading} 
               />
             </div>
           </div>
-          <Button type="submit" className="w-full" disabled={isLoading}> {/* Use context isLoading */}
+          <Button type="submit" className="w-full" disabled={isLoading}> 
             {isLoading ? "Sending..." : "Send Reset Instructions"}
           </Button>
         </form>

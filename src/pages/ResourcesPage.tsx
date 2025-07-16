@@ -23,7 +23,7 @@ const ResourcesPage = () => {
     console.log("Current user:", auth.currentUser);
   }, []);
 
-  // Helper function to log user activity
+  
   const logUserActivity = async (activityType: string, activityName: string) => {
     try {
       const user = auth.currentUser;
@@ -60,19 +60,18 @@ const ResourcesPage = () => {
     logUserActivity("bookmark", "bookmarkToggled");
   };
 
-  // Log search query changes
+  
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
     logUserActivity("search", "searchQueryChange");
   };
 
-  // Log category selection changes
   const handleCategorySelect = (category: string) => {
     setSelectedCategory(category);
     logUserActivity("category", "categorySelected");
   };
 
-  // Log tab changes
+
   const handleTabChange = (value: string) => {
     setSelectedTab(value);
     logUserActivity("tab", "tabChanged");

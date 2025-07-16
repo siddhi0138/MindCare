@@ -94,7 +94,6 @@ Remember, even small steps forward are still progress. What's one small thing yo
   }
 ];
 
-// Helper function to find matching AI response
 const findResponse = (message: string): string | null => {
   const lowerMessage = message.toLowerCase();
 
@@ -124,7 +123,7 @@ const loadChatHistory = async (userId: string): Promise<Message[]> => {
             id: messageData.id,
             content: messageData.content,
             sender: messageData.sender,
-            timestamp: messageData.timestamp.toDate(), // Convert Firebase timestamp to Date
+            timestamp: messageData.timestamp.toDate(),
           });
         });
       }
@@ -132,7 +131,7 @@ const loadChatHistory = async (userId: string): Promise<Message[]> => {
     return messages;
   } catch (error) {
     console.error('Error loading chat history:', error);
-    return []; // Return an empty array if there's an error
+    return []; 
   }
 };
 
@@ -185,18 +184,18 @@ const ChatInterface = () => {
   };
 
   const handleVoiceInput = () => {
-    // TODO: Check for user permission before starting
+    
     if (typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       const recognition = new SpeechRecognition();
       recognition.lang = 'en-us';
 
-      recognition.onresult = (event: any) => { // Using any for now, needs proper typing
+      recognition.onresult = (event: any) => { 
         const transcript = event.results[0][0].transcript;
         setInput((prevInput) => prevInput + transcript);
       };
 
-      recognition.onerror = (event: any) => { // Keep 'any' for SpeechRecognitionErrorEvent
+      recognition.onerror = (event: any) => { 
         console.error("Speech recognition error:", event.error);
         const toastProps: ToastProps = {
           description: `Speech recognition error: ${event.error}`,
@@ -213,7 +212,7 @@ const ChatInterface = () => {
   const handleSend = () => {
     if (!input.trim()) return;
 
-    // Add user message
+    
     const userMessage: Message = {
       id: uuidv4(),
       content: input,
@@ -222,7 +221,7 @@ const ChatInterface = () => {
     };
 
     setMessages((prev) => [...prev, userMessage]);
-    setInput(''); // Clear the input field
+    setInput('');
     setIsTyping(true);
 
     const chatHistoryCollection = collection(firestore, `users/${authContext.currentUser.id}/chatHistory`);
@@ -239,10 +238,10 @@ const ChatInterface = () => {
         });
     }
 
-    // Find if there's a specific response for this message
+    
     const specificResponse = findResponse(input);
 
-    // Simulate AI response with intelligent response selection
+    
     setTimeout(() => {
       const botMessage: Message = {
         id: uuidv4(),
@@ -254,15 +253,14 @@ const ChatInterface = () => {
       setMessages((prev) => [...prev, botMessage]);
       setIsTyping(false);
 
-      // Save the updated messages after the bot's response
       saveChatHistory(chatHistoryCollection, [...messages, userMessage, botMessage]);
 
-      // Update suggestions based on conversation context
+      
       updateSuggestions(input);
     }, 1500);
   };
 
-  // Generate contextual response based on user input
+  // Contextual response based on user input
   const generateResponse = (userInput: string): string => {
     const input = userInput.toLowerCase();
 
@@ -286,7 +284,7 @@ const ChatInterface = () => {
     }
   };
 
-  // Update suggestion prompts based on conversation context
+  
   const updateSuggestions = (userInput: string) => {
     const input = userInput.toLowerCase();
 
@@ -320,7 +318,7 @@ const ChatInterface = () => {
         });
     }
 
-    // Add as a message directly to improve UX flow
+    
     const userMessage: Message = {
       id: uuidv4(),
       content: suggestion,
@@ -332,7 +330,7 @@ const ChatInterface = () => {
     setIsTyping(true);
     setInput('');
 
-    // Simulate AI response
+    
     setTimeout(() => {
       const botMessage: Message = {
         id: uuidv4(),
@@ -350,7 +348,6 @@ const ChatInterface = () => {
   const saveChatHistory = async (chatHistoryCollection, messages: Message[]) => {
     if (!authContext.currentUser?.id) {
       console.error("User ID not found. Cannot save chat history.");
-      // Handle the case where the user ID is not available, e.g., display an error message
       return;
     }
     try {
@@ -366,7 +363,6 @@ const ChatInterface = () => {
       console.log('Chat history saved successfully!');
     } catch (error) {
       console.error('Error saving chat history:', error);
-      // Handle error appropriately, e.g., display an error message to the user
     }
   };
   const clearChatHistory = async () => {

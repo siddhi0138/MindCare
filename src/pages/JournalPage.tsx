@@ -82,7 +82,7 @@ const JournalPage = () => {
       return '';
     }
 
-    // Find the latest entry for this date
+    
     const latestEntry = entriesForDate.reduce((prev, current) =>
       prev.timestamp > current.timestamp ? prev : current
     );
@@ -90,7 +90,6 @@ const JournalPage = () => {
     return moodEmojiMap[latestEntry.mood] || moodEmojiMap['neutral'];
   };
 
-  // Custom day component for calendar
   const renderDay = (day: DayProps) => {    
     const emoji = getCalendarEntry(day.date);
     return (
@@ -197,7 +196,6 @@ const JournalPage = () => {
                     activityType: 'save',
                     activityName: 'Save Journal Entry',
                     pageName: 'JournalPage',
-                    // Include details of what was saved
                     details: JSON.stringify(entry),
                   } as any);
                 }

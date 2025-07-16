@@ -8,7 +8,6 @@ const ResourceDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  // Find the resource by id
   const resource = resourceData.find(r => r.id === id);
 
   if (!resource) {
@@ -46,7 +45,7 @@ const ResourceDetailPage = () => {
           <span>Read Time: {resource.readTime}</span>
           <span>Author: {resource.author}</span>
         </div>
-        {/* Additional detailed content can be added here */}
+        { }
       </div>
     </MainLayout>
   );

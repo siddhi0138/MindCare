@@ -13,14 +13,14 @@ const ProfilePage = () => {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
   
-  // Extract tab from URL query params
+  
   const queryParams = new URLSearchParams(location.search);
   const tabParam = queryParams.get('tab');
   
-  // Set default tab based on URL or use 'settings'
+  
   const [activeTab, setActiveTab] = useState<string>(tabParam || 'settings');
   
-  // Update URL when tab changes
+  
   useEffect(() => {
     if (activeTab) {
       navigate(`/profile?tab=${activeTab}`, { replace: true });
@@ -44,7 +44,7 @@ const ProfilePage = () => {
           </TabsContent>
           
           <TabsContent value="progress">
-            {/* Pass userId as an optional prop */}
+            { }
             <ProgressDashboard userId={currentUser?.id} />
           </TabsContent>
           
