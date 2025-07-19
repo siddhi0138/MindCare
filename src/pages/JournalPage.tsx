@@ -234,7 +234,6 @@ const JournalPage = () => {
                             getNormalizedDate(entry.timestamp).getTime() === getNormalizedDate(date).getTime()
                         );
                         if (entriesForDate.length > 0) {
-                          // Select the most recent entry for this date
                           const latestEntry = entriesForDate.reduce((prev, current) =>
                             prev.timestamp > current.timestamp ? prev : current
                           );

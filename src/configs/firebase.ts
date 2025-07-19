@@ -3,7 +3,7 @@ import { getFirestore, collection, addDoc, query, where, getDocs, orderBy, updat
 import { Timestamp } from 'firebase/firestore';
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+
 const firebaseConfig = {
   apiKey: "AIzaSyA5vygbj4RkWYTNPewDEtgQUnt6MrdMbrg",
   authDomain: "your-mental-buddy.firebaseapp.com",
@@ -112,7 +112,7 @@ const saveUserActivity = async (activity: { userId: string; timestamp: string; a
 // Function to update the user's therapist phone number in Firestore
 const updateUserTherapistNumber = async (userId: string, newPhoneNumber: string) => {
   try {
-    const userDocRef = doc(firestore, "users", userId); // Assuming you have a "users" collection
+    const userDocRef = doc(firestore, "users", userId); 
     await updateDoc(userDocRef, { therapistPhoneNumber: newPhoneNumber });
     console.log(`Therapist number updated for user: ${userId}`);
   } catch (e) {

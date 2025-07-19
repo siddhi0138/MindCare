@@ -53,7 +53,7 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
-                // Serenity app colors
+                
                 serenity: {
                     purple: {
                         DEFAULT: '#9b87f5',

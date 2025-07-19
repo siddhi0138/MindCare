@@ -2,7 +2,7 @@ import { initializeApp } from "firebase/app";
 import { getFirestore, collection, addDoc, serverTimestamp } from "firebase/firestore";
 
 
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+
 const firebaseConfig = {
   apiKey: "AIzaSyA5vygbj4RkWYTNPewDEtgQUnt6MrdMbrg",
   authDomain: "your-mental-buddy.firebaseapp.com",
@@ -21,9 +21,9 @@ const db = getFirestore(app);
 
 /**
  * Records user activity in Firestore.
- * @param userId - The ID of the user performing the activity.
- * @param activity - The type of activity being performed.
- * @param additionalData - Any additional data related to the activity.
+ * @param userId 
+ * @param activity 
+ * @param additionalData 
  */
 export const recordActivity = async (
   userId: string,

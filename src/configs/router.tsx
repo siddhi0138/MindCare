@@ -40,7 +40,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
-    // Optional: Add a loading spinner or skeleton screen here
+    
     return (
       <div className="flex justify-center items-center h-screen">
         Loading...
@@ -49,7 +49,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   }
 
   if (!isAuthenticated) {
-    // Redirect to login, preserving the intended location
+    
     return <Navigate to="/login" replace />;
   }
 

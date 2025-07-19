@@ -9,7 +9,7 @@ import {
   onAuthStateChanged,
   sendPasswordResetEmail,
   updateProfile as updateFirebaseProfile,
-  User as FirebaseUser // Rename to avoid conflict with local User interface
+  User as FirebaseUser 
 } from "firebase/auth";
 import { doc, setDoc, getDoc, Firestore } from "firebase/firestore";
 import { auth, firestore as firestoreInstance, googleProvider } from '@/configs/firebase';
@@ -17,26 +17,25 @@ import { auth, firestore as firestoreInstance, googleProvider } from '@/configs/
 
 // --- Interfaces ---
 interface User {
-  id: string; // Firebase UID
+  id: string; 
   email: string | null;
   firstName: string;
   lastName: string;
   profileImage?: string;
   therapistNumber?: string;
-  // Add any other custom fields you store in Firestore
+  
 }
 
 interface AuthContextType {
-  currentUser: User | null; // Use currentUser consistently
+  currentUser: User | null; 
   isAuthenticated: boolean;
-  isLoading: boolean; // Tracks initial auth check and ongoing operations
+  isLoading: boolean; 
   login: (email: string, password: string) => Promise<void>;
   signup: (firstName: string, lastName: string, email: string, password: string) => Promise<void>;
   loginWithGoogle: () => Promise<void>;
-  // loginWithApple: () => Promise<void>; // Add Apple login if needed
-  logout: () => Promise<void>; // Make logout async
+  logout: () => Promise<void>; 
   resetPassword: (email: string) => Promise<void>;
-  updateProfile: (userData: Partial<Pick<User, 'firstName' | 'lastName' | 'profileImage'>>) => Promise<void>; // Make update async
+  updateProfile: (userData: Partial<Pick<User, 'firstName' | 'lastName' | 'profileImage'>>) => Promise<void>; 
 }
 
 // --- Context ---
@@ -53,8 +52,8 @@ export const useAuth = () => {
 // --- Provider ---
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true); // True initially while checking auth state
-  const [isOperating, setIsOperating] = useState(false); // For specific operations like login/signup
+  const [isLoading, setIsLoading] = useState(true); 
+  const [isOperating, setIsOperating] = useState(false); 
   const navigate = useNavigate();
 
   // --- Firestore Helper ---
@@ -68,12 +67,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         email: firebaseUser.email,
         firstName: data.firstName || '',
         lastName: data.lastName || '',
-        profileImage: data.profileImage || firebaseUser.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${firebaseUser.uid}`, // Fallback profile image
+        profileImage: data.profileImage || firebaseUser.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${firebaseUser.uid}`,
         therapistNumber: data.therapistNumber,
-        // Add other fields if needed
+        
       };
     } else {
-      // Create a basic profile from available Firebase Auth info
        const basicProfile: User = {
         id: firebaseUser.uid,
         email: firebaseUser.email,
@@ -92,10 +90,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     await setDoc(userRef, {
       firstName,
       lastName,
-      email: firebaseUser.email, // Store email in Firestore as well if needed
-      createdAt: new Date(), // Optional: track creation date
-      profileImage: firebaseUser.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${firebaseUser.uid}` // Initial profile image
-    }, { merge: true }); // Use merge: true to avoid overwriting if doc exists unexpectedly
+      email: firebaseUser.email, 
+      createdAt: new Date(), 
+      profileImage: firebaseUser.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${firebaseUser.uid}` 
+    }, { merge: true });
   };
 
   // --- Auth State Listener ---
@@ -108,53 +106,49 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
            if (userProfile) {
              setCurrentUser(userProfile);
            } else {
-              // If getUserProfile returns null (e.g., Firestore error or profile doesn't exist and wasn't auto-created)
-              setCurrentUser(null); // Or handle as an error state
+              
+              setCurrentUser(null); 
               console.error("Failed to fetch or create user profile for:", firebaseCurrentUser.uid);
-              // Optionally sign out the user if a profile is mandatory
-              // await signOut(auth);
+              
             }
           } catch (error) {
           console.error("Error fetching user profile:", error);
-          setCurrentUser(null); // Set user to null on error
-          // Optionally sign out the user
-          // await signOut(auth);
+          setCurrentUser(null); 
         }
 
       } else {
         setCurrentUser(null);   
        }
-      setIsLoading(false); // Finished initial auth check
+      setIsLoading(false); 
     });
 
-    // Cleanup subscription on unmount
+    
     return () => unsubscribe();
-   }, []); // Run only once on mount
+   }, []); 
 
   // --- Auth Functions ---
   const login = async (email: string, password: string) => {
     setIsOperating(true);
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const userProfile = await getUserProfile(userCredential.user); // Fetch profile after login
+      const userProfile = await getUserProfile(userCredential.user); 
        if (userProfile) {
          setCurrentUser(userProfile);
          toast.success('Login successful', {
            description: `Welcome back, ${userProfile.firstName || 'User'}!`,
          });
-         navigate('/'); // Redirect after successful login
+         navigate('/'); 
        } else {
-          // Handle case where login succeeds but profile fetch fails
+          
          toast.error('Login succeeded but failed to load profile.');
-         // Sign out potentially?
-         // await signOut(auth);
+         
        }
     } catch (error: any) {
       console.error("Login Error:", error);
       toast.error('Login failed', {
         description: error.message || 'Please check your credentials and try again.',
       });
-       setCurrentUser(null); // Ensure user state is null on failed login
+       setCurrentUser(null); 
     } finally {
       setIsOperating(false);
     }
@@ -166,7 +160,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const firebaseUser = userCredential.user;
 
-      // Optionally update Firebase Auth profile (displayName)
+      
        await updateFirebaseProfile(firebaseUser, { displayName: `${firstName} ${lastName}` });
 
 
@@ -183,14 +177,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         navigate('/login', { state: { email: email, signupSuccess: true } }); // Redirect after successful signup
       } else {
          toast.error('Signup succeeded but failed to create profile.');
-         // Potentially revert signup or handle differently
+         
       }
     } catch (error: any) {
       console.error("Signup Error:", error);
       toast.error('Signup failed', {
         description: error.message || 'Could not create account. Please try again.',
       });
-       setCurrentUser(null); // Ensure user state is null on failed signup
+       setCurrentUser(null); 
     } finally {
       setIsOperating(false);
     }
@@ -207,7 +201,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       let profileData: User;
 
       if (!userSnap.exists()) {
-         // User is new, create profile in Firestore
+         
          const firstName = firebaseUser.displayName?.split(' ')[0] || 'User';
          const lastName = firebaseUser.displayName?.split(' ').slice(1).join(' ') || '';
          await createUserProfile(firebaseUser, firstName, lastName);
@@ -222,7 +216,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
              description: `Welcome, ${profileData.firstName}!`,
          });
       } else {
-         // User exists, fetch their profile
+         
          const existingProfile = await getUserProfile(firebaseUser);
          if (!existingProfile) throw new Error("Failed to fetch existing profile after Google sign-in.");
          profileData = existingProfile;
@@ -231,13 +225,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
          });
       }
 
-      setCurrentUser(profileData); // Update local state immediately
-      // Close the popup window after successful login to handle COOP policy.
-      navigate('/'); // Redirect after successful login/signup
+      setCurrentUser(profileData); 
+      navigate('/'); 
 
     } catch (error: any) {
       console.error("Google Sign-in Error:", error);
-       // Handle specific errors like popup closed by user
+       
       if (error.code !== 'auth/popup-closed-by-user') {
            toast.error('Google Sign-in failed', {
              description: error.message || 'Could not sign in with Google. Please try again.',
@@ -250,12 +243,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const logout = async () => {
-    setIsOperating(true); // Use isOperating for consistency, though logout is usually fast
+    setIsOperating(true); 
     try {
       await signOut(auth);
       setCurrentUser(null);
       toast.info('Logged out successfully');
-      navigate('/login'); // Redirect to login page after logout
+      navigate('/login'); 
     } catch (error: any) {
       console.error("Logout Error:", error);
       toast.error('Logout failed', {
@@ -284,29 +277,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const updateProfile = async (userData: Partial<Pick<User, 'firstName' | 'lastName' | 'profileImage'>>) => {
-     if (!currentUser) { // Use currentUser here
+     if (!currentUser) { 
        toast.error("Not logged in", { description: "You must be logged in to update your profile." });
        return;
      }
      setIsOperating(true);
      try {
-       const userRef = doc(firestoreInstance, "users", currentUser.id); // Use currentUser.id
-       await setDoc(userRef, userData, { merge: true }); // Update Firestore
+       const userRef = doc(firestoreInstance, "users", currentUser.id); 
+       await setDoc(userRef, userData, { merge: true }); 
 
-       // Optionally update Firebase Auth profile if name changed
+       
        const currentFirebaseUser = auth.currentUser;
        if (currentFirebaseUser && (userData.firstName || userData.lastName)) {
            const displayName = `${userData.firstName || currentUser.firstName} ${userData.lastName || currentUser.lastName}`.trim();
              await updateFirebaseProfile(currentFirebaseUser, { displayName });
          }
-        // Optionally update photoURL in Firebase Auth profile if profileImage changed
-        // if (currentFirebaseUser && userData.profileImage) {
-        //    await updateFirebaseProfile(currentFirebaseUser, { photoURL: userData.profileImage });
-        // }
+        
 
 
-       // Update local state optimistically or re-fetch
-       const updatedUser = { ...currentUser, ...userData }; // Use currentUser
+       
+       const updatedUser = { ...currentUser, ...userData }; 
        setCurrentUser(updatedUser);
 
        toast.success('Profile updated successfully');
@@ -323,18 +313,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // --- Context Value ---
   const value = {
     currentUser,
-    isAuthenticated: !!currentUser, // True if user object is not null
-    isLoading: isLoading || isOperating, // Combine initial loading and operation loading
+    isAuthenticated: !!currentUser, 
+    isLoading: isLoading || isOperating, 
     login,
     signup,
     loginWithGoogle,
-    // loginWithApple, // Add Apple login if needed
     logout,
     resetPassword,
     updateProfile,
   };
 
-  // Render children only after initial auth check is complete
   return (
     <AuthContext.Provider value={value}>
        {children}
