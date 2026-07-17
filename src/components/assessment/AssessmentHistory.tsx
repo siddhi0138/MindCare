@@ -37,11 +37,7 @@ const AssessmentHistory = ({ onSelectAssessment }: AssessmentHistoryProps) => {
   const [loading, setLoading] = useState(true);
   const [isDownloading, setIsDownloading] = useState(false);
   const [isEmailDialogOpen, setIsEmailDialogOpen] = useState(false);
-  // Defaults to the Resend account's verified test email, NOT the logged-in user's email —
-  // on the free tier without a verified domain, Resend can only deliver to the address the
-  // account owner signed up with, regardless of who's using the app.
-  const RESEND_VERIFIED_EMAIL = "sidds13aug@gmail.com";
-  const [recipientEmail, setRecipientEmail] = useState(RESEND_VERIFIED_EMAIL);
+  const [recipientEmail, setRecipientEmail] = useState("");
   const [isSendingEmail, setIsSendingEmail] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
@@ -49,6 +45,12 @@ const AssessmentHistory = ({ onSelectAssessment }: AssessmentHistoryProps) => {
   useEffect(() => {
     setSelectedIds(new Set(history.map((entry) => entry.id)));
   }, [history]);
+
+  useEffect(() => {
+    if (currentUser?.email) {
+      setRecipientEmail(currentUser.email);
+    }
+  }, [currentUser]);
 
   const toggleSelected = (id: string) => {
     setSelectedIds((prev) => {
@@ -267,9 +269,6 @@ const AssessmentHistory = ({ onSelectAssessment }: AssessmentHistoryProps) => {
             value={recipientEmail}
             onChange={(e) => setRecipientEmail(e.target.value)}
           />
-          <p className="text-xs text-muted-foreground -mt-2">
-            Sending is only enabled to {RESEND_VERIFIED_EMAIL} until a domain is verified at resend.com/domains.
-          </p>
           <DialogFooter>
             <Button onClick={handleSendEmail} disabled={isSendingEmail} className="w-full">
               {isSendingEmail ? 'Sending...' : 'Send'}
