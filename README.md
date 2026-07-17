@@ -1,15 +1,17 @@
 <div align="center">
 
-# MindCare
+# 💙 MindCare
 
-*A mental wellness companion — assessments, journaling, AI support, and community, in one place.*
+**Your pocket mental wellness companion — assess, journal, chat, and connect, all in one place.**
 
-[![Live App](https://img.shields.io/badge/live-your--mental--buddy.web.app-2d2d2d?style=flat-square)](https://your-mental-buddy.web.app)
-![React](https://img.shields.io/badge/React-18-2d2d2d?style=flat-square&logo=react&logoColor=61DAFB)
-![TypeScript](https://img.shields.io/badge/TypeScript-2d2d2d?style=flat-square&logo=typescript&logoColor=3178C6)
-![FastAPI](https://img.shields.io/badge/FastAPI-2d2d2d?style=flat-square&logo=fastapi&logoColor=009688)
-![Firebase](https://img.shields.io/badge/Firebase-2d2d2d?style=flat-square&logo=firebase&logoColor=FFCA28)
-![Gemini](https://img.shields.io/badge/Google%20Gemini-2d2d2d?style=flat-square&logo=googlegemini&logoColor=8E75FF)
+[![Live App](https://img.shields.io/badge/🌐_Live_App-your--mental--buddy.web.app-6C5CE7?style=for-the-badge)](https://your-mental-buddy.web.app)
+
+![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=black)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)
+![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)
+![Gemini](https://img.shields.io/badge/Google_Gemini-4285F4?style=for-the-badge&logo=googlegemini&logoColor=white)
 
 </div>
 
@@ -18,56 +20,77 @@
 MindCare helps people manage their well-being through self-assessments, mood tracking, journaling, guided
 coping tools, community support, and access to therapists — backed by real data persistence
 (Firebase/Firestore) and genuine AI features (Google Gemini via a Python backend). Every feature below is
-fully wired up and working end to end, not a placeholder.
+fully wired up and working end to end — no mock data, no placeholder buttons.
 
 <br>
 
-## Contents
+## 📑 Contents
 
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Getting Started](#getting-started)
-- [Contributing](#how-to-contribute)
-
-<br>
-
-## Features
-
-**Assessments** — anxiety, depression, and stress questionnaires with a history view; select entries to
-download as PDF, email, or delete individually or in bulk.
-
-**AI Wellness Chat** — a Gemini-powered assistant with crisis detection, RAG over a mental-health knowledge
-base (with PDF upload to expand it), voice input, and persisted conversation history.
-
-**Journal** — entries with mood tagging, a calendar view, and streak tracking; journal mood feeds into Mood
-Trends alongside the dedicated Mood Tracker.
-
-**Coping Tools** — guided breathing exercises, grounding exercises, affirmations, and relaxation games
-(Memory, Word Zen, Coloring, Find the Ball), each logged to a tool-activity history.
-
-**Progress Dashboard** — Mood Trends, Emotion Distribution, coping-tool activity, journaling streaks, an
-achievements system, and AI-generated mood forecasts and recommendations.
-
-**Lifestyle Risk Predictor** — a scikit-learn model estimates stress, anxiety, and depression risk from
-lifestyle inputs, with a saved prediction history.
-
-**Resources** — articles, podcasts, and videos, bookmarkable to a personal "Saved" list.
-
-**Reminders** — custom reminders, plus email reminders for upcoming therapist appointments and event RSVPs,
-starting five days out and continuing daily through the event.
-
-**Community** — real-time chat rooms, support groups (joinable and creatable), and events with RSVP, direct
-Google Calendar sync (falling back to an `.ics` download if declined), and email confirmation.
-
-**Therapist Directory** — search and filter by location, availability, and specialty; book consultations or
-video sessions with a simulated video-call screen, sync the appointment straight to Google Calendar, and
-manage upcoming and past appointments.
-
-**Emergency SOS** — one-tap access to crisis helplines, India and international.
+- [✨ Features](#features)
+- [🛠️ Tech Stack](#tech-stack)
+- [🚀 Getting Started](#getting-started)
+- [🤝 Contributing](#how-to-contribute)
 
 <br>
 
-## Tech Stack
+## ✨ Features
+
+### 📝 Assessments
+Standardized anxiety, depression, and stress questionnaires, each scored with a clear severity level and
+personalized recommendations. Every result is saved to a full history view where you can select entries to
+download as a PDF, email them to yourself (or anyone), or delete them individually or in bulk.
+
+### 💬 AI Wellness Chat
+A Gemini-powered assistant that actually understands context — it retrieves relevant passages from a curated
+mental-health knowledge base (RAG) before answering, detects crisis language and responds accordingly,
+supports voice input, and remembers your conversation history across sessions. You can even upload your own
+PDFs to expand what it knows.
+
+### 📔 Journal
+Free-form journal entries with mood tagging and a calendar view of your writing history, plus streak
+tracking to build the habit. Journal moods automatically feed into your Mood Trends chart, right alongside
+the dedicated Mood Tracker.
+
+### 🌬️ Coping Tools
+A toolbox for in-the-moment relief: guided breathing exercises, grounding techniques, affirmations, and four
+relaxation mini-games (Memory, Word Zen, Coloring, Find the Ball). Every session is logged so you can see
+which tools you actually reach for.
+
+### 📊 Progress Dashboard
+Your wellness at a glance — Mood Trends, Emotion Distribution, coping-tool activity, journaling streaks, an
+achievements system that rewards consistency, and AI-generated forecasts that flag where your mood might be
+heading next.
+
+### 🔮 Lifestyle Risk Predictor
+A scikit-learn model trained to estimate stress, anxiety, and depression risk from everyday lifestyle
+inputs — sleep, exercise, work hours, social support, and more — with every prediction saved to a personal
+history.
+
+### 📚 Resources
+A curated library of articles, podcasts, and videos on mental health topics, with a one-tap "Save" to build
+your own personal reading/watch list.
+
+### ⏰ Reminders
+Custom reminders you set yourself, plus automatic email reminders for upcoming therapist appointments and
+event RSVPs — starting five days out and continuing daily right through the day of the event.
+
+### 🫂 Community
+Real-time chat rooms, support groups you can join or create, and events you can RSVP to — complete with
+**direct Google Calendar sync** (falls back to an `.ics` download if you decline calendar access) and an
+email confirmation for every RSVP.
+
+### 🩺 Therapist Directory
+Search and filter therapists by location, availability, and specialty. Book a consultation or video session
+through a simulated video-call screen, sync the appointment straight to your Google Calendar, and manage all
+your upcoming and past appointments in one place.
+
+### 🆘 Emergency SOS
+One-tap access to crisis helplines, covering both India and international numbers — always just one tap
+away, no matter where you are in the app.
+
+<br>
+
+## 🛠️ Tech Stack
 
 | Layer | Stack |
 |---|---|
@@ -78,7 +101,7 @@ manage upcoming and past appointments.
 
 <br>
 
-## Getting Started
+## 🚀 Getting Started
 
 ### Prerequisites
 
@@ -149,6 +172,6 @@ risk predictor, and emailed reports and reminders all depend on the backend.
 
 <br>
 
-## How to Contribute
+## 🤝 How to Contribute
 
 Contributions and feedback are welcome — open an issue or submit a pull request.
