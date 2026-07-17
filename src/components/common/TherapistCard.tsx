@@ -228,7 +228,7 @@ const TherapistCard = ({
         </div>
       </div>
 
-      <Dialog open={bookingType !== null} onOpenChange={(open) => !open && setBookingType(null)}>
+      <Dialog open={bookingType !== null} onOpenChange={(open) => !open && !isBooking && setBookingType(null)}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
             <DialogTitle>
@@ -284,7 +284,7 @@ const TherapistCard = ({
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setBookingType(null)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setBookingType(null)} disabled={isBooking}>Cancel</Button>
             <Button onClick={confirmBooking} disabled={isBooking}>
               {isBooking ? 'Booking...' : 'Confirm Booking'}
             </Button>

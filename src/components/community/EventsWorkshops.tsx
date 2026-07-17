@@ -131,6 +131,7 @@ const EventsWorkshops = ({ onRSVP }: EventsWorkshopsProps) => {
   const [attendeeCounts, setAttendeeCounts] = useState<Record<string, number>>({});
   const [sendReminder, setSendReminder] = useState(true);
   const [addToCalendar, setAddToCalendar] = useState(true);
+  const [isRsvping, setIsRsvping] = useState(false);
 
   useEffect(() => {
     getEventAttendeeCounts().then(setAttendeeCounts);
@@ -157,7 +158,8 @@ const EventsWorkshops = ({ onRSVP }: EventsWorkshopsProps) => {
   };
 
   const confirmRSVP = async () => {
-    if (!selectedEvent || !currentUser) return;
+    if (!selectedEvent || !currentUser || isRsvping) return;
+    setIsRsvping(true);
     const eventStart = new Date(`${selectedEvent.date}T${selectedEvent.time}`);
 
     const googleCalendarResult = addToCalendar
@@ -171,6 +173,7 @@ const EventsWorkshops = ({ onRSVP }: EventsWorkshopsProps) => {
       : null;
 
     const result = await rsvpToEvent(currentUser.id, selectedEvent.id, selectedEvent.title, eventStart, sendReminder);
+    setIsRsvping(false);
     if (result.success) {
       setRsvpedEventIds((prev) => [...prev, selectedEvent.id]);
       setAttendeeCounts((prev) => ({ ...prev, [selectedEvent.id]: (prev[selectedEvent.id] || 0) + 1 }));
@@ -318,7 +321,7 @@ const EventsWorkshops = ({ onRSVP }: EventsWorkshopsProps) => {
         ))}
       </div>
 
-      <Dialog open={!!selectedEvent} onOpenChange={(open) => !open && setSelectedEvent(null)}>
+      <Dialog open={!!selectedEvent} onOpenChange={(open) => !open && !isRsvping && setSelectedEvent(null)}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>RSVP to {selectedEvent?.title}</DialogTitle>
@@ -363,8 +366,10 @@ const EventsWorkshops = ({ onRSVP }: EventsWorkshopsProps) => {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setSelectedEvent(null)}>Cancel</Button>
-            <Button onClick={confirmRSVP}>Confirm RSVP</Button>
+            <Button variant="outline" onClick={() => setSelectedEvent(null)} disabled={isRsvping}>Cancel</Button>
+            <Button onClick={confirmRSVP} disabled={isRsvping}>
+              {isRsvping ? "Confirming..." : "Confirm RSVP"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
