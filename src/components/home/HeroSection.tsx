@@ -23,10 +23,7 @@ const HeroSection = () => {
           
           <div className="flex flex-col sm:flex-row gap-4 pt-4">
             <Button size="lg" className="text-md" asChild>
-              <Link to="/">Get Started</Link>
-            </Button>
-            <Button size="lg" variant="outline" className="text-md" asChild>
-              <Link to="/resources">Learn More</Link>
+              <Link to="/signup">Get Started</Link>
             </Button>
           </div>
         </motion.div>

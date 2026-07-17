@@ -1,9 +1,10 @@
-import { Toaster } from "@/components/ui/toaster"; 
+import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Toaster as SonnerToaster } from "@/components/ui/sonner"; 
+import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 
-import AppRouter from './configs/router.tsx'; 
+import AppRouter from './configs/router.tsx';
+import ReminderChecker from '@/components/common/ReminderChecker';
 
 
 const queryClient = new QueryClient();
@@ -14,7 +15,8 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <SonnerToaster />
-      <AppRouter /> 
+      <ReminderChecker />
+      <AppRouter />
 
     </TooltipProvider>
   </QueryClientProvider>

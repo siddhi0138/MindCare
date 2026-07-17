@@ -1,15 +1,17 @@
 import { useState, useRef, useContext, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { toast } from '../ui/sonner';
-import { firestore, saveUserActivity } from '../../configs/firebase';
-import { collection, addDoc, getDocs, query, orderBy, deleteDoc, doc, getDoc, writeBatch } from 'firebase/firestore';
+import { firestore, saveUserActivity, saveEmotionLog, saveJournalEntry, getMoodEntries, deleteChatHistory } from '../../configs/firebase';
+import { collection, doc, setDoc, getDocs, query, orderBy, limit, Timestamp } from 'firebase/firestore';
 import { Button } from '../ui/button';
 import { Textarea } from '../ui/textarea';
 import { Card, CardContent, CardHeader, CardFooter, CardTitle } from '../ui/card';
 import { Separator } from '../ui/separator';
-import { Send, Mic, Smile, RotateCw, Paperclip } from 'lucide-react';
+import { Send, Mic, Smile, RotateCw, Paperclip, AlertTriangle, Wrench } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { AuthContext } from '../../contexts/AuthContext';
 import { v4 as uuidv4 } from 'uuid';
+import ClearHistoryButton from '../common/ClearHistoryButton';
 
 declare global {
   interface Window {
@@ -24,6 +26,8 @@ interface Message {
   sender: 'user' | 'bot';
   timestamp: Date;
   suggested?: boolean;
+  crisis?: boolean;
+  sources?: string[];
 }
 
 // AI suggestions based on different emotional states
@@ -50,93 +54,221 @@ const SUGGESTIONS = {
   ]
 };
 
-interface ToastProps {
-  description: string;
-  variant: "default" | "destructive" | "outline" | "secondary";
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
+interface ToolAction {
+  name: string;
+  args: Record<string, any>;
 }
 
-// AI responses with helpful resources and techniques
-const AI_RESPONSES = [
-  {
-    trigger: "breathing",
-    response: `Let's try a simple breathing exercise together:
-
-1. Breathe in through your nose for 4 counts
-2. Hold for 2 counts
-3. Exhale slowly through your mouth for 6 counts
-4. Repeat 5 times
-
-This 4-2-6 pattern helps activate your parasympathetic nervous system, which reduces anxiety. Would you like me to suggest more breathing techniques?`
-  },
-  {
-    trigger: "sleep",
-    response: `Sleep difficulties are common with anxiety. Here are some evidence-based techniques that might help:
-
-• Maintain a consistent sleep schedule (even on weekends)
-• Avoid screens 1-2 hours before bedtime
-• Try progressive muscle relaxation as you lie down
-• Keep your bedroom cool (around 65°F/18°C)
-• Consider a white noise machine to mask disruptive sounds
-
-Would you like to explore any of these techniques in more detail?`
-  },
-  {
-    trigger: "overwhelm",
-    response: `When you're feeling overwhelmed, it can help to break things down:
-
-1. Take a few deep breaths first
-2. Write down everything that's on your mind
-3. Identify just ONE small task you can complete
-4. Focus only on that task until it's done
-5. Take a short break and acknowledge your progress
-
-Remember, even small steps forward are still progress. What's one small thing you could do right now?`
-  }
-];
-
-const findResponse = (message: string): string | null => {
-  const lowerMessage = message.toLowerCase();
-
-  for (const item of AI_RESPONSES) {
-    if (lowerMessage.includes(item.trigger)) {
-      return item.response;
-    }
-  }
-
-  return null;
+const TOOL_LABELS: Record<string, string> = {
+  save_journal_entry: 'Saving to your journal',
+  get_recent_mood_summary: 'Checking your recent mood check-ins',
+  recommend_meditation: 'Finding a meditation for you',
+  request_therapist_referral: 'Looking up therapist specialists',
 };
 
-// Function to load chat history
-const loadChatHistory = async (userId: string): Promise<Message[]> => {
+interface StreamCallbacks {
+  onMeta: (meta: { crisis: boolean; sources: string[] }) => void;
+  onChunk: (text: string) => void;
+  onToolCall?: (call: ToolAction) => void;
+  onActions?: (actions: ToolAction[]) => void;
+}
+
+interface MoodContext {
+  avg_mood: number | null;
+  recent_moods: number[];
+}
+
+// Streams the FastAPI/Gemini backend response as NDJSON events (meta -> [tool_call|chunk]* -> [actions] -> done)
+const streamAIResponse = async (
+  message: string,
+  priorMessages: Message[],
+  moodContext: MoodContext,
+  callbacks: StreamCallbacks
+): Promise<void> => {
+  const history = priorMessages
+    .filter((m) => m.content?.trim())
+    .slice(-10)
+    .map((m) => ({
+      role: m.sender === 'user' ? 'user' : 'model',
+      content: m.content,
+    }));
+
+  const res = await fetch(`${API_BASE_URL}/chat/stream`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message, history, mood_context: moodContext }),
+  });
+
+  if (!res.ok || !res.body) {
+    const errorBody = await res.json().catch(() => null);
+    throw new Error(errorBody?.detail || `Request failed with status ${res.status}`);
+  }
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop() || '';
+
+    for (const line of lines) {
+      if (!line.trim()) continue;
+      const event = JSON.parse(line);
+      if (event.type === 'meta') callbacks.onMeta({ crisis: event.crisis, sources: event.sources });
+      else if (event.type === 'chunk') callbacks.onChunk(event.text);
+      else if (event.type === 'tool_call') callbacks.onToolCall?.({ name: event.name, args: event.args });
+      else if (event.type === 'actions') callbacks.onActions?.(event.actions);
+      else if (event.type === 'error') throw new Error(event.detail);
+    }
+  }
+};
+
+// Executes an action tool the AI decided to call, using the authenticated client SDK
+const executeToolAction = async (action: ToolAction, navigate: (path: string) => void) => {
+  if (action.name === 'save_journal_entry') {
+    const result = await saveJournalEntry({
+      mood: action.args.mood,
+      entryText: action.args.entry_text,
+    });
+    if (result.success) {
+      toast.success('Journal entry saved', { description: 'The AI assistant saved this to your journal.' });
+    }
+  } else if (action.name === 'request_therapist_referral') {
+    const specialty = action.args.specialty as string | undefined;
+    toast.info('Opening therapist directory', {
+      description: specialty ? `Filtered for ${specialty}` : undefined,
+    });
+    navigate(specialty ? `/therapists?specialty=${encodeURIComponent(specialty)}` : '/therapists');
+  }
+};
+
+// Uploads a PDF to the backend so it's chunked, embedded, and added to the RAG knowledge base
+const uploadKnowledgeBasePdf = async (file: File): Promise<{ chunksAdded: number }> => {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const res = await fetch(`${API_BASE_URL}/upload-pdf`, {
+    method: 'POST',
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const errorBody = await res.json().catch(() => null);
+    throw new Error(errorBody?.detail || `Upload failed with status ${res.status}`);
+  }
+
+  const data = await res.json();
+  return { chunksAdded: data.chunks_added as number };
+};
+
+// Best-effort background emotion classification for analytics — never blocks the chat UI
+const logUserEmotion = async (message: string) => {
+  try {
+    const res = await fetch(`${API_BASE_URL}/analyze-emotion`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message }),
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    await saveEmotionLog({ emotion: data.emotion, confidence: data.confidence });
+  } catch (error) {
+    console.error('Error logging emotion:', error);
+  }
+};
+
+const LOCAL_CHAT_PREFIX = 'mindcare-chat-';
+
+// Caches the active conversation in localStorage so a refresh renders instantly, before the Firestore round-trip resolves
+const saveLocalChat = (userId: string, chatId: string, messages: Message[]) => {
+  try {
+    localStorage.setItem(LOCAL_CHAT_PREFIX + userId, JSON.stringify({ chatId, messages }));
+  } catch (error) {
+    console.error('Error caching chat locally:', error);
+  }
+};
+
+const loadLocalChat = (userId: string): { chatId: string; messages: Message[] } | null => {
+  try {
+    const raw = localStorage.getItem(LOCAL_CHAT_PREFIX + userId);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return {
+      chatId: parsed.chatId,
+      messages: parsed.messages.map((m: Omit<Message, 'timestamp'> & { timestamp: string }) => ({
+        ...m,
+        timestamp: new Date(m.timestamp),
+      })),
+    };
+  } catch (error) {
+    console.error('Error reading cached chat:', error);
+    return null;
+  }
+};
+
+// Loads the most recent conversation document (one Firestore doc = one full conversation)
+const loadChatHistory = async (userId: string): Promise<{ chatId: string; messages: Message[] } | null> => {
   try {
     const chatHistoryCollection = collection(firestore, `users/${userId}/chatHistory`);
-    const q = query(chatHistoryCollection, orderBy("timestamp"));
+    const q = query(chatHistoryCollection, orderBy('timestamp', 'desc'), limit(1));
     const querySnapshot = await getDocs(q);
+    if (querySnapshot.empty) return null;
 
-    // Map the documents to an array of Message objects
-    const messages: Message[] = [];
-    querySnapshot.forEach((doc) => {
-      const data = doc.data();
-      if (data.messages) {
-        data.messages.forEach((messageData: any) => {
-          messages.push({
-            id: messageData.id,
-            content: messageData.content,
-            sender: messageData.sender,
-            timestamp: messageData.timestamp.toDate(),
-          });
-        });
-      }
-    });
-    return messages;
+    const docSnap = querySnapshot.docs[0];
+    const data = docSnap.data() as {
+      messages?: Array<{
+        id: string;
+        content: string;
+        sender: 'user' | 'bot';
+        timestamp: Timestamp;
+        crisis?: boolean;
+        sources?: string[];
+      }>;
+    };
+    const messages: Message[] = (data.messages || []).map((m) => ({
+      id: m.id,
+      content: m.content,
+      sender: m.sender,
+      timestamp: m.timestamp.toDate(),
+      crisis: m.crisis,
+      sources: m.sources,
+    }));
+    return { chatId: docSnap.id, messages };
   } catch (error) {
     console.error('Error loading chat history:', error);
-    return []; 
+    return null;
+  }
+};
+
+// Upserts the full message list for one conversation — always overwrites the same doc instead of appending a new one
+const persistChatHistory = async (userId: string, chatId: string, messages: Message[]) => {
+  try {
+    await setDoc(doc(firestore, `users/${userId}/chatHistory`, chatId), {
+      messages: messages.map((m) => ({
+        id: m.id,
+        content: m.content,
+        sender: m.sender,
+        timestamp: Timestamp.fromDate(m.timestamp),
+        crisis: m.crisis ?? false,
+        sources: m.sources ?? [],
+      })),
+      timestamp: Timestamp.now(),
+    });
+  } catch (error) {
+    console.error('Error saving chat history:', error);
   }
 };
 
 const ChatInterface = () => {
   const authContext = useContext(AuthContext) as any;
+  const navigate = useNavigate();
 
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -151,24 +283,41 @@ const ChatInterface = () => {
   const [suggestions, setSuggestions] = useState<string[]>(SUGGESTIONS.anxiety);
   const [showEmojis, setShowEmojis] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [loadHistory, setLoadHistory] = useState<boolean>(true);
+  const [chatId, setChatId] = useState<string>(() => uuidv4());
+  const [isUploadingDoc, setIsUploadingDoc] = useState(false);
+  const [moodContext, setMoodContext] = useState<MoodContext>({ avg_mood: null, recent_moods: [] });
+  const [activeTool, setActiveTool] = useState<string | null>(null);
+
+  // Hydrates from localStorage first (instant, no network wait), then reconciles with Firestore (source of truth)
+  useEffect(() => {
+    const userId = authContext.currentUser?.id;
+    if (!userId) return;
+
+    const cached = loadLocalChat(userId);
+    if (cached && cached.messages.length > 0) {
+      setChatId(cached.chatId);
+      setMessages(cached.messages);
+    }
+
+    loadChatHistory(userId).then((remote) => {
+      if (remote && remote.messages.length > 0) {
+        setChatId(remote.chatId);
+        setMessages(remote.messages);
+        saveLocalChat(userId, remote.chatId, remote.messages);
+      }
+    });
+  }, [authContext.currentUser?.id]);
 
   useEffect(() => {
-    if (authContext.currentUser?.id) {
-      const fetchChatHistory = async () => {
-        if (loadHistory) {
-          const loadedMessages = await loadChatHistory(authContext.currentUser.id);
-          if (loadedMessages.length > 0) {
-            setMessages(loadedMessages);
-          }
-        } else {
-          setMessages([]);
-        }
-      };
-
-      fetchChatHistory();
-    }
-  }, [authContext.currentUser?.id, loadHistory]);
+    if (!authContext.currentUser?.id) return;
+    getMoodEntries(authContext.currentUser.id).then((entries) => {
+      const moods = entries.map((e) => e.mood);
+      setMoodContext({
+        avg_mood: moods.length ? moods.reduce((a, b) => a + b, 0) / moods.length : null,
+        recent_moods: moods.slice(-10),
+      });
+    });
+  }, [authContext.currentUser?.id]);
 
 
 
@@ -195,24 +344,20 @@ const ChatInterface = () => {
         setInput((prevInput) => prevInput + transcript);
       };
 
-      recognition.onerror = (event: any) => { 
+      recognition.onerror = (event: any) => {
         console.error("Speech recognition error:", event.error);
-        const toastProps: ToastProps = {
-          description: `Speech recognition error: ${event.error}`,
-          variant: "destructive"
-        }
+        toast.error('Voice input failed', { description: `Speech recognition error: ${event.error}` });
       };
 
       recognition.start();
     } else {
-      alert('Speech recognition is not supported in this browser.');
+      toast.error('Not supported', { description: 'Speech recognition is not supported in this browser.' });
     }
   };
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!input.trim()) return;
 
-    
     const userMessage: Message = {
       id: uuidv4(),
       content: input,
@@ -220,11 +365,10 @@ const ChatInterface = () => {
       timestamp: new Date(),
     };
 
+    const priorMessages = messages;
     setMessages((prev) => [...prev, userMessage]);
     setInput('');
     setIsTyping(true);
-
-    const chatHistoryCollection = collection(firestore, `users/${authContext.currentUser.id}/chatHistory`);
 
     if (authContext.currentUser?.id) {
       saveUserActivity(
@@ -238,53 +382,69 @@ const ChatInterface = () => {
         });
     }
 
-    
-    const specificResponse = findResponse(input);
+    const botMessageId = uuidv4();
+    let accumulated = '';
+    let botCrisis = false;
+    let botSources: string[] = [];
+    let placeholderAdded = false;
 
-    
-    setTimeout(() => {
-      const botMessage: Message = {
-        id: uuidv4(),
-        content: specificResponse || generateResponse(input),
-        sender: 'bot',
-        timestamp: new Date(),
-      };
+    try {
+      await streamAIResponse(userMessage.content, priorMessages, moodContext, {
+        onMeta: ({ crisis, sources }) => {
+          botCrisis = crisis;
+          botSources = sources;
+        },
+        onToolCall: (call) => setActiveTool(call.name),
+        onChunk: (text) => {
+          accumulated += text;
+          setActiveTool(null);
+          if (!placeholderAdded) {
+            placeholderAdded = true;
+            setIsTyping(false);
+            setMessages((prev) => [
+              ...prev,
+              { id: botMessageId, content: accumulated, sender: 'bot', timestamp: new Date(), crisis: botCrisis, sources: botSources },
+            ]);
+          } else {
+            setMessages((prev) => prev.map((m) => (m.id === botMessageId ? { ...m, content: accumulated } : m)));
+          }
+        },
+        onActions: (actions) => {
+          actions.forEach((action) => executeToolAction(action, navigate));
+        },
+      });
 
-      setMessages((prev) => [...prev, botMessage]);
+      if (authContext.currentUser?.id) {
+        const botMessage: Message = {
+          id: botMessageId,
+          content: accumulated,
+          sender: 'bot',
+          timestamp: new Date(),
+          crisis: botCrisis,
+          sources: botSources,
+        };
+        const finalMessages = [...priorMessages, userMessage, botMessage];
+        const userId = authContext.currentUser.id;
+        saveLocalChat(userId, chatId, finalMessages);
+        persistChatHistory(userId, chatId, finalMessages);
+      }
+
+      if (!botCrisis) {
+        updateSuggestions(userMessage.content);
+        if (authContext.currentUser?.id) logUserEmotion(userMessage.content);
+      }
+    } catch (error) {
+      console.error('Error getting AI response:', error);
+      toast.error('Connection issue', {
+        description: "Couldn't reach the AI assistant. Please try again in a moment.",
+      });
+    } finally {
       setIsTyping(false);
-
-      saveChatHistory(chatHistoryCollection, [...messages, userMessage, botMessage]);
-
-      
-      updateSuggestions(input);
-    }, 1500);
-  };
-
-  // Contextual response based on user input
-  const generateResponse = (userInput: string): string => {
-    const input = userInput.toLowerCase();
-
-    if (input.includes("anxious") || input.includes("anxiety") || input.includes("nervous") || input.includes("worry")) {
-      return "I understand anxiety can be really challenging. Many people find that combining breathing exercises with grounding techniques helps in the moment. Would you like to try a quick breathing exercise or learn about the 5-4-3-2-1 grounding technique?";
-    }
-    else if (input.includes("depress") || input.includes("sad") || input.includes("hopeless") || input.includes("unmotivated")) {
-      return "I'm sorry you're feeling this way. Depression can make everyday activities feel much harder. Small steps are important - even getting out of bed or taking a shower is an achievement. Have you been able to talk to a mental health professional about how you're feeling?";
-    }
-    else if (input.includes("stress") || input.includes("overwhelm") || input.includes("too much")) {
-      return "Being overwhelmed by stress is a common experience. Sometimes taking a step back to identify what's in your control can help. Would you like to try a quick prioritization exercise or a brief mindfulness moment?";
-    }
-    else if (input.includes("thank")) {
-      return "You're very welcome. I'm here to support you whenever you need it. Is there anything else on your mind you'd like to discuss?";
-    }
-    else if (input.includes("meditation") || input.includes("mindful")) {
-      return "Meditation can be a powerful tool for mental wellbeing. We have several guided meditations in our meditation section ranging from 2-30 minutes. Would you prefer a quick mindfulness exercise now, or shall I point you to our full meditation library?";
-    }
-    else {
-      return "Thank you for sharing that with me. How are you feeling about it now? Is there a specific aspect of your wellbeing you'd like to focus on today?";
+      setActiveTool(null);
     }
   };
 
-  
+
   const updateSuggestions = (userInput: string) => {
     const input = userInput.toLowerCase();
 
@@ -302,10 +462,8 @@ const ChatInterface = () => {
     }
   };
 
-  const handleSuggestionClick = (suggestion: string) => {
+  const handleSuggestionClick = async (suggestion: string) => {
     setInput(suggestion);
-
-    const chatHistoryCollection = collection(firestore, `users/${authContext.currentUser.id}/chatHistory`);
 
     if (authContext.currentUser?.id) {
       saveUserActivity(
@@ -318,7 +476,6 @@ const ChatInterface = () => {
         });
     }
 
-    
     const userMessage: Message = {
       id: uuidv4(),
       content: suggestion,
@@ -326,102 +483,154 @@ const ChatInterface = () => {
       timestamp: new Date(),
     };
 
+    const priorMessages = messages;
     setMessages((prev) => [...prev, userMessage]);
     setIsTyping(true);
     setInput('');
 
-    
-    setTimeout(() => {
-      const botMessage: Message = {
-        id: uuidv4(),
-        content: findResponse(suggestion) || generateResponse(suggestion),
-        sender: 'bot',
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, botMessage]);
+    const botMessageId = uuidv4();
+    let accumulated = '';
+    let botCrisis = false;
+    let botSources: string[] = [];
+    let placeholderAdded = false;
+
+    try {
+      await streamAIResponse(suggestion, priorMessages, moodContext, {
+        onMeta: ({ crisis, sources }) => {
+          botCrisis = crisis;
+          botSources = sources;
+        },
+        onToolCall: (call) => setActiveTool(call.name),
+        onChunk: (text) => {
+          accumulated += text;
+          setActiveTool(null);
+          if (!placeholderAdded) {
+            placeholderAdded = true;
+            setIsTyping(false);
+            setMessages((prev) => [
+              ...prev,
+              { id: botMessageId, content: accumulated, sender: 'bot', timestamp: new Date(), crisis: botCrisis, sources: botSources },
+            ]);
+          } else {
+            setMessages((prev) => prev.map((m) => (m.id === botMessageId ? { ...m, content: accumulated } : m)));
+          }
+        },
+        onActions: (actions) => {
+          actions.forEach((action) => executeToolAction(action, navigate));
+        },
+      });
+
+      if (authContext.currentUser?.id) {
+        const botMessage: Message = {
+          id: botMessageId,
+          content: accumulated,
+          sender: 'bot',
+          timestamp: new Date(),
+          crisis: botCrisis,
+          sources: botSources,
+        };
+        const finalMessages = [...priorMessages, userMessage, botMessage];
+        const userId = authContext.currentUser.id;
+        saveLocalChat(userId, chatId, finalMessages);
+        persistChatHistory(userId, chatId, finalMessages);
+        if (!botCrisis) logUserEmotion(suggestion);
+      }
+    } catch (error) {
+      console.error('Error getting AI response:', error);
+      toast.error('Connection issue', {
+        description: "Couldn't reach the AI assistant. Please try again in a moment.",
+      });
+    } finally {
       setIsTyping(false);
-
-      saveChatHistory(chatHistoryCollection, [...messages, userMessage, botMessage]);
-    }, 1500);
-  };
-
-  const saveChatHistory = async (chatHistoryCollection, messages: Message[]) => {
-    if (!authContext.currentUser?.id) {
-      console.error("User ID not found. Cannot save chat history.");
-      return;
-    }
-    try {
-      const chatHistoryCollection = collection(firestore, `users/${authContext.currentUser.id}/chatHistory`);
-      await addDoc(chatHistoryCollection, {
-        messages,
-        timestamp: new Date(),
-
-        chatId: (Date.now() + Math.random()).toString(),
-        chatName: "New Conversation",
-
-      });
-      console.log('Chat history saved successfully!');
-    } catch (error) {
-      console.error('Error saving chat history:', error);
+      setActiveTool(null);
     }
   };
-  const clearChatHistory = async () => {
-    if (!authContext.currentUser?.id) {
-      console.error("User ID not found. Cannot clear chat history.");
-      return;
-    }
-    try {
-      const chatHistoryCollection = collection(firestore, `users/${authContext.currentUser.id}/chatHistory`);
-      const querySnapshot = await getDocs(chatHistoryCollection);
-      const batch = writeBatch(firestore);
-      querySnapshot.forEach((doc) => {
-        batch.delete(doc.ref);
-      });
-      await batch.commit();
-      console.log('Chat history cleared successfully!');
-    } catch (error) {
-      console.error('Error clearing chat history:', error);
-    }
-  };
-  const handleStartNewChat = async () => {
+
+  // Starts a fresh conversation. The previous one is already persisted (saved after each exchange), so this
+  // just points the UI at a brand-new chatId — nothing gets deleted.
+  const handleStartNewChat = () => {
+    const userId = authContext.currentUser?.id;
+
     toast.info("Starting a new conversation", {
       description: "Your previous conversation has been saved to your history."
     });
 
-    if (authContext.currentUser?.id) {
-      saveUserActivity(
-        {
-          userId: authContext.currentUser.id,
-          timestamp: new Date().toISOString(),
-          activityType: 'start_new_chat',
-          activityName: 'Start New Chat',
-          pageName: 'ChatPage',
-        });
-        await clearChatHistory();
-      const chatHistoryCollection = collection(firestore, `users/${authContext.currentUser.id}/chatHistory`);
-      saveChatHistory(chatHistoryCollection, messages); // Call the save function here
-      setLoadHistory(false);
-      setMessages([
-        {
-          id: uuidv4(),
-          content: "Hi there! I'm your AI wellness companion. How are you feeling today?",
-          sender: 'bot',
-          timestamp: new Date(),
-        }
-      ]);
-      setSuggestions(SUGGESTIONS.anxiety);
-      setLoadHistory(true)
+    if (userId) {
+      saveUserActivity({
+        userId,
+        timestamp: new Date().toISOString(),
+        activityType: 'start_new_chat',
+        activityName: 'Start New Chat',
+        pageName: 'ChatPage',
+      });
     }
+
+    const newChatId = uuidv4();
+    const welcomeMessages: Message[] = [
+      {
+        id: uuidv4(),
+        content: "Hi there! I'm your AI wellness companion. How are you feeling today?",
+        sender: 'bot',
+        timestamp: new Date(),
+      }
+    ];
+
+    setChatId(newChatId);
+    setMessages(welcomeMessages);
+    setSuggestions(SUGGESTIONS.anxiety);
+    if (userId) saveLocalChat(userId, newChatId, welcomeMessages);
   };
 
+  const handleHistoryCleared = () => {
+    const userId = authContext.currentUser?.id;
+    const newChatId = uuidv4();
+    const welcomeMessages: Message[] = [
+      {
+        id: uuidv4(),
+        content: "Hi there! I'm your AI wellness companion. How are you feeling today?",
+        sender: 'bot',
+        timestamp: new Date(),
+      }
+    ];
+
+    setChatId(newChatId);
+    setMessages(welcomeMessages);
+    setSuggestions(SUGGESTIONS.anxiety);
+    if (userId) {
+      localStorage.removeItem(LOCAL_CHAT_PREFIX + userId);
+    }
+  };
 
   const handleAttachDocument = () => {
     fileInputRef.current?.click();
   };
 
-  const handleFileSelected = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelected = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) setInput((prevInput) => prevInput + ` Attached file: ${file.name}`);
+    event.target.value = '';
+    if (!file) return;
+
+    if (!file.name.toLowerCase().endsWith('.pdf')) {
+      toast.error('Unsupported file', {
+        description: 'Only PDF files can be added to the knowledge base right now.',
+      });
+      return;
+    }
+
+    setIsUploadingDoc(true);
+    try {
+      const { chunksAdded } = await uploadKnowledgeBasePdf(file);
+      toast.success('Document added', {
+        description: `${file.name} is now part of the AI's knowledge base (${chunksAdded} section${chunksAdded === 1 ? '' : 's'} indexed).`,
+      });
+    } catch (error) {
+      console.error('Error uploading document:', error);
+      toast.error('Upload failed', {
+        description: "Couldn't process that PDF. Please try again.",
+      });
+    } finally {
+      setIsUploadingDoc(false);
+    }
   };
 
   return (
@@ -432,14 +641,25 @@ const ChatInterface = () => {
             <div className="w-2 h-2 rounded-full bg-green-500"></div>
             AI Wellness Assistant
           </CardTitle>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 rounded-full"
-            onClick={handleStartNewChat}
-          >
-            <RotateCw size={16} />
-          </Button>
+          <div className="flex items-center gap-1">
+            {authContext.currentUser?.id && (
+              <ClearHistoryButton
+                itemLabel="chat history"
+                pageName="ChatPage"
+                onConfirm={() => deleteChatHistory(authContext.currentUser.id)}
+                onCleared={handleHistoryCleared}
+              />
+            )}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 rounded-full"
+              onClick={handleStartNewChat}
+              title="Start a new conversation"
+            >
+              <RotateCw size={16} />
+            </Button>
+          </div>
         </div>
       </CardHeader>
 
@@ -453,12 +673,25 @@ const ChatInterface = () => {
             className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             <div
-              className={`max-w-[80%] rounded-2xl px-4 py-2 ${message.sender === 'user'
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-muted'
+              className={`max-w-[80%] rounded-2xl px-4 py-2 ${message.crisis
+                ? 'bg-destructive/10 border border-destructive text-foreground'
+                : message.sender === 'user'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted'
                 }`}
             >
+              {message.crisis && (
+                <div className="flex items-center gap-1.5 text-destructive font-medium text-xs mb-1.5">
+                  <AlertTriangle size={14} />
+                  Crisis support resources
+                </div>
+              )}
               <p className="text-sm whitespace-pre-line">{message.content}</p>
+              {message.sources && message.sources.length > 0 && (
+                <p className="text-xs mt-1.5 opacity-60">
+                  Based on: {message.sources.join(', ')}
+                </p>
+              )}
               <p className="text-xs text-right mt-1 opacity-70">
                 {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </p>
@@ -469,11 +702,18 @@ const ChatInterface = () => {
         {isTyping && (
           <div className="flex justify-start">
             <div className="bg-muted rounded-2xl px-4 py-2">
-              <div className="flex gap-1 items-center">
-                <div className="w-2 h-2 rounded-full bg-foreground/70 animate-pulse"></div>
-                <div className="w-2 h-2 rounded-full bg-foreground/70 animate-pulse delay-150"></div>
-                <div className="w-2 h-2 rounded-full bg-foreground/70 animate-pulse delay-300"></div>
-              </div>
+              {activeTool ? (
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <Wrench size={14} className="animate-pulse" />
+                  {TOOL_LABELS[activeTool] || `Using ${activeTool}`}...
+                </div>
+              ) : (
+                <div className="flex gap-1 items-center">
+                  <div className="w-2 h-2 rounded-full bg-foreground/70 animate-pulse"></div>
+                  <div className="w-2 h-2 rounded-full bg-foreground/70 animate-pulse delay-150"></div>
+                  <div className="w-2 h-2 rounded-full bg-foreground/70 animate-pulse delay-300"></div>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -514,12 +754,20 @@ const ChatInterface = () => {
             <div className="absolute right-3 bottom-2 flex items-center gap-2">
               <input
                 type="file"
+                accept=".pdf"
                 ref={fileInputRef}
                 className="hidden"
                 onChange={handleFileSelected}
               />
-              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" onClick={handleAttachDocument}>
-                <Paperclip size={16} />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 rounded-full"
+                onClick={handleAttachDocument}
+                disabled={isUploadingDoc}
+                title="Add a PDF to the AI's knowledge base"
+              >
+                <Paperclip size={16} className={isUploadingDoc ? 'animate-pulse' : ''} />
               </Button>
               {showEmojis && (
                 <div className="absolute bottom-12 right-0 bg-white border rounded-md shadow-md p-2 flex flex-wrap w-40">

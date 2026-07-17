@@ -2,13 +2,15 @@ import MainLayout from '../components/layout/MainLayout';
 import JournalEditor from '../components/journal/JournalEditor';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import { Checkbox } from '../components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import { Calendar as CalendarIcon, List, FileText, PlusCircle } from 'lucide-react';
+import { Calendar as CalendarIcon, List, FileText, PlusCircle, Trash2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { collection, query, where, orderBy, onSnapshot } from 'firebase/firestore';
-import { firestore, saveUserActivity } from '@/configs/firebase';
+import { firestore, saveUserActivity, deleteJournalEntries, deleteJournalEntry } from '@/configs/firebase';
+import ClearHistoryButton from '@/components/common/ClearHistoryButton';
 import { Calendar } from '../components/ui/calendar';
 import { format } from 'date-fns';
 import { DayProps } from 'react-day-picker';
@@ -41,8 +43,34 @@ const JournalPage = () => {
   const [entries, setEntries] = useState<JournalEntry[]>([]);
   const [selectedEntry, setSelectedEntry] = useState<JournalEntry | undefined>(undefined);
   const [editorKey, setEditorKey] = useState(0);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const { currentUser } = useAuth();
   const { toast, recordActivity } = useToast();
+
+  const toggleSelected = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const handleDeleteSelected = async () => {
+    const results = await Promise.all(Array.from(selectedIds).map((id) => deleteJournalEntry(id)));
+    const failed = results.filter((r) => !r.success).length;
+    setSelectedIds(new Set());
+    if (currentUser) {
+      saveUserActivity({
+        userId: currentUser.id,
+        timestamp: new Date().toISOString(),
+        activityType: 'delete',
+        activityName: `Deleted ${results.length - failed} journal entries`,
+        pageName: 'JournalPage',
+      });
+    }
+    return { success: failed === 0 };
+  };
 
   useEffect(() => {
     recordActivity('View', 'Visit Journal Page', 'JournalPage');
@@ -125,7 +153,12 @@ const JournalPage = () => {
           </Button>
         </div>
 
-        <Tabs defaultValue="write">
+        <Tabs
+          defaultValue="write"
+          onValueChange={(value) => {
+            if (currentUser) recordActivity('tab-switch', value, 'JournalPage');
+          }}
+        >
           <TabsList className="grid grid-cols-1 md:grid-cols-3 mb-8">
             <TabsTrigger value="write" className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
@@ -142,12 +175,30 @@ const JournalPage = () => {
           </TabsList>
 
           <TabsContent value="entries">
+            {entries.length > 0 && currentUser?.id && (
+              <div className="flex justify-end items-center gap-2 mb-4">
+                {selectedIds.size > 0 && (
+                  <ClearHistoryButton
+                    itemLabel={`${selectedIds.size} ${selectedIds.size === 1 ? 'journal entry' : 'journal entries'}`}
+                    pageName="JournalPage"
+                    mode="delete-selected"
+                    onConfirm={handleDeleteSelected}
+                    onCleared={() => setSelectedIds(new Set())}
+                  />
+                )}
+                <ClearHistoryButton
+                  itemLabel="journal entries"
+                  pageName="JournalPage"
+                  onConfirm={() => deleteJournalEntries(currentUser.id)}
+                />
+              </div>
+            )}
             {entries.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {entries.map((entry) => (
                   <Card
                     key={entry.id}
-                    className={`border-primary/10 cursor-pointer card-hover ${
+                    className={`border-primary/10 cursor-pointer card-hover relative ${
                       selectedEntry?.id === entry.id ? 'bg-primary/10' : ''
                     }`}
                     onClick={() => {
@@ -164,8 +215,14 @@ const JournalPage = () => {
                       }
                     }}
                   >
+                    <Checkbox
+                      className="absolute top-3 right-3 z-10 bg-background"
+                      checked={selectedIds.has(entry.id)}
+                      onCheckedChange={() => toggleSelected(entry.id)}
+                      onClick={(e) => e.stopPropagation()}
+                    />
                     <CardHeader className="pb-2">
-                      <CardTitle className="flex justify-between items-center">
+                      <CardTitle className="flex justify-between items-center pr-8">
                         <span>{entry.title || 'Untitled'}</span>
                         <span className="text-sm text-muted-foreground">
                           {entry.timestamp ? format(entry.timestamp, 'PPP') : 'No Date'}

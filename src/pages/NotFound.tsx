@@ -1,6 +1,7 @@
 
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
+import { recordActivity } from "@/hooks/use-toast";
 
 const NotFound = () => {
   const location = useLocation();
@@ -10,6 +11,7 @@ const NotFound = () => {
       "404 Error: User attempted to access non-existent route:",
       location.pathname
     );
+    recordActivity("view", `Hit 404: ${location.pathname}`, "NotFound");
   }, [location.pathname]);
 
   return (

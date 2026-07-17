@@ -1,12 +1,24 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Calendar, Clock, MapPin, Users, Filter, ExternalLink } from "lucide-react";
+import { Calendar, Clock, MapPin, Users, Filter, ExternalLink, Check } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 import { EventsWorkshopsProps } from "./EventsWorkshops.d";
+import { useAuth } from "@/contexts/AuthContext";
+import { rsvpToEvent, cancelEventRsvp, getUserEventRsvps, getEventAttendeeCounts, saveUserActivity } from "@/configs/firebase";
+import { sendNotificationEmail } from "@/lib/notify";
+import { downloadIcsEvent } from "@/lib/ics";
+
+// Parses seed duration strings like "1.5 hours", "1 hour", "30 minutes" into minutes
+const parseDurationMinutes = (duration: string): number => {
+  const match = duration.match(/([\d.]+)\s*(hour|minute)/i);
+  if (!match) return 60;
+  const value = parseFloat(match[1]);
+  return match[2].toLowerCase().startsWith('hour') ? value * 60 : value;
+};
 
 interface Event {
   id: string;
@@ -24,12 +36,19 @@ interface Event {
   tags: string[];
 }
 
+// Seed events keep a rolling schedule relative to today, rather than a fixed past date that would always read as "over"
+const daysFromNow = (n: number) => {
+  const d = new Date();
+  d.setDate(d.getDate() + n);
+  return d.toISOString().slice(0, 10);
+};
+
 const EVENTS_DATA: Event[] = [
   {
     id: "1",
     title: "Mindfulness for Beginners Workshop",
     description: "Learn the basics of mindfulness meditation in this interactive workshop led by Dr. Sarah Johnson.",
-    date: "2025-04-25",
+    date: daysFromNow(5),
     time: "18:00",
     duration: "1.5 hours",
     location: "Online",
@@ -44,7 +63,7 @@ const EVENTS_DATA: Event[] = [
     id: "2",
     title: "Coping with Anxiety Webinar",
     description: "Join our panel of experts as they discuss evidence-based strategies for managing anxiety.",
-    date: "2025-04-27",
+    date: daysFromNow(7),
     time: "19:00",
     duration: "1 hour",
     location: "Online",
@@ -59,7 +78,7 @@ const EVENTS_DATA: Event[] = [
     id: "3",
     title: "Live Guided Meditation Session",
     description: "Join our popular weekly guided meditation session to reduce stress and improve focus.",
-    date: "2025-04-21",
+    date: daysFromNow(1),
     time: "08:00",
     duration: "30 minutes",
     location: "Online",
@@ -74,7 +93,7 @@ const EVENTS_DATA: Event[] = [
     id: "4",
     title: "Building Healthy Relationships Workshop",
     description: "Learn practical skills for improving communication and building healthier relationships.",
-    date: "2025-04-30",
+    date: daysFromNow(10),
     time: "17:30",
     duration: "2 hours",
     location: "Community Center, 123 Main St.",
@@ -89,7 +108,7 @@ const EVENTS_DATA: Event[] = [
     id: "5",
     title: "Mental Health in the Workplace Panel",
     description: "Industry experts discuss creating mentally healthy work environments and supporting employee wellbeing.",
-    date: "2025-05-03",
+    date: daysFromNow(14),
     time: "12:00",
     duration: "1.5 hours",
     location: "Online",
@@ -103,21 +122,97 @@ const EVENTS_DATA: Event[] = [
 ];
 
 const EventsWorkshops = ({ onRSVP }: EventsWorkshopsProps) => {
+  const { currentUser } = useAuth();
   const [events] = useState<Event[]>(EVENTS_DATA);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [detailsEvent, setDetailsEvent] = useState<Event | null>(null);
+  const [rsvpedEventIds, setRsvpedEventIds] = useState<string[]>([]);
+  const [attendeeCounts, setAttendeeCounts] = useState<Record<string, number>>({});
+  const [sendReminder, setSendReminder] = useState(true);
+  const [addToCalendar, setAddToCalendar] = useState(true);
+
+  useEffect(() => {
+    getEventAttendeeCounts().then(setAttendeeCounts);
+    if (currentUser) {
+      getUserEventRsvps(currentUser.id).then(setRsvpedEventIds);
+    } else {
+      setRsvpedEventIds([]);
+    }
+  }, [currentUser]);
+
+  const attendeeCount = (event: Event) => event.attendees + (attendeeCounts[event.id] || 0);
 
   const handleRSVP = (event: Event) => {
+    if (!currentUser) {
+      toast.error("Login required", { description: "Please log in to RSVP for events." });
+      return;
+    }
     setSelectedEvent(event);
+    setSendReminder(true);
+    setAddToCalendar(true);
     if (onRSVP) {
       onRSVP(event.title);
     }
   };
 
-  const confirmRSVP = () => {
-    toast.success(`RSVP confirmed for "${selectedEvent?.title}"`, {
-      description: "We've sent the event details to your email."
-    });
+  const confirmRSVP = async () => {
+    if (!selectedEvent || !currentUser) return;
+    const eventStart = new Date(`${selectedEvent.date}T${selectedEvent.time}`);
+
+    const result = await rsvpToEvent(currentUser.id, selectedEvent.id, selectedEvent.title, eventStart, sendReminder);
+    if (result.success) {
+      setRsvpedEventIds((prev) => [...prev, selectedEvent.id]);
+      setAttendeeCounts((prev) => ({ ...prev, [selectedEvent.id]: (prev[selectedEvent.id] || 0) + 1 }));
+      toast.success(`RSVP confirmed for "${selectedEvent.title}"`, {
+        description: "We've sent the event details to your email."
+      });
+
+      saveUserActivity({
+        userId: currentUser.id,
+        timestamp: new Date().toISOString(),
+        activityType: 'rsvp_event',
+        activityName: `RSVP'd to ${selectedEvent.title}`,
+        pageName: 'CommunityPage',
+      });
+
+      if (currentUser.email) {
+        sendNotificationEmail(
+          currentUser.email,
+          `RSVP confirmed: ${selectedEvent.title}`,
+          `You're confirmed for "${selectedEvent.title}" on ${eventStart.toLocaleString()} at ${selectedEvent.location}, hosted by ${selectedEvent.host}.${sendReminder ? ` We'll email you daily reminders starting 5 days before, through the day of the event.` : ''}`
+        );
+      }
+
+      if (addToCalendar) {
+        downloadIcsEvent({
+          title: selectedEvent.title,
+          description: selectedEvent.description,
+          location: selectedEvent.location,
+          start: eventStart,
+          durationMinutes: parseDurationMinutes(selectedEvent.duration),
+        });
+      }
+    } else {
+      toast.error("Could not RSVP", { description: "Please try again in a moment." });
+    }
     setSelectedEvent(null);
+  };
+
+  const handleCancelRSVP = async (event: Event) => {
+    if (!currentUser) return;
+    const result = await cancelEventRsvp(currentUser.id, event.id);
+    if (result.success) {
+      setRsvpedEventIds((prev) => prev.filter((id) => id !== event.id));
+      setAttendeeCounts((prev) => ({ ...prev, [event.id]: Math.max(0, (prev[event.id] || 0) - 1) }));
+      toast.info(`RSVP cancelled for "${event.title}"`);
+      saveUserActivity({
+        userId: currentUser.id,
+        timestamp: new Date().toISOString(),
+        activityType: 'cancel_rsvp',
+        activityName: `Cancelled RSVP for ${event.title}`,
+        pageName: 'CommunityPage',
+      });
+    }
   };
 
   const formatDate = (dateStr: string) => {
@@ -172,7 +267,7 @@ const EventsWorkshops = ({ onRSVP }: EventsWorkshopsProps) => {
               </div>
               <div className="flex items-center gap-2 text-sm">
                 <Users size={16} className="text-muted-foreground" />
-                <span>{event.attendees}/{event.maxAttendees} attending</span>
+                <span>{attendeeCount(event)}/{event.maxAttendees} attending</span>
               </div>
               <div className="flex flex-wrap gap-2 pt-2">
                 {event.tags.map((tag, i) => (
@@ -182,14 +277,24 @@ const EventsWorkshops = ({ onRSVP }: EventsWorkshopsProps) => {
             </CardContent>
             <CardFooter className="border-t pt-4">
               <div className="w-full flex gap-2">
-                <Button 
-                  className="flex-1" 
-                  onClick={() => handleRSVP(event)}
-                  disabled={event.attendees >= event.maxAttendees}
-                >
-                  {event.attendees >= event.maxAttendees ? "Fully Booked" : "RSVP"}
-                </Button>
-                <Button variant="outline" className="flex items-center gap-2">
+                {rsvpedEventIds.includes(event.id) ? (
+                  <Button
+                    className="flex-1 flex items-center justify-center gap-2"
+                    variant="outline"
+                    onClick={() => handleCancelRSVP(event)}
+                  >
+                    <Check size={16} /> RSVP'd — Cancel
+                  </Button>
+                ) : (
+                  <Button
+                    className="flex-1"
+                    onClick={() => handleRSVP(event)}
+                    disabled={attendeeCount(event) >= event.maxAttendees}
+                  >
+                    {attendeeCount(event) >= event.maxAttendees ? "Fully Booked" : "RSVP"}
+                  </Button>
+                )}
+                <Button variant="outline" className="flex items-center gap-2" onClick={() => setDetailsEvent(event)}>
                   <ExternalLink size={16} />
                   <span>Details</span>
                 </Button>
@@ -223,17 +328,73 @@ const EventsWorkshops = ({ onRSVP }: EventsWorkshopsProps) => {
               <span className="text-sm text-muted-foreground">{selectedEvent?.host}</span>
             </div>
             <div className="flex items-center gap-2">
-              <input type="checkbox" id="event-reminder" className="rounded" />
-              <label htmlFor="event-reminder">Send me a reminder 1 hour before the event</label>
+              <input
+                type="checkbox"
+                id="event-reminder"
+                className="rounded"
+                checked={sendReminder}
+                onChange={(e) => setSendReminder(e.target.checked)}
+              />
+              <label htmlFor="event-reminder">Email me daily reminders starting 5 days before the event</label>
             </div>
             <div className="flex items-center gap-2">
-              <input type="checkbox" id="add-calendar" className="rounded" />
-              <label htmlFor="add-calendar">Add to my calendar</label>
+              <input
+                type="checkbox"
+                id="add-calendar"
+                className="rounded"
+                checked={addToCalendar}
+                onChange={(e) => setAddToCalendar(e.target.checked)}
+              />
+              <label htmlFor="add-calendar">Add to my calendar (.ics download)</label>
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setSelectedEvent(null)}>Cancel</Button>
             <Button onClick={confirmRSVP}>Confirm RSVP</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!detailsEvent} onOpenChange={(open) => !open && setDetailsEvent(null)}>
+        <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{detailsEvent?.title}</DialogTitle>
+            <DialogDescription>{detailsEvent?.description}</DialogDescription>
+          </DialogHeader>
+          {detailsEvent && (
+            <div className="space-y-3 py-2">
+              <div className="flex items-center gap-2 text-sm">
+                <Calendar size={16} className="text-muted-foreground" />
+                <span>{formatDate(detailsEvent.date)}</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <Clock size={16} className="text-muted-foreground" />
+                <span>{detailsEvent.time} • {detailsEvent.duration}</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <MapPin size={16} className="text-muted-foreground" />
+                <span>{detailsEvent.location}</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <Users size={16} className="text-muted-foreground" />
+                <span>{attendeeCount(detailsEvent)}/{detailsEvent.maxAttendees} attending</span>
+              </div>
+              <div className="text-sm">
+                <span className="font-medium">Host: </span>
+                <span className="text-muted-foreground">{detailsEvent.host}</span>
+              </div>
+              <div className="flex flex-wrap gap-2 pt-1">
+                {detailsEvent.tags.map((tag, i) => (
+                  <Badge key={i} variant="outline" className="text-xs">{tag}</Badge>
+                ))}
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDetailsEvent(null)}>Close</Button>
+            {detailsEvent && !rsvpedEventIds.includes(detailsEvent.id) && (
+              <Button onClick={() => { handleRSVP(detailsEvent); setDetailsEvent(null); }}>RSVP</Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>

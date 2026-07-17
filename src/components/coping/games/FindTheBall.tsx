@@ -3,7 +3,11 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 import { Volume2, VolumeX, TimerIcon, TrophyIcon } from 'lucide-react'; // Added TimerIcon, TrophyIcon
+import { useAuth } from '@/contexts/AuthContext';
+import { saveToolSession } from '@/configs/firebase';
 
 // Define Leaderboard Entry Type
 interface LeaderboardEntry {
@@ -13,6 +17,7 @@ interface LeaderboardEntry {
 }
 
 const FindTheBall = () => {
+  const { currentUser } = useAuth();
   // Core Game State
   const [cupPositions, setCupPositions] = useState([0, 1, 2]);
   const [ballPosition, setBallPosition] = useState(0);
@@ -36,6 +41,8 @@ const FindTheBall = () => {
 
   // Leaderboard State
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [pendingHighScore, setPendingHighScore] = useState<{ score: number; level: number } | null>(null);
+  const [nameInput, setNameInput] = useState('Player');
 
   // UI & Sound State
   const [soundEnabled, setSoundEnabled] = useState(true);
@@ -77,24 +84,34 @@ const FindTheBall = () => {
 
   // --- Leaderboard Management ---
   const addLeaderboardEntry = useCallback((newScore: number, finalLevel: number) => {
+    if (currentUser) {
+      saveToolSession({ toolType: "find-the-ball", details: { score: newScore, level: finalLevel } });
+    }
+
     if (newScore <= 0) return; // Don't add zero scores
 
     const isHighScore = leaderboard.length < 5 || newScore > leaderboard[leaderboard.length - 1]?.score;
 
     if (isHighScore) {
-      const name = prompt(`New high score! Enter your name (max 10 chars):`, "Player") || "Player";
-      const playerName = name.substring(0, 10); // Limit name length
-
-      const newEntry: LeaderboardEntry = { name: playerName, score: newScore, level: finalLevel };
-      const updatedLeaderboard = [...leaderboard, newEntry]
-        .sort((a, b) => b.score - a.score || b.level - a.level) // Sort by score, then level
-        .slice(0, 5); // Keep top 5
-
-      setLeaderboard(updatedLeaderboard);
-      localStorage.setItem('findTheBallLeaderboard', JSON.stringify(updatedLeaderboard));
-      toast.info("Your score has been added to the leaderboard!");
+      setNameInput('Player');
+      setPendingHighScore({ score: newScore, level: finalLevel });
     }
-  }, [leaderboard]); // Include leaderboard in dependencies
+  }, [leaderboard, currentUser]); // Include leaderboard in dependencies
+
+  const confirmLeaderboardName = () => {
+    if (!pendingHighScore) return;
+    const playerName = (nameInput.trim() || 'Player').substring(0, 10); // Limit name length
+
+    const newEntry: LeaderboardEntry = { name: playerName, score: pendingHighScore.score, level: pendingHighScore.level };
+    const updatedLeaderboard = [...leaderboard, newEntry]
+      .sort((a, b) => b.score - a.score || b.level - a.level) // Sort by score, then level
+      .slice(0, 5); // Keep top 5
+
+    setLeaderboard(updatedLeaderboard);
+    localStorage.setItem('findTheBallLeaderboard', JSON.stringify(updatedLeaderboard));
+    toast.info("Your score has been added to the leaderboard!");
+    setPendingHighScore(null);
+  };
 
   // --- Sound Player Helper ---
   const playSound = (audioRef: React.RefObject<HTMLAudioElement>) => {
@@ -373,6 +390,30 @@ const FindTheBall = () => {
              )}
            </CardContent>
          </Card>
+
+        <Dialog open={pendingHighScore !== null} onOpenChange={(open) => !open && setPendingHighScore(null)}>
+          <DialogContent className="sm:max-w-xs">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <TrophyIcon className="h-5 w-5" /> New High Score!
+              </DialogTitle>
+              <DialogDescription>
+                Score {pendingHighScore?.score} at Level {pendingHighScore?.level} — enter your name for the leaderboard.
+              </DialogDescription>
+            </DialogHeader>
+            <Input
+              value={nameInput}
+              onChange={(e) => setNameInput(e.target.value)}
+              maxLength={10}
+              placeholder="Player"
+              autoFocus
+              onKeyDown={(e) => e.key === 'Enter' && confirmLeaderboardName()}
+            />
+            <DialogFooter>
+              <Button onClick={confirmLeaderboardName} className="w-full">Save Score</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
     </div>
   );
 };

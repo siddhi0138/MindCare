@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast, recordActivity } from "@/hooks/use-toast";
+import { saveToolSession } from "@/configs/firebase";
  
 const GroundingExercisePage: React.FC = () => {
     return (
@@ -70,6 +71,9 @@ const GroundingExerciseContent = () => {
         setExerciseStarted(false);
         setExerciseCompleted(true);
         setCurrentStep(0);
+        if (currentUser) {
+          saveToolSession({ toolType: "grounding", details: { steps: steps.length } });
+        }
     }
   };
 

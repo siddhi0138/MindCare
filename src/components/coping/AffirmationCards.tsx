@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Sparkles, ArrowRight, ArrowLeft, Heart } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 import { useAuth } from "@/contexts/AuthContext";
-import { saveUserActivity } from "@/configs/firebase";
+import { saveUserActivity, saveToolSession } from "@/configs/firebase";
 
 const affirmations = [
   {
@@ -100,6 +100,10 @@ const AffirmationCards = () => {
         };
 
         await saveUserActivity(activityData);
+        await saveToolSession({
+          toolType: "affirmations",
+          details: { affirmation: currentAffirmation.text, category: currentAffirmation.category },
+        });
       }
     } else {
       toast.error("You must be logged in to add favorites.");

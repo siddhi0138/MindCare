@@ -1,10 +1,24 @@
 
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import MainLayout from "@/components/layout/MainLayout";
 import TherapistDirectory from "@/components/therapist/TherapistDirectory";
+import AppointmentsList from "@/components/therapist/AppointmentsList";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserSearch, CalendarClock, Video } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { recordActivity } from "@/hooks/use-toast";
 
 const TherapistPage = () => {
+  const { currentUser } = useAuth();
+  const [searchParams] = useSearchParams();
+  const specialty = searchParams.get("specialty") || undefined;
+  const [bookingVersion, setBookingVersion] = useState(0);
+
+  useEffect(() => {
+    if (currentUser) recordActivity('visit-therapist-page', 'Visited Therapist Page', 'TherapistPage');
+  }, [currentUser]);
+
   return (
     <MainLayout>
       <div className="w-full mx-auto px-4 py-8 md:px-6 md:py-12 lg:px-8">
@@ -15,8 +29,14 @@ const TherapistPage = () => {
             Choose between in-person or virtual sessions to begin your wellness journey.
           </p>
         </div>
-        
-        <Tabs defaultValue="find" className="w-full">
+
+        <Tabs
+          defaultValue="find"
+          className="w-full"
+          onValueChange={(value) => {
+            if (currentUser) recordActivity('tab-switch', value, 'TherapistPage');
+          }}
+        >
           <TabsList className="bg-background border-b rounded-none w-full mb-10">
             <TabsTrigger value="find" className="flex items-center gap-2 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none ">
               <UserSearch className="h-4 w-4" />
@@ -33,27 +53,15 @@ const TherapistPage = () => {
           </TabsList>
           
           <TabsContent value="find">
-            <TherapistDirectory />
+            <TherapistDirectory initialSearch={specialty} onBooked={() => setBookingVersion((v) => v + 1)} />
           </TabsContent>
-          
+
           <TabsContent value="appointments">
-            <div className="flex flex-col items-center justify-center p-12 text-center border rounded-lg bg-muted/10 shadow-sm">
-              <CalendarClock className="h-16 w-16 text-muted-foreground mb-6" />
-              <h3 className="text-xl font-semibold text-foreground mb-3">No Current Appointments</h3>
-              <p className="text-muted-foreground max-w-md">
-                Schedule your first appointment with one of our qualified therapists to get started.
-              </p>
-            </div>
+            <AppointmentsList mode="upcoming" refreshKey={bookingVersion} />
           </TabsContent>
-          
+
           <TabsContent value="sessions">
-            <div className="flex flex-col items-center justify-center p-12 text-center border rounded-lg bg-muted/10 shadow-sm">
-              <Video className="h-16 w-16 text-muted-foreground mb-6" />
-              <h3 className="text-xl font-semibold text-foreground mb-3">No Past Sessions</h3>
-              <p className="text-muted-foreground max-w-md">
-                Your therapy session history will be displayed here once you complete your first session.
-              </p>
-            </div>
+            <AppointmentsList mode="past" refreshKey={bookingVersion} />
           </TabsContent>
         </Tabs>
       </div>

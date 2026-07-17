@@ -122,7 +122,12 @@ const MeditationPage = () => {
           </div>
         </div>
 
-        <Tabs defaultValue="all">
+        <Tabs
+          defaultValue="all"
+          onValueChange={(value) => {
+            if (currentUser) recordActivity('tab-switch', value, 'MeditationPage');
+          }}
+        >
           <TabsList className="mb-8">
             <TabsTrigger value="all">All</TabsTrigger>
             <TabsTrigger value="sleep" className="flex items-center gap-1">

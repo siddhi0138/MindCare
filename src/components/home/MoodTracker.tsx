@@ -6,21 +6,38 @@ import { Textarea } from '@/components/ui/textarea';
 import { Slider } from '@/components/ui/slider';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { motion } from 'framer-motion';
+import { toast } from '@/components/ui/sonner';
+import { saveMoodEntry } from '@/configs/firebase';
+import { useAuth } from '@/contexts/AuthContext';
 
 const moodEmojis = ['😔', '😕', '😐', '🙂', '😊'];
 const moodLabels = ['Very Low', 'Low', 'Neutral', 'Good', 'Great'];
 
 const MoodTracker = () => {
+  const { currentUser } = useAuth();
   const [moodLevel, setMoodLevel] = useState(2); // 0-4 index for the 5 mood levels
   const [selectedEmoji, setSelectedEmoji] = useState(2); // Track selected emoji
   const [note, setNote] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
-  const handleSubmit = () => {
-    // Here you would normally save this to your backend
-    console.log('Mood submitted:', { mood: moodLevel, note });
+  const handleSubmit = async () => {
+    if (!currentUser?.id) {
+      toast.error('Please sign in', { description: 'Sign in to save your mood check-ins.' });
+      return;
+    }
+
+    setIsSaving(true);
+    const result = await saveMoodEntry({ mood: moodLevel, note: note.trim() || undefined }, { upsertDaily: true });
+    setIsSaving(false);
+
+    if (!result.success) {
+      toast.error('Could not save your mood', { description: 'Please try again in a moment.' });
+      return;
+    }
+
     setSubmitted(true);
-    
+
     // Reset after a delay for demo purposes
     setTimeout(() => {
       setSubmitted(false);
@@ -106,8 +123,8 @@ const MoodTracker = () => {
                   />
                 </div>
                 
-                <Button onClick={handleSubmit} className="w-full">
-                  Save Today's Mood
+                <Button onClick={handleSubmit} className="w-full" disabled={isSaving}>
+                  {isSaving ? 'Saving...' : "Save Today's Mood"}
                 </Button>
               </div>
             </>

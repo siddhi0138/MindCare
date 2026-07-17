@@ -11,6 +11,7 @@ import AssessmentHistory from './AssessmentHistory';
 import { AssessmentResult } from './AssessmentResult';
 import { useAuth } from '@/contexts/AuthContext';
 import { saveAssessmentResult } from '@/configs/firebase';
+import { toast } from '@/components/ui/sonner';
 
 export type AssessmentType = 'anxiety' | 'depression' | 'stress';
 
@@ -90,15 +91,15 @@ const AssessmentHub = () => {
     };
     const response = await saveAssessmentResult(saveResult);
     if (response.success) {
-      alert('Assessment result saved successfully.');
+      toast.success('Assessment result saved', { description: 'View it anytime in your Assessment History.' });
     } else {
-      alert('Failed to save assessment result.');
+      toast.error('Could not save assessment result', { description: 'Please try again in a moment.' });
     }
   };
 
   return (
     <div className="space-y-6">
-      {!isAssessing && !result && (
+      {!isAssessing && !result && activeTab !== 'history' && (
         <>
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-bold">Mental Health Assessments</h2>
@@ -169,7 +170,7 @@ const AssessmentHub = () => {
                 </p>
               </CardContent>
               <CardFooter>
-                <Button 
+                <Button
                   onClick={() => startAssessment('stress')}
                   className="w-full flex items-center justify-center gap-2"
                 >
@@ -179,7 +180,7 @@ const AssessmentHub = () => {
               </CardFooter>
             </Card>
           </div>
-          
+
           <Card className="bg-muted/50 border-dashed">
             <CardContent className="p-4">
               <div className="flex items-start gap-4">
@@ -260,7 +261,12 @@ const AssessmentHub = () => {
       )}
       
       {activeTab === 'history' && (
-        <AssessmentHistory onSelectAssessment={startAssessment} />
+        <div className="space-y-4">
+          <Button variant="outline" onClick={() => setActiveTab('anxiety')}>
+            Back to Assessments
+          </Button>
+          <AssessmentHistory onSelectAssessment={startAssessment} />
+        </div>
       )}
     </div>
   );

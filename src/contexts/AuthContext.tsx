@@ -9,10 +9,14 @@ import {
   onAuthStateChanged,
   sendPasswordResetEmail,
   updateProfile as updateFirebaseProfile,
-  User as FirebaseUser 
+  reauthenticateWithCredential,
+  EmailAuthProvider,
+  updatePassword as updateFirebasePassword,
+  User as FirebaseUser
 } from "firebase/auth";
 import { doc, setDoc, getDoc, Firestore } from "firebase/firestore";
 import { auth, firestore as firestoreInstance, googleProvider } from '@/configs/firebase';
+import { recordActivity } from '@/hooks/use-toast';
 
 
 // --- Interfaces ---
@@ -35,7 +39,8 @@ interface AuthContextType {
   loginWithGoogle: () => Promise<void>;
   logout: () => Promise<void>; 
   resetPassword: (email: string) => Promise<void>;
-  updateProfile: (userData: Partial<Pick<User, 'firstName' | 'lastName' | 'profileImage'>>) => Promise<void>; 
+  changePassword: (currentPassword: string, newPassword: string) => Promise<boolean>;
+  updateProfile: (userData: Partial<Pick<User, 'firstName' | 'lastName' | 'profileImage'>>) => Promise<void>;
 }
 
 // --- Context ---
@@ -137,7 +142,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
          toast.success('Login successful', {
            description: `Welcome back, ${userProfile.firstName || 'User'}!`,
          });
-         navigate('/'); 
+         recordActivity('login', 'Logged in', 'LoginPage');
+         navigate('/');
        } else {
           
          toast.error('Login succeeded but failed to load profile.');
@@ -174,6 +180,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         toast.success('Signup successful', {
           description: `Welcome, ${userProfile.firstName || 'User'}!`,
         });
+        recordActivity('signup', 'Created account', 'SignupPage');
         navigate('/login', { state: { email: email, signupSuccess: true } }); // Redirect after successful signup
       } else {
          toast.error('Signup succeeded but failed to create profile.');
@@ -215,18 +222,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
          toast.success('Account created with Google', {
              description: `Welcome, ${profileData.firstName}!`,
          });
+         setCurrentUser(profileData);
+         recordActivity('signup', 'Created account with Google', 'SignupPage');
       } else {
-         
+
          const existingProfile = await getUserProfile(firebaseUser);
          if (!existingProfile) throw new Error("Failed to fetch existing profile after Google sign-in.");
          profileData = existingProfile;
          toast.success('Logged in with Google', {
              description: `Welcome back, ${profileData.firstName}!`,
          });
+         setCurrentUser(profileData);
+         recordActivity('login', 'Logged in with Google', 'LoginPage');
       }
 
-      setCurrentUser(profileData); 
-      navigate('/'); 
+      navigate('/');
 
     } catch (error: any) {
       console.error("Google Sign-in Error:", error);
@@ -276,6 +286,35 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const changePassword = async (currentPassword: string, newPassword: string): Promise<boolean> => {
+    const firebaseUser = auth.currentUser;
+    if (!firebaseUser || !firebaseUser.email) {
+      toast.error('Not logged in', { description: 'You must be logged in to change your password.' });
+      return false;
+    }
+    setIsOperating(true);
+    try {
+      const credential = EmailAuthProvider.credential(firebaseUser.email, currentPassword);
+      await reauthenticateWithCredential(firebaseUser, credential);
+      await updateFirebasePassword(firebaseUser, newPassword);
+      toast.success('Password changed successfully', {
+        description: 'Your password has been updated.',
+      });
+      recordActivity('update', 'Changed Password', 'ProfilePage');
+      return true;
+    } catch (error: any) {
+      console.error('Password Change Error:', error);
+      let description = error.message || 'Could not change password. Please try again.';
+      if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+        description = 'Your current password is incorrect.';
+      }
+      toast.error('Password change failed', { description });
+      return false;
+    } finally {
+      setIsOperating(false);
+    }
+  };
+
   const updateProfile = async (userData: Partial<Pick<User, 'firstName' | 'lastName' | 'profileImage'>>) => {
      if (!currentUser) { 
        toast.error("Not logged in", { description: "You must be logged in to update your profile." });
@@ -320,6 +359,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     loginWithGoogle,
     logout,
     resetPassword,
+    changePassword,
     updateProfile,
   };
 

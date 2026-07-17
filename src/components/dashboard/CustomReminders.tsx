@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,8 +12,8 @@ import {
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { 
-  PlusCircle, 
+import {
+  PlusCircle,
   Trash2,
   Clock,
   Bell,
@@ -26,6 +26,8 @@ import {
   Bed
 } from 'lucide-react';
 import { toast } from '@/components/ui/sonner';
+import { useAuth } from '@/contexts/AuthContext';
+import { saveReminder, getReminders, updateReminder, deleteReminder } from '@/configs/firebase';
 
 interface Reminder {
   id: string;
@@ -47,33 +49,10 @@ const reminderTypes = [
 ];
 
 const CustomReminders = () => {
-  const [reminders, setReminders] = useState<Reminder[]>([
-    {
-      id: '1',
-      title: 'Drink Water',
-      time: '10:00',
-      days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
-      active: true,
-      type: 'hydrate'
-    },
-    {
-      id: '2',
-      title: 'Take a Mindful Break',
-      time: '15:30',
-      days: ['Mon', 'Wed', 'Fri'],
-      active: true,
-      type: 'mindfulness'
-    },
-    {
-      id: '3',
-      title: 'Evening Medication',
-      time: '20:00',
-      days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-      active: false,
-      type: 'medication'
-    }
-  ]);
-  
+  const { currentUser } = useAuth();
+  const [reminders, setReminders] = useState<Reminder[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
   const [newReminder, setNewReminder] = useState<Partial<Reminder>>({
     title: '',
     time: '',
@@ -81,52 +60,84 @@ const CustomReminders = () => {
     active: true,
     type: 'custom'
   });
-  
+
   const [isAddingNew, setIsAddingNew] = useState(false);
-  
-  const handleToggleReminder = (id: string) => {
-    setReminders(reminders.map(reminder => 
-      reminder.id === id ? { ...reminder, active: !reminder.active } : reminder
-    ));
-    
-    const reminder = reminders.find(r => r.id === id);
-    if (reminder) {
-      toast.info(
-        reminder.active ? 'Reminder disabled' : 'Reminder enabled',
-        { description: reminder.title }
-      );
+
+  useEffect(() => {
+    if (!currentUser) {
+      setIsLoading(false);
+      return;
     }
-  };
-  
-  const handleDeleteReminder = (id: string) => {
+
+    setIsLoading(true);
+    getReminders(currentUser.id)
+      .then((docs) =>
+        setReminders(
+          docs.map((doc) => ({
+            id: doc.id,
+            title: doc.title,
+            time: doc.time,
+            days: doc.days,
+            active: doc.active,
+            type: doc.type,
+          }))
+        )
+      )
+      .finally(() => setIsLoading(false));
+  }, [currentUser]);
+
+  const handleToggleReminder = async (id: string) => {
     const reminder = reminders.find(r => r.id === id);
-    setReminders(reminders.filter(reminder => reminder.id !== id));
-    
+    if (!reminder) return;
+
+    const nextActive = !reminder.active;
+    setReminders(reminders.map(r => (r.id === id ? { ...r, active: nextActive } : r)));
+    await updateReminder(id, { active: nextActive });
+
+    toast.info(
+      nextActive ? 'Reminder enabled' : 'Reminder disabled',
+      { description: reminder.title }
+    );
+  };
+
+  const handleDeleteReminder = async (id: string) => {
+    const reminder = reminders.find(r => r.id === id);
+    setReminders(reminders.filter(r => r.id !== id));
+    await deleteReminder(id);
+
     if (reminder) {
       toast.success('Reminder deleted', {
         description: reminder.title
       });
     }
   };
-  
-  const handleAddReminder = () => {
+
+  const handleAddReminder = async () => {
     if (!newReminder.title || !newReminder.time || !newReminder.type) {
       toast.error('Missing information', {
         description: 'Please fill in all required fields'
       });
       return;
     }
-    
-    const reminder: Reminder = {
-      id: Date.now().toString(),
+
+    const payload = {
       title: newReminder.title,
       time: newReminder.time,
-      days: newReminder.days || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+      days: newReminder.days && newReminder.days.length > 0 ? newReminder.days : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
       active: true,
-      type: newReminder.type
+      type: newReminder.type,
     };
-    
-    setReminders([...reminders, reminder]);
+
+    const result = await saveReminder(payload);
+    if (result.success) {
+      setReminders([{ id: result.id, ...payload }, ...reminders]);
+      toast.success('Reminder created', {
+        description: payload.title
+      });
+    } else {
+      toast.error('Could not create reminder');
+    }
+
     setIsAddingNew(false);
     setNewReminder({
       title: '',
@@ -135,12 +146,8 @@ const CustomReminders = () => {
       active: true,
       type: 'custom'
     });
-    
-    toast.success('Reminder created', {
-      description: reminder.title
-    });
   };
-  
+
   const cancelAddReminder = () => {
     setIsAddingNew(false);
     setNewReminder({
@@ -151,7 +158,7 @@ const CustomReminders = () => {
       type: 'custom'
     });
   };
-  
+
   const getReminderIcon = (type: string) => {
     const reminderType = reminderTypes.find(t => t.value === type);
     return reminderType ? reminderType.icon : <Bell className="h-4 w-4" />;
@@ -171,7 +178,7 @@ const CustomReminders = () => {
           </Button>
         )}
       </div>
-      
+
       {isAddingNew && (
         <Card className="border-primary/10">
           <CardHeader>
@@ -189,7 +196,7 @@ const CustomReminders = () => {
                     placeholder="Reminder title"
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="time">Time</Label>
                   <Input
@@ -200,7 +207,7 @@ const CustomReminders = () => {
                   />
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="type">Reminder Type</Label>
                 <Select
@@ -222,7 +229,7 @@ const CustomReminders = () => {
                   </SelectContent>
                 </Select>
               </div>
-              
+
               <div className="pt-4 flex justify-end gap-2">
                 <Button variant="outline" onClick={cancelAddReminder}>
                   Cancel
@@ -235,19 +242,25 @@ const CustomReminders = () => {
           </CardContent>
         </Card>
       )}
-      
-      {reminders.length > 0 ? (
+
+      {isLoading ? (
+        <Card className="border-primary/10">
+          <CardContent className="p-8 text-center text-sm text-muted-foreground">
+            Loading your reminders...
+          </CardContent>
+        </Card>
+      ) : reminders.length > 0 ? (
         <div className="space-y-4">
           {reminders.map(reminder => (
-            <Card 
-              key={reminder.id} 
+            <Card
+              key={reminder.id}
               className={`border-primary/10 ${!reminder.active ? 'opacity-60' : ''}`}
             >
               <CardContent className="p-4 flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <div className={`p-2 rounded-full ${reminder.active ? 'bg-primary/10' : 'bg-muted'}`}>
-                    {reminder.active ? 
-                      getReminderIcon(reminder.type) : 
+                    {reminder.active ?
+                      getReminderIcon(reminder.type) :
                       <BellOff className="h-4 w-4 text-muted-foreground" />
                     }
                   </div>
@@ -261,7 +274,7 @@ const CustomReminders = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center gap-2">
                   <Switch
                     checked={reminder.active}

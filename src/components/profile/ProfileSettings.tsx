@@ -8,9 +8,11 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { User, Mail, Lock, Camera } from 'lucide-react';
 import { toast } from '@/components/ui/sonner';
+import { recordActivity } from '@/hooks/use-toast';
 
 const ProfileSettings = () => {
-  const { currentUser, updateProfile } = useAuth();
+  const { currentUser, updateProfile, changePassword } = useAuth();
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
   
   const [formData, setFormData] = useState({    
     firstName: currentUser?.firstName || '',
@@ -24,7 +26,7 @@ const ProfileSettings = () => {
   
   const [isEditing, setIsEditing] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -39,11 +41,12 @@ const ProfileSettings = () => {
       firstName: formData.firstName,
       lastName: formData.lastName
     });
-    
+    recordActivity('update', 'Updated Profile', 'ProfilePage');
+
     setIsEditing(false);
   };
   
-  const handleChangePassword = () => {
+  const handleChangePassword = async () => {
     // Validate passwords
     if (formData.newPassword !== formData.confirmPassword) {
       toast.error("Passwords don't match", {
@@ -51,26 +54,26 @@ const ProfileSettings = () => {
       });
       return;
     }
-    
+
     if (formData.newPassword.length < 8) {
       toast.error("Password too short", {
         description: "Password must be at least 8 characters long"
       });
       return;
     }
-    
-    // In a real app, this would call an API to change the password
-    toast.success("Password changed successfully", {
-      description: "Your password has been updated"
-    });
-    
-    // Reset password fields
-    setFormData(prev => ({
-      ...prev,
-      currentPassword: '',
-      newPassword: '',
-      confirmPassword: ''
-    }));
+
+    setIsChangingPassword(true);
+    const success = await changePassword(formData.currentPassword, formData.newPassword);
+    setIsChangingPassword(false);
+
+    if (success) {
+      setFormData(prev => ({
+        ...prev,
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      }));
+    }
   };
   
   const handleImageUpload = () => {
@@ -86,7 +89,8 @@ const ProfileSettings = () => {
       updateProfile({
         profileImage: newImageUrl
       });
-      
+      recordActivity('update', 'Changed Profile Image', 'ProfilePage');
+
       setFormData(prev => ({
         ...prev,
         profileImage: newImageUrl
@@ -255,11 +259,11 @@ const ProfileSettings = () => {
           </div>
         </CardContent>
         <CardFooter>
-          <Button 
+          <Button
             onClick={handleChangePassword}
-            disabled={!formData.currentPassword || !formData.newPassword || !formData.confirmPassword}
+            disabled={isChangingPassword || !formData.currentPassword || !formData.newPassword || !formData.confirmPassword}
           >
-            Update Password
+            {isChangingPassword ? 'Updating...' : 'Update Password'}
           </Button>
         </CardFooter>
       </Card>

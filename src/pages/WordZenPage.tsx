@@ -1,12 +1,22 @@
 
 // src/pages/WordZenPage.tsx
-import React from 'react';
+import React, { useEffect } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import { Button } from "@/components/ui/button"
 import WordZen from '@/components/coping/games/WordZen';
 import { Link } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { recordActivity } from '@/hooks/use-toast';
 
 const WordZenPage: React.FC = () => {
+  const { currentUser } = useAuth();
+
+  useEffect(() => {
+    if (currentUser) {
+      recordActivity('Start Playing', 'Game started', 'WordZenPage');
+    }
+  }, [currentUser]);
+
   return (
     <MainLayout>
       <div className="max-w-4xl mx-auto">

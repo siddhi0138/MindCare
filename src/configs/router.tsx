@@ -10,6 +10,9 @@ import LoginPage from '@/pages/LoginPage';
 import SignupPage from '@/pages/SignupPage';
 import NotFound from '@/pages/NotFound';
 import PrivacyPage from '@/pages/PrivacyPage';
+import AboutPage from '@/pages/AboutPage';
+import ContactPage from '@/pages/ContactPage';
+import TermsPage from '@/pages/TermsPage';
 
 // Protected Pages
 import JournalPage from '@/pages/JournalPage';
@@ -65,6 +68,9 @@ const AppRouter = () => {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
       <Route path="/privacy" element={<PrivacyPage />} />
+      <Route path="/about" element={<AboutPage />} />
+      <Route path="/contact" element={<ContactPage />} />
+      <Route path="/terms" element={<TermsPage />} />
 
       {/* Protected routes */}
       <Route path="/journal" element={<ProtectedRoute><JournalPage /></ProtectedRoute>} />

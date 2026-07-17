@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { Calendar as CalendarIcon, Save, Lock, Cloud } from 'lucide-react';
 import { collection, addDoc, Timestamp } from 'firebase/firestore';
-import { firestore } from '@/configs/firebase';
+import { firestore, saveMoodEntry } from '@/configs/firebase';
 import { toast } from '@/components/ui/sonner';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -36,6 +36,16 @@ const JournalEditor: React.FC<JournalEditorProps> = ({ onSave }) => {
     { label: 'Sad', value: 'sad', emoji: '😔' },
   ];
 
+  // Maps the journal's mood label onto the same 0-4 scale the Mood Tracker/Mood Trends chart use,
+  // so a mood picked while journaling shows up in Progress Dashboard trends too, not just the entry itself.
+  const moodToScore: Record<string, number> = {
+    sad: 0,
+    anxious: 1,
+    neutral: 2,
+    calm: 3,
+    happy: 4,
+  };
+
   const handleSave = async () => {
     if (!currentUser) {
       toast.error("You must be logged in to save entries.");
@@ -55,6 +65,7 @@ const JournalEditor: React.FC<JournalEditorProps> = ({ onSave }) => {
         mood,
         timestamp: Timestamp.now(),
       });
+      saveMoodEntry({ mood: moodToScore[mood] ?? 2, note: title || undefined });
       toast.success("Journal entry saved successfully!");
       if (onSave) {
         onSave({ title, content, mood });

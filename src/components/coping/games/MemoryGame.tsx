@@ -6,6 +6,7 @@ import { Gamepad2, RefreshCcw } from "lucide-react";
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from "@/hooks/use-toast";
 import { recordActivity } from "@/hooks/use-toast";
+import { saveToolSession } from "@/configs/firebase";
 
 interface Card {
   id: number;
@@ -79,6 +80,7 @@ const MemoryGame: React.FC<GameProps> = ({ onBack }) => {
       toast({title:`Congratulations! You completed the game in ${moves} moves!`});
       if (currentUser) {
           await recordActivity("game-completed", "Memory Game", "MemoryGamePage");
+          await saveToolSession({ toolType: "memory-game", details: { moves } });
       }
     }
   }, [matches, emojis.length, moves, currentUser, toast]);

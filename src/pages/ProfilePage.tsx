@@ -7,32 +7,43 @@ import ProfileSettings from '@/components/profile/ProfileSettings';
 import ProgressDashboard from '@/components/dashboard/ProgressDashboard';
 import CustomReminders from '@/components/dashboard/CustomReminders';
 import { useAuth } from '@/contexts/AuthContext';
+import { recordActivity } from '@/hooks/use-toast';
 
 const ProfilePage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { currentUser } = useAuth();
-  
-  
+
+
   const queryParams = new URLSearchParams(location.search);
   const tabParam = queryParams.get('tab');
-  
-  
+
+
   const [activeTab, setActiveTab] = useState<string>(tabParam || 'settings');
-  
-  
+
+
   useEffect(() => {
     if (activeTab) {
       navigate(`/profile?tab=${activeTab}`, { replace: true });
     }
   }, [activeTab, navigate]);
 
+  useEffect(() => {
+    recordActivity('view', 'Visited Profile Page', 'ProfilePage');
+  }, []);
+
   return (
     <MainLayout>
       <div className="container w-full py-6">
         <h1 className="text-3xl font-bold mb-6">My Profile</h1>
         
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <Tabs
+          value={activeTab}
+          onValueChange={(value) => {
+            setActiveTab(value);
+            if (currentUser) recordActivity('tab-switch', value, 'ProfilePage');
+          }}
+        >
           <TabsList className="mb-6">
             <TabsTrigger value="settings">Settings</TabsTrigger>
             <TabsTrigger value="progress">Progress Dashboard</TabsTrigger>

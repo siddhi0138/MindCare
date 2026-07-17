@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -7,6 +7,9 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { AlertCircle, MessageCircle, Users, Shield, ArrowRight } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 import { ChatRoomsProps } from "./ChatRooms.d";
+import { useAuth } from "@/contexts/AuthContext";
+import { sendRoomMessage, subscribeToRoomMessages, joinChatRoom, getUserChatRoomMemberships, saveUserActivity } from "@/configs/firebase";
+import { Timestamp } from "firebase/firestore";
 
 interface ChatRoom {
   id: string;
@@ -80,104 +83,91 @@ const CHATROOMS_DATA: ChatRoom[] = [
 
 interface Message {
   id: string;
+  userId: string;
   username: string;
   content: string;
-  timestamp: string;
-  isCurrentUser: boolean;
+  timestamp: Timestamp;
 }
 
-const SAMPLE_MESSAGES: Message[] = [
-  {
-    id: "m1",
-    username: "Moderator_Sam",
-    content: "Welcome to our Anxiety Support chat room! Please remember to follow our community guidelines and be respectful to all members.",
-    timestamp: "10:32 AM",
-    isCurrentUser: false
-  },
-  {
-    id: "m2",
-    username: "AnxietyWarrior",
-    content: "Hi everyone, I've been trying the breathing techniques we discussed last week and they've been really helping with my panic attacks.",
-    timestamp: "10:45 AM",
-    isCurrentUser: false
-  },
-  {
-    id: "m3",
-    username: "JessT",
-    content: "That's great to hear! Which technique has been working best for you?",
-    timestamp: "10:47 AM",
-    isCurrentUser: false
-  },
-  {
-    id: "m4",
-    username: "AnxietyWarrior",
-    content: "The 4-7-8 breathing has been a game changer for me, especially at night when my mind starts racing.",
-    timestamp: "10:49 AM",
-    isCurrentUser: false
-  },
-  {
-    id: "m5",
-    username: "NewToThis",
-    content: "I'm new here. Been struggling with social anxiety for years and finally seeking support. Any tips for first-time therapy sessions?",
-    timestamp: "10:52 AM",
-    isCurrentUser: false
-  },
-  {
-    id: "m6",
-    username: "TherapistAna",
-    content: "Welcome! It's normal to feel nervous about your first therapy session. I recommend writing down some key points you want to discuss beforehand so you don't forget anything important.",
-    timestamp: "10:55 AM",
-    isCurrentUser: false
-  },
-  {
-    id: "m7",
-    username: "You",
-    content: "Hi everyone, I'm also dealing with anxiety. Recently started meditation and it's helping a bit.",
-    timestamp: "Just now",
-    isCurrentUser: true
-  }
-];
+const formatTime = (timestamp: Timestamp) =>
+  timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
 const ChatRooms = ({ onJoinRoom }: ChatRoomsProps) => {
+  const { currentUser } = useAuth();
   const [rooms] = useState<ChatRoom[]>(CHATROOMS_DATA);
   const [selectedRoom, setSelectedRoom] = useState<ChatRoom | null>(null);
-  const [messages, setMessages] = useState<Message[]>(SAMPLE_MESSAGES);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [chatOpen, setChatOpen] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const [joinedRoomIds, setJoinedRoomIds] = useState<string[]>([]);
+  const unsubscribeRef = useRef<(() => void) | null>(null);
+
+  useEffect(() => {
+    if (currentUser) {
+      getUserChatRoomMemberships(currentUser.id).then(setJoinedRoomIds);
+    } else {
+      setJoinedRoomIds([]);
+    }
+  }, [currentUser]);
+
+  useEffect(() => {
+    return () => unsubscribeRef.current?.();
+  }, []);
 
   const handleJoinChat = (room: ChatRoom) => {
+    if (!currentUser) {
+      toast.error("Login required", { description: "Please log in to join community chat rooms." });
+      return;
+    }
+
+    unsubscribeRef.current?.();
     setSelectedRoom(room);
+    setMessages([]);
     setChatOpen(true);
+    unsubscribeRef.current = subscribeToRoomMessages(room.id, (roomMessages) => {
+      setMessages(roomMessages as unknown as Message[]);
+    });
+
+    if (!joinedRoomIds.includes(room.id)) {
+      joinChatRoom(currentUser.id, room.id, room.name).then(() => {
+        setJoinedRoomIds((prev) => [...prev, room.id]);
+      });
+      saveUserActivity({
+        userId: currentUser.id,
+        timestamp: new Date().toISOString(),
+        activityType: 'join_room',
+        activityName: `Joined ${room.name}`,
+        pageName: 'CommunityPage',
+      });
+    }
+
     if (onJoinRoom) {
       onJoinRoom(room.name);
     }
   };
 
-  const handleSendMessage = () => {
-    if (!newMessage.trim()) return;
+  const handleCloseChat = () => {
+    unsubscribeRef.current?.();
+    unsubscribeRef.current = null;
+    setChatOpen(false);
+  };
 
-    const newMsg: Message = {
-      id: `new-${Date.now()}`,
-      username: "You",
-      content: newMessage,
-      timestamp: "Just now",
-      isCurrentUser: true
-    };
+  const handleSendMessage = async () => {
+    if (!newMessage.trim() || !selectedRoom || !currentUser) return;
 
-    setMessages([...messages, newMsg]);
+    setIsSending(true);
+    const displayName = `${currentUser.firstName} ${currentUser.lastName}`.trim() || 'You';
+    await sendRoomMessage(selectedRoom.id, displayName, newMessage);
     setNewMessage("");
-
-    // Simulate a response after a delay
-    setTimeout(() => {
-      const response: Message = {
-        id: `resp-${Date.now()}`,
-        username: "SupportBot",
-        content: "Thanks for sharing! Remember that everyone's journey is different, and it's great that you're finding techniques that work for you.",
-        timestamp: "Just now",
-        isCurrentUser: false
-      };
-      setMessages(prev => [...prev, response]);
-    }, 1500);
+    setIsSending(false);
+    saveUserActivity({
+      userId: currentUser.id,
+      timestamp: new Date().toISOString(),
+      activityType: 'send_room_message',
+      activityName: `Sent a message in ${selectedRoom.name}`,
+      pageName: 'CommunityPage',
+    });
   };
 
   return (
@@ -196,11 +186,16 @@ const ChatRooms = ({ onJoinRoom }: ChatRoomsProps) => {
             <CardHeader>
               <div className="flex justify-between items-start">
                 <CardTitle className="text-xl">{room.name}</CardTitle>
-                {room.ageRestricted && (
-                  <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
-                    Age Restricted
-                  </Badge>
-                )}
+                <div className="flex flex-col items-end gap-1">
+                  {room.ageRestricted && (
+                    <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
+                      Age Restricted
+                    </Badge>
+                  )}
+                  {joinedRoomIds.includes(room.id) && (
+                    <Badge variant="secondary">Joined</Badge>
+                  )}
+                </div>
               </div>
               <CardDescription>{room.description}</CardDescription>
             </CardHeader>
@@ -221,11 +216,11 @@ const ChatRooms = ({ onJoinRoom }: ChatRoomsProps) => {
               </div>
             </CardContent>
             <CardFooter>
-              <Button 
-                className="w-full flex items-center gap-2" 
+              <Button
+                className="w-full flex items-center gap-2"
                 onClick={() => handleJoinChat(room)}
               >
-                <span>Join Chat</span>
+                <span>{joinedRoomIds.includes(room.id) ? 'Reopen Chat' : 'Join Chat'}</span>
                 <ArrowRight size={16} />
               </Button>
             </CardFooter>
@@ -233,7 +228,7 @@ const ChatRooms = ({ onJoinRoom }: ChatRoomsProps) => {
         ))}
       </div>
 
-      <Dialog open={chatOpen} onOpenChange={setChatOpen}>
+      <Dialog open={chatOpen} onOpenChange={(open) => (open ? setChatOpen(true) : handleCloseChat())}>
         <DialogContent className="sm:max-w-[500px] max-h-[80vh]">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
@@ -251,53 +246,56 @@ const ChatRooms = ({ onJoinRoom }: ChatRoomsProps) => {
               </Badge>
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="flex flex-col h-[50vh]">
             <div className="bg-muted/30 p-2 rounded flex items-center gap-2 text-sm mb-4">
               <AlertCircle size={16} className="text-muted-foreground" />
               <span>Remember to follow our community guidelines and be respectful to all members.</span>
             </div>
-            
+
             <div className="flex-grow overflow-y-auto mb-4 space-y-4" style={{ maxHeight: 'calc(50vh - 200px)' }}>
-              {messages.map((msg) => (
-                <div 
-                  key={msg.id} 
-                  className={`flex ${msg.isCurrentUser ? 'justify-end' : 'justify-start'}`}
-                >
-                  <div 
-                    className={`max-w-[80%] rounded-xl p-3 ${
-                      msg.isCurrentUser 
-                        ? 'bg-primary text-primary-foreground' 
-                        : 'bg-muted'
-                    }`}
-                  >
-                    {!msg.isCurrentUser && (
-                      <p className="text-xs font-medium mb-1">
-                        {msg.username === "Moderator_Sam" || msg.username === "SupportBot" ? (
-                          <span className="flex items-center gap-1">
-                            {msg.username}
-                            <Shield size={12} className="text-blue-500" />
-                          </span>
-                        ) : msg.username}
-                      </p>
-                    )}
-                    <p className="text-sm">{msg.content}</p>
-                    <p className="text-xs text-right mt-1 opacity-70">
-                      {msg.timestamp}
-                    </p>
-                  </div>
-                </div>
-              ))}
+              {messages.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-8">
+                  No messages yet. Be the first to say hello!
+                </p>
+              ) : (
+                messages.map((msg) => {
+                  const isCurrentUser = msg.userId === currentUser?.id;
+                  return (
+                    <div
+                      key={msg.id}
+                      className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'}`}
+                    >
+                      <div
+                        className={`max-w-[80%] rounded-xl p-3 ${
+                          isCurrentUser
+                            ? 'bg-primary text-primary-foreground'
+                            : 'bg-muted'
+                        }`}
+                      >
+                        {!isCurrentUser && (
+                          <p className="text-xs font-medium mb-1">{msg.username}</p>
+                        )}
+                        <p className="text-sm whitespace-pre-line">{msg.content}</p>
+                        <p className="text-xs text-right mt-1 opacity-70">
+                          {formatTime(msg.timestamp)}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
             </div>
-            
+
             <div className="border-t pt-4">
               <div className="flex items-end gap-2">
-                <textarea 
+                <textarea
                   className="flex-grow resize-none rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                   placeholder="Type your message..."
                   rows={2}
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
+                  disabled={isSending}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
                       e.preventDefault();
@@ -305,16 +303,16 @@ const ChatRooms = ({ onJoinRoom }: ChatRoomsProps) => {
                     }
                   }}
                 />
-                <Button onClick={handleSendMessage}>Send</Button>
+                <Button onClick={handleSendMessage} disabled={isSending || !newMessage.trim()}>Send</Button>
               </div>
               <p className="text-xs text-muted-foreground mt-2">
                 Press Enter to send. Use Shift+Enter for a new line.
               </p>
             </div>
           </div>
-          
+
           <DialogFooter>
-            <Button variant="outline" onClick={() => setChatOpen(false)}>Close Chat</Button>
+            <Button variant="outline" onClick={handleCloseChat}>Close Chat</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

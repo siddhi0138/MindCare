@@ -9,9 +9,10 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Users, Calendar, MessageCircle } from 'lucide-react';
 import { toast } from '@/components/ui/sonner';
+import { recordActivity } from '@/hooks/use-toast';
 
 const CommunityHub = () => {
-  const { isAuthenticated } = useAuth() || {};
+  const { isAuthenticated, currentUser } = useAuth() || {};
   const [activeTab, setActiveTab] = useState("chat-rooms");
   
   const handleJoinRoom = (roomName: string) => {
@@ -59,7 +60,14 @@ const CommunityHub = () => {
         </p>
       </div>
       
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <Tabs
+        value={activeTab}
+        onValueChange={(value) => {
+          setActiveTab(value);
+          if (currentUser) recordActivity('tab-switch', value, 'CommunityPage');
+        }}
+        className="w-full"
+      >
         <TabsList className="grid w-full grid-cols-3 md:w-auto">
           <TabsTrigger value="chat-rooms" className="flex items-center gap-2">
             <MessageCircle className="h-4 w-4" />

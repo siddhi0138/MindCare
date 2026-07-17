@@ -2,33 +2,26 @@ import MainLayout from '@/components/layout/MainLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"; // Corrected path
 import GuidedBreathingExercise from '@/components/coping/GuidedBreathingExercise';
 import AffirmationCards from '@/components/coping/AffirmationCards';
-import { Gamepad2, Heart, Sparkles, Wind } from 'lucide-react';
+import { Gamepad2, Heart, LineChart, Sparkles, Wind } from 'lucide-react';
+import ToolHistory from '@/components/coping/ToolHistory';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from "@/components/ui/card";
 
 import { Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useToast, recordActivity } from '@/hooks/use-toast';
+import { recordActivity } from '@/hooks/use-toast';
 import GroundingExercise from '@/components/coping/GroundingExercise';
+import { saveToolSession } from '@/configs/firebase';
 
 const CopingToolsPage = () => {
-  const { currentUser } = useAuth();
-  const { } = useToast();
+  const { currentUser, isAuthenticated } = useAuth();
+  const [showHistory, setShowHistory] = useState(false);
   useEffect(() => {
-    const recordVisit = async () => {
-      currentUser &&
-        (await recordActivity('view', 'Visited Coping Tools', 'Coping Page '));
-    };
-    recordVisit();
+    if (currentUser) recordActivity('view', 'Visited Coping Tools', 'CopingToolsPage');
   }, [currentUser]);
-  const handleGameClick = async (gameName: string) => {
-    currentUser &&
-      (await recordActivity(
-        'game-started',
-        'GamePage',
-        gameName
-      ));
+  const handleGameClick = (gameName: string) => {
+    if (currentUser) recordActivity('game-started', gameName, 'CopingToolsPage');
   };
   return (
     <MainLayout>
@@ -39,7 +32,23 @@ const CopingToolsPage = () => {
           Practice these techniques regularly for best results.
         </p>
 
-        <Tabs defaultValue="breathing" className="w-full">
+        {showHistory ? (
+          <div className="space-y-6">
+            <Button variant="outline" onClick={() => setShowHistory(false)}>
+              Back to Tools
+            </Button>
+            <h2 className="text-2xl font-semibold">Your Tool Activity</h2>
+            <ToolHistory />
+          </div>
+        ) : (
+        <>
+        <Tabs
+          defaultValue="breathing"
+          className="w-full"
+          onValueChange={(value) => {
+            if (currentUser) recordActivity('tab-switch', value, 'CopingToolsPage');
+          }}
+        >
           <TabsList className="grid grid-cols-4 mb-8">
             <TabsTrigger value="breathing" className="flex items-center gap-2">
               <Wind className="h-4 w-4" />
@@ -173,13 +182,8 @@ const CopingToolsPage = () => {
 
                     <Link
                       to="/interactive-tools/grounding"
-                      onClick={async () => {
-                        currentUser &&
-                          (await recordActivity(
-                            'Start Exercise',
-                            'Grounding Exercise',
-                            'Grounding Exercise Page'
-                          ));
+                      onClick={() => {
+                        if (currentUser) recordActivity('Start Exercise', 'Grounding Exercise', 'Grounding Exercise Page');
                       }}
                     >
                       <Button>Start Exercise</Button>
@@ -189,7 +193,28 @@ const CopingToolsPage = () => {
               </Card>
             </div>
           </TabsContent>
+
         </Tabs>
+
+        {isAuthenticated && (
+          <div className="flex justify-end mt-6">
+            <Button
+              variant="outline"
+              onClick={async () => {
+                setShowHistory(true);
+                if (currentUser) {
+                  await recordActivity('view', 'View Tool History', 'CopingToolsPage');
+                }
+              }}
+              className="flex items-center gap-2"
+            >
+              <LineChart className="h-4 w-4" />
+              View History
+            </Button>
+          </div>
+        )}
+        </>
+        )}
       </div>
     </MainLayout>
   );
@@ -202,38 +227,45 @@ interface StartExerciseButtonProps {
 const StartExerciseButton: React.FC<StartExerciseButtonProps> = ({
   exerciseType,
 }) => {
-  const [activeExercise, setActiveExercise] = useState<"4-7-8" | "box" | null>(null);
-  const [isPaused, setIsPaused] = useState(false);
-  const [inhaleDuration, setInhaleDuration] = useState(exerciseType === "4-7-8" ? 4 : 4,);
-  const [holdDuration, setHoldDuration] = useState(exerciseType === "4-7-8" ? 7 : 4,);
-  const [exhaleDuration, setExhaleDuration] = useState(exerciseType === "4-7-8" ? 8 : 4);  
+  const { currentUser } = useAuth();
+  const [showExercise, setShowExercise] = useState(false);
+  const inhaleDuration = exerciseType === "4-7-8" ? 4 : 4;
+  const holdDuration = exerciseType === "4-7-8" ? 7 : 4;
+  const exhaleDuration = exerciseType === "4-7-8" ? 8 : 4;
+  const cycles = 5;
 
   const handleStartExercise = () => {
-    setIsPaused(false);
-    setActiveExercise(exerciseType);
+    setShowExercise(true);
+    if (currentUser) {
+      recordActivity(
+        'exercise-started',
+        exerciseType === '4-7-8' ? '4-7-8 Breathing' : 'Box Breathing',
+        'CopingToolsPage'
+      );
+    }
   };
 
-  const handlePauseExercise = () => {
-    setIsPaused(true);
+  const handleExerciseComplete = () => {
+    if (currentUser) {
+      saveToolSession({
+        toolType: exerciseType === "4-7-8" ? "breathing-478" : "breathing-box",
+        details: { cycles },
+      });
+    }
   };
+
+  if (!showExercise) {
+    return <Button onClick={handleStartExercise}>Start Exercise</Button>;
+  }
 
   return (
-    <>
-      {activeExercise !== exerciseType ? (
-        <Button onClick={handleStartExercise}>Start Exercise</Button>
-      ) : (
-        <Button onClick={handlePauseExercise} variant="secondary">
-          Pause Exercise
-        </Button>
-      )}
-      {activeExercise === exerciseType && !isPaused && (
-        <GuidedBreathingExercise
-          inhaleDuration={inhaleDuration}
-          holdDuration={holdDuration}
-          exhaleDuration={exhaleDuration}
-        />
-      )}
-    </>
+    <GuidedBreathingExercise
+      inhaleDuration={inhaleDuration}
+      holdDuration={holdDuration}
+      exhaleDuration={exhaleDuration}
+      cycles={cycles}
+      onComplete={handleExerciseComplete}
+    />
   );
 };
 

@@ -1,8 +1,11 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Plot from 'react-plotly.js';
 import { useAuth } from '@/contexts/AuthContext';
 import { saveUserActivity } from '@/configs/firebase';
 import MainLayout from '@/components/layout/MainLayout';
+import LifestyleRiskPredictor from '@/components/assessment/LifestyleRiskPredictor';
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 interface DataPoint {
   Age: number;
@@ -18,136 +21,11 @@ interface DataPoint {
   Financial_Stress: string;
   Relationship_Issues: string;
 }
-const sampleData: DataPoint[] = [
-  {
-    Age: 25,
-    Gender: 'Male',
-    Region: 'North America',
-    Stress_Level: 7,
-    Anxiety_Level: 5,
-    Depression_Level: 3,
-    Sleep_Duration: 6.5,
-    Exercise_Frequency: 3,
-    Social_Media_Usage: 4,
-    Work_Hours: 45,
-    Financial_Stress: 'Yes',
-    Relationship_Issues: 'No',
-  },
-  {
-    Age: 32,
-    Gender: 'Female',
-    Region: 'Europe',
-    Stress_Level: 8,
-    Anxiety_Level: 7,
-    Depression_Level: 6,
-    Sleep_Duration: 5.5,
-    Exercise_Frequency: 2,
-    Social_Media_Usage: 5,
-    Work_Hours: 50,
-    Financial_Stress: 'Yes',
-    Relationship_Issues: 'Yes',
-  },
-  {
-    Age: 45,
-    Gender: 'Male',
-    Region: 'Asia',
-    Stress_Level: 6,
-    Anxiety_Level: 4,
-    Depression_Level: 3,
-    Sleep_Duration: 7,
-    Exercise_Frequency: 4,
-    Social_Media_Usage: 2,
-    Work_Hours: 40,
-    Financial_Stress: 'No',
-    Relationship_Issues: 'No',
-  },
-  {
-    Age: 29,
-    Gender: 'Female',
-    Region: 'South America',
-    Stress_Level: 9,
-    Anxiety_Level: 8,
-    Depression_Level: 7,
-    Sleep_Duration: 5,
-    Exercise_Frequency: 1,
-    Social_Media_Usage: 6,
-    Work_Hours: 55,
-    Financial_Stress: 'Yes',
-    Relationship_Issues: 'Yes',
-  },
-  {
-    Age: 38,
-    Gender: 'Male',
-    Region: 'Australia',
-    Stress_Level: 5,
-    Anxiety_Level: 3,
-    Depression_Level: 2,
-    Sleep_Duration: 7.5,
-    Exercise_Frequency: 5,
-    Social_Media_Usage: 3,
-    Work_Hours: 38,
-    Financial_Stress: 'No',
-    Relationship_Issues: 'No',
-  },
-  {
-    Age: 52,
-    Gender: 'Female',
-    Region: 'Africa',
-    Stress_Level: 7,
-    Anxiety_Level: 6,
-    Depression_Level: 5,
-    Sleep_Duration: 6,
-    Exercise_Frequency: 2,
-    Social_Media_Usage: 1,
-    Work_Hours: 42,
-    Financial_Stress: 'Yes',
-    Relationship_Issues: 'No',
-  },
-  {
-    Age: 22,
-    Gender: 'Male',
-    Region: 'North America',
-    Stress_Level: 8,
-    Anxiety_Level: 7,
-    Depression_Level: 6,
-    Sleep_Duration: 5.5,
-    Exercise_Frequency: 3,
-    Social_Media_Usage: 7,
-    Work_Hours: 30,
-    Financial_Stress: 'Yes',
-    Relationship_Issues: 'Yes',
-  },
-  {
-    Age: 41,
-    Gender: 'Female',
-    Region: 'Europe',
-    Stress_Level: 6,
-    Anxiety_Level: 5,
-    Depression_Level: 4,
-    Sleep_Duration: 6.5,
-    Exercise_Frequency: 4,
-    Social_Media_Usage: 3,
-    Work_Hours: 45,
-    Financial_Stress: 'No',
-    Relationship_Issues: 'No',
-  },
-  {
-    Age: 56,
-    Gender: 'Male',
-    Region: 'Europe',
-    Stress_Level: 10,
-    Anxiety_Level: 8,
-    Depression_Level: 5,
-    Sleep_Duration: 5.6,
-    Exercise_Frequency: 5,
-    Social_Media_Usage: 4,
-    Work_Hours: 51,
-    Financial_Stress: 'Yes',
-    Relationship_Issues: 'Yes',
-  },
-];
+
 const AnalysisPageUpdated = () => {
   const { currentUser } = useAuth();
+  const [sampleData, setSampleData] = useState<DataPoint[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const recordVisit = async () => {
@@ -165,10 +43,36 @@ const AnalysisPageUpdated = () => {
     };
     recordVisit();
   }, [currentUser]);
+
+  useEffect(() => {
+    const loadDataset = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/wellness-dataset-sample?n=300`);
+        if (res.ok) setSampleData(await res.json());
+      } catch (error) {
+        console.error('Error loading wellness dataset:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadDataset();
+  }, []);
+
   const regionCounts: { [key: string]: number } = {};
   sampleData.forEach((d) => {
     regionCounts[d.Region] = (regionCounts[d.Region] || 0) + d.Stress_Level;
   });
+
+  if (isLoading) {
+    return (
+      <MainLayout>
+        <div className="flex items-center justify-center py-24 text-muted-foreground">
+          Loading population analytics...
+        </div>
+      </MainLayout>
+    );
+  }
+
   return (
     <MainLayout>
       <style>{`
@@ -197,8 +101,12 @@ const AnalysisPageUpdated = () => {
           }
         }
       `}</style>
-      <div className="dashboard">
-        <h1 className="text-3xl font-bold mb-6"></h1>
+      <div className="dashboard px-6 md:px-12">
+        <h1 className="text-3xl font-bold mb-2">Wellness Analytics</h1>
+        <p className="text-sm text-muted-foreground mb-6 max-w-2xl">
+          Population-level patterns from a synthetic wellness dataset (not real patient data), powering the
+          machine learning model used below to estimate your own risk from lifestyle factors.
+        </p>
         <div className="chart-container">
           <div className="chart-box">
             <Plot
@@ -325,6 +233,10 @@ const AnalysisPageUpdated = () => {
             />
             <div className="chart-title">Social Media Users: Anxiety & Depression Heatmap</div>
           </div>
+        </div>
+
+        <div className="mt-4 mb-12">
+          <LifestyleRiskPredictor />
         </div>
       </div>
     </MainLayout>

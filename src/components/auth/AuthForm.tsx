@@ -11,6 +11,7 @@ import { Mail, Lock, Eye, EyeOff, User } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/components/ui/sonner';
 import ForgotPasswordForm from './ForgotPasswordForm';
+import { recordActivity } from '@/hooks/use-toast';
 
 interface AuthFormProps {
   defaultTab?: 'login' | 'signup';
@@ -261,7 +262,7 @@ const AuthForm = ({ defaultTab = 'login' }: AuthFormProps) => {
         </div>
       </CardContent>
       <CardFooter className="text-center text-xs text-muted-foreground">
-        By continuing, you agree to our <Button variant="link" className="p-0 h-auto text-xs" onClick={() => navigate('/privacy')}>Terms of Service</Button> and <Button variant="link" className="p-0 h-auto text-xs" onClick={() => navigate('/privacy')}>Privacy Policy</Button>.
+        By continuing, you agree to our <Button variant="link" className="p-0 h-auto text-xs" onClick={() => navigate('/terms')}>Terms of Service</Button> and <Button variant="link" className="p-0 h-auto text-xs" onClick={() => navigate('/privacy')}>Privacy Policy</Button>.
       </CardFooter>
     </Card>
   );

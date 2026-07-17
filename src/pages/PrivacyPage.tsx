@@ -1,9 +1,15 @@
+import { useEffect } from "react";
 import MainLayout from "@/components/layout/MainLayout";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
+import { recordActivity } from "@/hooks/use-toast";
 
 const PrivacyPage = () => {
+  useEffect(() => {
+    recordActivity("view", "Visited Privacy Page", "PrivacyPage");
+  }, []);
+
   return (
     <MainLayout>
       <div className="max-w-3xl mx-auto py-8">

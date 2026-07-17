@@ -5,6 +5,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Gamepad2, RefreshCcw, Check, Clock } from "lucide-react";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
+import { saveToolSession } from "@/configs/firebase";
 
 type GameLevel = {
   id: number;
@@ -65,6 +67,7 @@ const formatTime = (seconds: number): string => {
 };
 
 const WordZenGame = () => {
+  const { currentUser } = useAuth();
   const [selectedLevel, setSelectedLevel] = useState<GameLevel>(LEVELS[0]);
   const [currentCategory, setCurrentCategory] = useState(WORD_CATEGORIES[0]);
   const [grid, setGrid] = useState<Cell[][]>([]);
@@ -273,6 +276,12 @@ const WordZenGame = () => {
             toast.success("Congratulations! You found all words!", {
               duration: 5000
             });
+            if (currentUser) {
+              saveToolSession({
+                toolType: "word-zen",
+                details: { score: score + wordScore, difficulty: selectedLevel.difficulty, wordsFound: newFoundWords.length },
+              });
+            }
           }
           
           return;

@@ -1,0 +1,15 @@
+fastapi
+uvicorn[standard]
+google-genai
+python-dotenv
+pydantic
+faiss-cpu
+pypdf
+numpy
+python-multipart
+langfuse
+scikit-learn
+joblib
+pandas
+fpdf2
+resend

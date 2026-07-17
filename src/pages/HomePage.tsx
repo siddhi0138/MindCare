@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { useEffect } from "react";
-import { recordActivity } from "@/firebase/firebase-init";
+import { recordActivity } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react"; 
@@ -16,10 +16,7 @@ const HomePage = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    const recordVisit = async () => {
-      currentUser && (await recordActivity('visit', 'visit-home-page', 'HomePage'));
-    };
-    recordVisit();
+    if (currentUser) recordActivity('visit', 'visit-home-page', 'HomePage');
   }, [currentUser]);
 
   const handleQuickJournalClick = async () => {

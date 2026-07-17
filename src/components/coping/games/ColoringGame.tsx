@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
 import { RotateCcw, Download } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { saveToolSession } from "@/configs/firebase";
 
 const colors = [
   "#FF5733", // red-orange
@@ -52,6 +54,7 @@ const patterns = [
 ];
 
 const ColoringGame = () => {
+  const { currentUser } = useAuth();
   const [selectedColor, setSelectedColor] = useState(colors[0]);
   const [brushSize, setBrushSize] = useState(5);
   const [currentPattern, setCurrentPattern] = useState(patterns[0]);
@@ -223,6 +226,10 @@ const ColoringGame = () => {
     document.body.appendChild(downloadLink);
     downloadLink.click();
     document.body.removeChild(downloadLink);
+
+    if (currentUser) {
+      saveToolSession({ toolType: "coloring", details: { pattern: currentPattern.name } });
+    }
   };
 
   return (

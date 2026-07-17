@@ -13,6 +13,15 @@ dist
 dist-ssr
 *.local
 
+# Backend
+backend/.env
+backend/__pycache__/
+backend/venv/
+
+# Applied directly via Firebase Console — not tracked in git
+firestore.rules
+firestore.indexes.json
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
