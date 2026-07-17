@@ -5,6 +5,7 @@ import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 
 import AppRouter from './configs/router.tsx';
 import ReminderChecker from '@/components/common/ReminderChecker';
+import BackendWarmup from '@/components/common/BackendWarmup';
 
 
 const queryClient = new QueryClient();
@@ -15,6 +16,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <SonnerToaster />
+      <BackendWarmup />
       <ReminderChecker />
       <AppRouter />
 
