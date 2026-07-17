@@ -13,3 +13,5 @@ joblib
 pandas
 fpdf2
 resend
+google-auth
+requests

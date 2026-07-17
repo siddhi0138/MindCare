@@ -80,6 +80,15 @@ LANGFUSE_HOST=https://cloud.langfuse.com
 
 # Optional — enables emailed reports/reminders, get a key at https://resend.com/api-keys
 RESEND_API_KEY=
+
+# Optional — sends notification emails via Gmail API instead of Resend (works for any
+# recipient, not just the Resend account owner). Takes priority over RESEND_API_KEY above
+# when set. Requires a Google Cloud OAuth client with the gmail.send scope authorized
+# once against the sending Gmail account to get a refresh token.
+GMAIL_SENDER_EMAIL=
+GMAIL_CLIENT_ID=
+GMAIL_CLIENT_SECRET=
+GMAIL_REFRESH_TOKEN=
 ```
 
 Then run:

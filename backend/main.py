@@ -12,10 +12,10 @@ from google import genai
 from google.genai import types
 from pydantic import BaseModel
 
+import email_service
+import gmail_service
 from analytics import build_recommendation, classify_emotion, predict_mood_trend
 from crisis import CRISIS_RESPONSE, assess_risk
-from email_service import is_configured as is_email_configured
-from email_service import send_email, send_email_with_attachment
 from observability import trace_generation, usage_details_from_gemini
 from prompts import SYSTEM_PROMPT
 from rag import KnowledgeBase, extract_pdf_text
@@ -260,6 +260,38 @@ def predict_wellness_risk_endpoint(req: WellnessRiskRequest):
     return WellnessRiskResponse(**result)
 
 
+def is_email_configured() -> bool:
+    return gmail_service.is_configured() or email_service.is_configured()
+
+
+def send_email(to_email: str, subject: str, body: str) -> None:
+    if gmail_service.is_configured():
+        gmail_service.send_email(to_email=to_email, subject=subject, body=body)
+    else:
+        email_service.send_email(to_email=to_email, subject=subject, body=body)
+
+
+def send_email_with_attachment(
+    to_email: str, subject: str, body: str, attachment_bytes: bytes, attachment_filename: str
+) -> None:
+    if gmail_service.is_configured():
+        gmail_service.send_email_with_attachment(
+            to_email=to_email,
+            subject=subject,
+            body=body,
+            attachment_bytes=attachment_bytes,
+            attachment_filename=attachment_filename,
+        )
+    else:
+        email_service.send_email_with_attachment(
+            to_email=to_email,
+            subject=subject,
+            body=body,
+            attachment_bytes=attachment_bytes,
+            attachment_filename=attachment_filename,
+        )
+
+
 @app.get("/email-status")
 def email_status():
     return {"configured": is_email_configured()}
@@ -276,7 +308,7 @@ def send_notification_email_endpoint(req: NotificationEmailRequest):
     if not is_email_configured():
         raise HTTPException(
             status_code=503,
-            detail="Email sending isn't configured on the server yet. Add RESEND_API_KEY to backend/.env",
+            detail="Email sending isn't configured on the server yet. Add GMAIL_* or RESEND_API_KEY to backend/.env",
         )
     try:
         send_email(to_email=req.recipient_email, subject=req.subject, body=req.body)
@@ -300,7 +332,7 @@ def send_report_email_endpoint(req: EmailReportRequest):
     if not is_email_configured():
         raise HTTPException(
             status_code=503,
-            detail="Email sending isn't configured on the server yet. Add RESEND_API_KEY to backend/.env",
+            detail="Email sending isn't configured on the server yet. Add GMAIL_* or RESEND_API_KEY to backend/.env",
         )
 
     pdf_bytes = generate_assessment_report_pdf(req.user_name, [e.model_dump() for e in req.entries])
