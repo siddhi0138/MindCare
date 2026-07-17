@@ -13,6 +13,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { bookAppointment, saveUserActivity } from '@/configs/firebase';
 import { sendNotificationEmail } from '@/lib/notify';
 import { downloadIcsEvent } from '@/lib/ics';
+import { addEventToGoogleCalendar } from '@/lib/googleCalendar';
 
 interface Therapist {
   id: string;
@@ -95,6 +96,16 @@ const TherapistCard = ({
     }
 
     setIsBooking(true);
+    const googleCalendarResult = addToCalendar
+      ? await addEventToGoogleCalendar({
+          title: `${bookingType === 'video' ? 'Video Session' : 'Consultation'} with ${displayName}`,
+          description: `${bookingType === 'video' ? 'Video session' : 'Consultation'} booked via MindCare.`,
+          location: bookingType === 'video' ? 'Video call' : 'MindCare',
+          start: scheduledFor,
+          durationMinutes: 50,
+        })
+      : null;
+
     const result = await bookAppointment({
       therapistId: displayId,
       therapistName: displayName,
@@ -123,13 +134,17 @@ const TherapistCard = ({
         );
       }
       if (addToCalendar) {
-        downloadIcsEvent({
-          title: `${bookingType === 'video' ? 'Video Session' : 'Consultation'} with ${displayName}`,
-          description: `${bookingType === 'video' ? 'Video session' : 'Consultation'} booked via MindCare.`,
-          location: bookingType === 'video' ? 'Video call' : 'MindCare',
-          start: scheduledFor,
-          durationMinutes: 50,
-        });
+        if (googleCalendarResult?.success) {
+          toast.success('Added to Google Calendar');
+        } else {
+          downloadIcsEvent({
+            title: `${bookingType === 'video' ? 'Video Session' : 'Consultation'} with ${displayName}`,
+            description: `${bookingType === 'video' ? 'Video session' : 'Consultation'} booked via MindCare.`,
+            location: bookingType === 'video' ? 'Video call' : 'MindCare',
+            start: scheduledFor,
+            durationMinutes: 50,
+          });
+        }
       }
       setBookingType(null);
       onBooked?.();
@@ -264,7 +279,7 @@ const TherapistCard = ({
                 onChange={(e) => setAddToCalendar(e.target.checked)}
               />
               <label htmlFor="appointment-calendar" className="text-sm">
-                Add to my calendar (.ics download)
+                Add to my Google Calendar
               </label>
             </div>
           </div>

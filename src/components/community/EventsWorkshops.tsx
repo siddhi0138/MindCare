@@ -11,6 +11,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { rsvpToEvent, cancelEventRsvp, getUserEventRsvps, getEventAttendeeCounts, saveUserActivity } from "@/configs/firebase";
 import { sendNotificationEmail } from "@/lib/notify";
 import { downloadIcsEvent } from "@/lib/ics";
+import { addEventToGoogleCalendar } from "@/lib/googleCalendar";
 
 // Parses seed duration strings like "1.5 hours", "1 hour", "30 minutes" into minutes
 const parseDurationMinutes = (duration: string): number => {
@@ -159,6 +160,16 @@ const EventsWorkshops = ({ onRSVP }: EventsWorkshopsProps) => {
     if (!selectedEvent || !currentUser) return;
     const eventStart = new Date(`${selectedEvent.date}T${selectedEvent.time}`);
 
+    const googleCalendarResult = addToCalendar
+      ? await addEventToGoogleCalendar({
+          title: selectedEvent.title,
+          description: selectedEvent.description,
+          location: selectedEvent.location,
+          start: eventStart,
+          durationMinutes: parseDurationMinutes(selectedEvent.duration),
+        })
+      : null;
+
     const result = await rsvpToEvent(currentUser.id, selectedEvent.id, selectedEvent.title, eventStart, sendReminder);
     if (result.success) {
       setRsvpedEventIds((prev) => [...prev, selectedEvent.id]);
@@ -184,13 +195,17 @@ const EventsWorkshops = ({ onRSVP }: EventsWorkshopsProps) => {
       }
 
       if (addToCalendar) {
-        downloadIcsEvent({
-          title: selectedEvent.title,
-          description: selectedEvent.description,
-          location: selectedEvent.location,
-          start: eventStart,
-          durationMinutes: parseDurationMinutes(selectedEvent.duration),
-        });
+        if (googleCalendarResult?.success) {
+          toast.success("Added to Google Calendar");
+        } else {
+          downloadIcsEvent({
+            title: selectedEvent.title,
+            description: selectedEvent.description,
+            location: selectedEvent.location,
+            start: eventStart,
+            durationMinutes: parseDurationMinutes(selectedEvent.duration),
+          });
+        }
       }
     } else {
       toast.error("Could not RSVP", { description: "Please try again in a moment." });
@@ -344,7 +359,7 @@ const EventsWorkshops = ({ onRSVP }: EventsWorkshopsProps) => {
                 checked={addToCalendar}
                 onChange={(e) => setAddToCalendar(e.target.checked)}
               />
-              <label htmlFor="add-calendar">Add to my calendar (.ics download)</label>
+              <label htmlFor="add-calendar">Add to my Google Calendar</label>
             </div>
           </div>
           <DialogFooter>
