@@ -227,8 +227,7 @@ const EventsWorkshops = ({ onRSVP }: EventsWorkshopsProps) => {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-semibold">Events & Workshops</h2>
+      <div className="flex justify-end items-center mb-6">
         <Button variant="outline" className="flex items-center gap-2">
           <Filter size={16} />
           <span>Filter Events</span>

@@ -172,8 +172,7 @@ const ChatRooms = ({ onJoinRoom }: ChatRoomsProps) => {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-semibold">Chat Rooms</h2>
+      <div className="flex justify-end items-center mb-6">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Shield size={16} />
           <span>All chats are moderated for safety</span>

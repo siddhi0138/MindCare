@@ -206,8 +206,17 @@ const SupportGroups = ({ onJoinGroup }: SupportGroupsProps) => {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-semibold">Support Groups</h2>
+      <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
+        <Tabs value={activeCategory} onValueChange={setActiveCategory}>
+          <TabsList>
+            <TabsTrigger value="all">All Groups</TabsTrigger>
+            <TabsTrigger value="anxiety">Anxiety</TabsTrigger>
+            <TabsTrigger value="depression">Depression</TabsTrigger>
+            <TabsTrigger value="grief">Grief</TabsTrigger>
+            <TabsTrigger value="trauma">Trauma</TabsTrigger>
+          </TabsList>
+        </Tabs>
+
         <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
           <DialogTrigger asChild>
             <Button className="flex items-center gap-2">
@@ -268,16 +277,6 @@ const SupportGroups = ({ onJoinGroup }: SupportGroupsProps) => {
           </DialogContent>
         </Dialog>
       </div>
-
-      <Tabs value={activeCategory} onValueChange={setActiveCategory} className="mb-6">
-        <TabsList>
-          <TabsTrigger value="all">All Groups</TabsTrigger>
-          <TabsTrigger value="anxiety">Anxiety</TabsTrigger>
-          <TabsTrigger value="depression">Depression</TabsTrigger>
-          <TabsTrigger value="grief">Grief</TabsTrigger>
-          <TabsTrigger value="trauma">Trauma</TabsTrigger>
-        </TabsList>
-      </Tabs>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {visibleGroups.map((group) => {
