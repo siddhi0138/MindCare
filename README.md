@@ -26,15 +26,18 @@ data persistence (Firebase/Firestore) and AI features (Google Gemini via a Pytho
 - **Reminders** — custom reminders, plus email reminders for upcoming therapist appointments and event RSVPs
   (starting 5 days out, daily, via a backend email service).
 - **Community** — real-time chat rooms, support groups (joinable and creatable), and events with RSVP,
-  `.ics` calendar download, and email confirmation.
+  direct Google Calendar sync (falls back to `.ics` download if declined), and email confirmation.
 - **Therapist Directory** — search/filter by location, availability, and specialty; book consultations or
-  video sessions with a simulated video-call screen, and manage upcoming/past appointments.
+  video sessions with a simulated video-call screen, sync the appointment straight to Google Calendar, and
+  manage upcoming/past appointments.
 - **Emergency SOS** — one-tap access to crisis helplines (India and international).
 
 ## Tech Stack
 
-**Frontend:** React, TypeScript, Vite, shadcn-ui, Tailwind CSS, React Router, Recharts, Plotly
-**Backend:** FastAPI (Python), Google Gemini (`google-genai`), scikit-learn, FAISS (RAG), fpdf2, Resend
+**Frontend:** React, TypeScript, Vite, shadcn-ui, Tailwind CSS, React Router, Recharts, Plotly, Google Identity
+Services (Calendar OAuth)
+**Backend:** FastAPI (Python), Google Gemini (`google-genai`), scikit-learn, FAISS (RAG), fpdf2, Gmail API,
+Resend
 **Data:** Firebase Auth + Firestore
 **Observability:** Langfuse (optional, traces Gemini calls)
 
@@ -57,6 +60,13 @@ The frontend runs on `http://localhost:8080` by default and talks to the backend
 (override with a `VITE_API_URL` env var if needed). Firebase config is already set in
 `src/configs/firebase.ts`, pointed at this project's Firebase instance — Firestore security rules and
 indexes are managed directly in the Firebase Console, not checked into this repo.
+
+Optional — direct "Add to Google Calendar" on event RSVPs and therapist bookings needs a
+`VITE_GOOGLE_CLIENT_ID` env var (`.env.local` for dev, `.env.production` for the deployed build). Create an
+OAuth client at [console.cloud.google.com](https://console.cloud.google.com) (enable the Google Calendar
+API, set up the OAuth consent screen, then create a **Web application** OAuth client with your app's origins
+listed under Authorized JavaScript origins — no redirect URI needed). Without this set, the calendar
+checkbox falls back to the `.ics` download automatically.
 
 ### Backend
 
