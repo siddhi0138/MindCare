@@ -1,124 +1,96 @@
-# Your Mental Buddy
+# MindCare
 
-## About Your Mental Buddy
+## About
 
-Your Mental Buddy is a mental health application designed to support users in managing their mental well-being. It provides a comprehensive suite of tools and resources, including self-assessments, mood tracking, coping mechanisms, educational content, and community support features. The application aims to provide a supportive and user-friendly environment where individuals can easily access the resources they need to improve and maintain their mental health.
-
-Your Mental Buddy offers tools such as guided meditations, therapeutic coloring games, and cognitive exercises, alongside resources like articles, support groups, and therapist directories. The application also supports users by providing a platform for self-expression through journaling and mood tracking, and by offering emergency support resources for immediate help.
-
-## Target Users
-
-This application is designed for:
-
-*   Individuals looking to improve their mental health.
-*   People experiencing stress, anxiety, or depression.
-*   Anyone seeking a convenient way to access mental health support and resources.
+MindCare is a mental health application that helps users manage their well-being through self-assessments,
+mood tracking, journaling, guided coping tools, community support, and access to therapists — backed by real
+data persistence (Firebase/Firestore) and AI features (Google Gemini via a Python backend).
 
 ## Key Features
 
-### Pages
+### Mental Health Tools
 
-*   **Assessment Page:** Allows users to take self-assessments for anxiety, stress, and depression. This feature helps users understand their mental state and identify areas that need attention.
-*   **Chat Page:** Enables users to communicate with support groups or therapists. This feature fosters a sense of community and provides access to professional help.
-*   **ColoringGamePage:** Offers a therapeutic coloring game for relaxation. This feature promotes mindfulness and reduces stress through a creative and calming activity.
-*   **Community Page:** Provides a platform for users to connect and support each other. This feature helps users share experiences, offer encouragement, and build a supportive network.
-*   **CopingToolsPage:** Offers various coping mechanisms and tools for managing stress and emotions. This feature equips users with practical techniques to handle difficult situations and emotions.
-*   **ExercisesPage:** Features physical exercises to improve mental well-being. This feature promotes physical health, which is closely linked to mental well-being.
-*   **FindTheBallGamePage:** Includes a simple game to distract and calm users. This feature provides a quick and easy way to shift focus and reduce anxiety.
-*   **GroundingExercisePage:** Provides exercises to help users stay present and grounded. This feature helps users manage dissociation and anxiety by focusing on the present moment.
-*   **JournalPage:** Allows users to maintain a personal journal for self-reflection. This feature encourages self-awareness and helps users process their thoughts and emotions.
-*   **MeditationPage:** Offers guided meditation sessions for relaxation. This feature promotes relaxation, reduces stress, and improves focus.
-*   **MemoryGamePage:** A memory game to improve cognitive function and provide a calming activity. This feature offers a gentle mental workout that can be both stimulating and relaxing.
-*   **ResourcesPage:** Provides access to educational materials and resources on mental health. This feature empowers users with knowledge and information to better understand and manage their mental health.
-*   **TherapistPage:** Helps users find and connect with therapists. This feature streamlines the process of finding professional mental health support.
-*   **WordZenPage:** A word puzzle game designed to promote relaxation and focus. This feature provides a calming and engaging mental activity.
+- **Assessments** — anxiety, depression, and stress questionnaires with a history view (select entries to
+  download as PDF, email, or delete individually or in bulk).
+- **AI Wellness Chat** — a Gemini-powered assistant with crisis detection, RAG over a mental-health knowledge
+  base (with PDF upload to expand it), voice input, and persisted conversation history.
+- **Journal** — entries with mood tagging, a calendar view, and streak tracking; journal mood feeds into
+  Mood Trends alongside the dedicated Mood Tracker.
+- **Coping Tools** — guided breathing exercises, grounding exercises, affirmations, and relaxation games
+  (Memory, Word Zen, Coloring, Find the Ball), each logged to a tool-activity history.
+- **Progress Dashboard** — Mood Trends, Emotion Distribution, coping-tool activity, journaling streaks, an
+  achievements system, and AI-generated mood forecasts/recommendations.
+- **Lifestyle Risk Predictor** — a scikit-learn model estimates stress/anxiety/depression risk from lifestyle
+  inputs, with a saved prediction history.
+- **Resources** — articles, podcasts, and videos, bookmarkable to a personal "Saved" list.
+- **Reminders** — custom reminders, plus email reminders for upcoming therapist appointments and event RSVPs
+  (starting 5 days out, daily, via a backend email service).
+- **Community** — real-time chat rooms, support groups (joinable and creatable), and events with RSVP,
+  `.ics` calendar download, and email confirmation.
+- **Therapist Directory** — search/filter by location, availability, and specialty; book consultations or
+  video sessions with a simulated video-call screen, and manage upcoming/past appointments.
+- **Emergency SOS** — one-tap access to crisis helplines (India and international).
 
-### Components
+## Tech Stack
 
-*   **AffirmationCards:** Displays positive affirmations to boost mood and self-esteem. This component helps users cultivate a more positive mindset.
-*   **AffirmationGenerator:** Generates personalized affirmations for users. This component tailors positive messages to individual needs and preferences.
-*   **CustomReminders:** Allows users to set custom reminders for self-care activities. This component helps users integrate self-care into their daily routines.
-*   **ProgressDashboard:** Visualizes user progress and achievements in managing their mental health. This component motivates users by showing their progress over time.
-*   **MoodTracker:** Tracks user's mood over time, providing insights into their emotional patterns. This component helps users understand their emotional trends and triggers.
-*   **JournalEditor:** Enables users to write and edit journal entries. This component provides a user-friendly interface for journaling.
-*   **MoodJournalEntry:** Records daily mood entries with optional notes. This component allows users to log their daily emotional state and any relevant context.
-*   **EmergencySOS:** Provides quick access to emergency mental health resources. This component ensures users can quickly access help in crisis situations.
-
-## Technologies Used
-
-Your Mental Buddy is built using the following technologies:
-
-*   **Framework:** React
-*   **Language:** TypeScript
-*   **Build Tool:** Vite
-*   **UI Library:** shadcn-ui
-*   **Styling:** Tailwind CSS
+**Frontend:** React, TypeScript, Vite, shadcn-ui, Tailwind CSS, React Router, Recharts, Plotly
+**Backend:** FastAPI (Python), Google Gemini (`google-genai`), scikit-learn, FAISS (RAG), fpdf2, Resend
+**Data:** Firebase Auth + Firestore
+**Observability:** Langfuse (optional, traces Gemini calls)
 
 ## Getting Started
-
-To run Your Mental Buddy locally, follow these steps:
 
 ### Prerequisites
 
-Ensure you have the following installed:
+- **Node.js** (LTS) and npm — [nodejs.org](https://nodejs.org/)
+- **Python 3.11+**
+- A **Google Gemini API key** — [ai.google.dev](https://ai.google.dev/)
 
-*   **Node.js:** You can download it from [nodejs.org](https://nodejs.org/). We recommend using the LTS version.
-*   **npm:** npm is included with Node.js. To check if you have it installed, run `npm -v` in your terminal.
-
-### Installation
-
-1.  **Clone the repository:**
-
-    
-
-## Getting Started
-
-To run Your Mental Buddy locally, follow these steps:
-
-1.  **Clone the repository:** Use your preferred IDE to clone the repository.
-
-    
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. 
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+### Frontend
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory
-cd <YOUR_PROJECT_DIRECTORY>
-
-# Step 3: Install dependencies
 npm install
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+The frontend runs on `http://localhost:8080` by default and talks to the backend at `http://localhost:8000`
+(override with a `VITE_API_URL` env var if needed). Firebase config is already set in
+`src/configs/firebase.ts`, pointed at this project's Firebase instance — Firestore security rules and
+indexes are managed directly in the Firebase Console, not checked into this repo.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Backend
 
-**Use GitHub Codespaces**
+```sh
+cd backend
+python -m venv venv
+venv\Scripts\activate        # Windows
+# source venv/bin/activate   # macOS/Linux
+pip install -r requirements.txt
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+Create `backend/.env`:
+
+```
+GEMINI_API_KEY=your_key_here
+
+# Optional — Gemini call tracing, get free keys at https://cloud.langfuse.com
+LANGFUSE_PUBLIC_KEY=
+LANGFUSE_SECRET_KEY=
+LANGFUSE_HOST=https://cloud.langfuse.com
+
+# Optional — enables emailed reports/reminders, get a key at https://resend.com/api-keys
+RESEND_API_KEY=
+```
+
+Then run:
+
+```sh
+uvicorn main:app --reload --port 8000
+```
+
+Both the frontend and backend need to be running for the app to be fully functional — chat, AI insights,
+the risk predictor, and emailed reports/reminders all depend on the backend.
 
 ## How to Contribute
 
-We welcome contributions and feedback! If you have suggestions or want to report issues, please open an issue on our GitHub repository.
-
-## Next Steps
-
-*   Explore the application's features.
-*   Provide feedback and report any issues.
-*   Consider contributing to the project by submitting pull requests.
+Contributions and feedback are welcome — open an issue or submit a pull request.
