@@ -45,6 +45,10 @@ app = FastAPI(title="MindCare AI Backend")
 
 app.add_middleware(
     CORSMiddleware,
+    allow_origins=[
+        "https://your-mental-buddy.web.app",
+        "https://your-mental-buddy.firebaseapp.com",
+    ],
     allow_origin_regex=r"http://localhost:\d+",
     allow_methods=["*"],
     allow_headers=["*"],
