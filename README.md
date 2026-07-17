@@ -62,9 +62,11 @@ achievements system that rewards consistency, and AI-generated forecasts that fl
 heading next.
 
 ### 🔮 Lifestyle Risk Predictor
-A scikit-learn model trained to estimate stress, anxiety, and depression risk from everyday lifestyle
-inputs — sleep, exercise, work hours, social support, and more — with every prediction saved to a personal
-history.
+A Ridge regression model estimates stress, anxiety, and depression risk from everyday lifestyle inputs —
+sleep, exercise, work hours, social support, and more — with every prediction saved to a personal history.
+The model isn't a default pick: `backend/ml/train_model.py` cross-validates it against Linear Regression,
+Random Forest, and Gradient Boosting, and Ridge wins on every target (see
+[`model_comparison.json`](backend/ml/models/model_comparison.json)).
 
 ### 📚 Resources
 A curated library of articles, podcasts, and videos on mental health topics, with a one-tap "Save" to build
@@ -95,7 +97,7 @@ away, no matter where you are in the app.
 | Layer | Stack |
 |---|---|
 | Frontend | React · TypeScript · Vite · shadcn-ui · Tailwind CSS · React Router · Recharts · Plotly · Google Identity Services (Calendar OAuth) |
-| Backend | FastAPI (Python) · Google Gemini (`google-genai`) · scikit-learn · FAISS (RAG) · fpdf2 · Gmail API · Resend |
+| Backend | FastAPI (Python) · Google Gemini (`google-genai`) · scikit-learn (Ridge regression, cross-validated) · FAISS (RAG) · fpdf2 · Gmail API · Resend |
 | Data | Firebase Auth + Firestore |
 | Observability | Langfuse — optional, traces Gemini calls |
 
