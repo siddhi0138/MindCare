@@ -90,6 +90,10 @@ your upcoming and past appointments in one place.
 One-tap access to crisis helplines, covering both India and international numbers — always just one tap
 away, no matter where you are in the app.
 
+### 📱 Mobile-First
+A persistent bottom navigation bar, touch-friendly tab bars, and responsive charts, games, and dashboards
+mean the app is built to feel native on a phone first — not just shrunk down from desktop.
+
 <br>
 
 ## 🛠️ Tech Stack
