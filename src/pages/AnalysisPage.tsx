@@ -80,20 +80,30 @@ const AnalysisPageUpdated = () => {
           display: flex;
           flex-wrap: wrap;
           justify-content: space-between;
-          padding: 60px;
+          padding: 16px;
           gap: 25px;
         }
         .chart-box {
           width: 48%;
+          min-width: 0;
           display: flex;
           flex-direction: column;
           align-items: center;
+        }
+        .chart-box .js-plotly-plot,
+        .chart-box .plot-container {
+          width: 100% !important;
         }
         .chart-title {
           margin-top: 10px;
           font-weight: bold;
           text-align: center;
           font-size: 16px;
+        }
+        @media (min-width: 768px) {
+          .chart-container {
+            padding: 60px;
+          }
         }
         @media (max-width: 768px) {
           .chart-box {
@@ -111,6 +121,7 @@ const AnalysisPageUpdated = () => {
           <div className="chart-box">
             <Plot
               style={{ width: '100%' }}
+              useResizeHandler={true}
               data={[
                 {
                   x: [
@@ -133,7 +144,7 @@ const AnalysisPageUpdated = () => {
                   marker: { color: 'teal' },
                 },
               ]}
-              layout={{ margin: { t: 30, b: 30 } }}
+              layout={{ autosize: true, margin: { t: 30, b: 30 } }}
             />
             <div className="chart-title">Major Causes of Stress</div>
           </div>
@@ -141,6 +152,7 @@ const AnalysisPageUpdated = () => {
           <div className="chart-box">
             <Plot
               style={{ width: '100%' }}
+              useResizeHandler={true}
               data={[
                 {
                   x: sampleData.map((d) => d.Age),
@@ -150,7 +162,7 @@ const AnalysisPageUpdated = () => {
                   line: { color: 'purple' },
                 },
               ]}
-              layout={{ margin: { t: 30, b: 30 } }}
+              layout={{ autosize: true, margin: { t: 30, b: 30 } }}
             />
             <div className="chart-title">Stress Level by Age</div>
           </div>
@@ -158,6 +170,7 @@ const AnalysisPageUpdated = () => {
           <div className="chart-box">
             <Plot
               style={{ width: '100%' }}
+              useResizeHandler={true}
               data={[
                 {
                   x: sampleData.map((d) => d.Sleep_Duration),
@@ -172,6 +185,7 @@ const AnalysisPageUpdated = () => {
                 },
               ]}
               layout={{
+                autosize: true,
                 xaxis: { title: 'Sleep Duration' },
                 yaxis: { title: 'Stress Level' },
                 margin: { t: 30, b: 30 },
@@ -183,6 +197,7 @@ const AnalysisPageUpdated = () => {
           <div className="chart-box">
             <Plot
               style={{ width: '100%' }}
+              useResizeHandler={true}
               data={[
                 {
                   type: 'pie',
@@ -192,7 +207,7 @@ const AnalysisPageUpdated = () => {
                   hole: 0.4,
                 },
               ]}
-              layout={{ margin: { t: 30, b: 30 } }}
+              layout={{ autosize: true, margin: { t: 30, b: 30 } }}
             />
             <div className="chart-title">Stress Distribution by Region</div>
           </div>
@@ -200,6 +215,7 @@ const AnalysisPageUpdated = () => {
           <div className="chart-box">
             <Plot
               style={{ width: '100%' }}
+              useResizeHandler={true}
               data={[
                 {
                   y: sampleData.map((d) => d.Stress_Level),
@@ -209,6 +225,7 @@ const AnalysisPageUpdated = () => {
                 },
               ]}
               layout={{
+                autosize: true,
                 xaxis: { title: 'Exercise Frequency' },
                 yaxis: { title: 'Stress Level' },
                 margin: { t: 30, b: 30 },
@@ -220,6 +237,7 @@ const AnalysisPageUpdated = () => {
           <div className="chart-box">
             <Plot
               style={{ width: '100%' }}
+              useResizeHandler={true}
               data={[
                 {
                   z: sampleData.map((d) => [d.Anxiety_Level, d.Depression_Level]),
@@ -229,7 +247,7 @@ const AnalysisPageUpdated = () => {
                   colorscale: 'YlOrRd',
                 },
               ]}
-              layout={{ margin: { t: 30, b: 30 } }}
+              layout={{ autosize: true, margin: { t: 30, b: 30 } }}
             />
             <div className="chart-title">Social Media Users: Anxiety & Depression Heatmap</div>
           </div>

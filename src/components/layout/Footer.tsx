@@ -6,7 +6,7 @@ import { Heart, Phone } from 'lucide-react';
 
 const Footer = () => {
   return (
-    <footer className="bg-background border-t py-10 px-6">
+    <footer className="bg-background border-t pt-10 px-6 pb-24 md:pb-10">
       <div className="container mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 md:gap-8">
           <div className="col-span-1 md:col-span-1">

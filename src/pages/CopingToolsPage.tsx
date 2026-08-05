@@ -50,21 +50,21 @@ const CopingToolsPage = () => {
           }}
         >
           <TabsList className="grid grid-cols-4 mb-8">
-            <TabsTrigger value="breathing" className="flex items-center gap-2">
-              <Wind className="h-4 w-4" />
-              <span>Breathing</span>
+            <TabsTrigger value="breathing" className="flex items-center gap-1.5 sm:gap-2 px-1">
+              <Wind className="h-4 w-4 shrink-0" />
+              <span className="hidden sm:inline">Breathing</span>
             </TabsTrigger>
-            <TabsTrigger value="affirmations" className="flex items-center gap-2">
-              <Heart className="h-4 w-4" />
-              <span>Affirmations</span>
+            <TabsTrigger value="affirmations" className="flex items-center gap-1.5 sm:gap-2 px-1">
+              <Heart className="h-4 w-4 shrink-0" />
+              <span className="hidden sm:inline">Affirmations</span>
             </TabsTrigger>
-            <TabsTrigger value="games" className="flex items-center gap-2">
-              <Gamepad2 className="h-4 w-4" />
-              <span>Games</span>
+            <TabsTrigger value="games" className="flex items-center gap-1.5 sm:gap-2 px-1">
+              <Gamepad2 className="h-4 w-4 shrink-0" />
+              <span className="hidden sm:inline">Games</span>
             </TabsTrigger>
-            <TabsTrigger value="grounding" className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4" />
-              <span>Grounding</span>
+            <TabsTrigger value="grounding" className="flex items-center gap-1.5 sm:gap-2 px-1">
+              <Sparkles className="h-4 w-4 shrink-0" />
+              <span className="hidden sm:inline">Grounding</span>
             </TabsTrigger>
           </TabsList>
 

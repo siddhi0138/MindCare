@@ -137,7 +137,7 @@ const ResourcesPage = () => {
 
           <TabsContent value="saved" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {!currentUser ? (
-              <div className="col-span-3 py-12 text-center">
+              <div className="col-span-1 md:col-span-2 lg:col-span-3 py-12 text-center">
                 <h3 className="text-xl font-medium mb-2">Log in to save resources</h3>
                 <p className="text-muted-foreground">Your bookmarked articles, podcasts, and videos will show up here.</p>
               </div>
@@ -157,7 +157,7 @@ const ResourcesPage = () => {
                 />
               ))
             ) : (
-              <div className="col-span-3 py-12 text-center">
+              <div className="col-span-1 md:col-span-2 lg:col-span-3 py-12 text-center">
                 <h3 className="text-xl font-medium mb-2">Nothing saved yet</h3>
                 <p className="text-muted-foreground">Tap the bookmark icon on any resource to save it here.</p>
               </div>
@@ -181,7 +181,7 @@ const ResourcesPage = () => {
                 />
               ))
             ) : (
-              <div className="col-span-3 py-12 text-center">
+              <div className="col-span-1 md:col-span-2 lg:col-span-3 py-12 text-center">
                 <h3 className="text-xl font-medium mb-2">No resources found</h3>
                 <p className="text-muted-foreground">Try adjusting your search or filter criteria</p>
               </div>
@@ -204,7 +204,7 @@ const ResourcesPage = () => {
                         onBookmarkToggle={() => toggleBookmark(resource.id)}
                     />
                 ))):(
-              <div className="col-span-3 py-12 text-center">
+              <div className="col-span-1 md:col-span-2 lg:col-span-3 py-12 text-center">
                 <h3 className="text-xl font-medium mb-2">No resources found</h3>
                 <p className="text-muted-foreground">Try adjusting your search or filter criteria</p>
               </div>
@@ -228,7 +228,7 @@ const ResourcesPage = () => {
                   onBookmarkToggle={() => toggleBookmark(resource.id)}
                 />
               ))):(
-                <div className="col-span-3 py-12 text-center">
+                <div className="col-span-1 md:col-span-2 lg:col-span-3 py-12 text-center">
                 <h3 className="text-xl font-medium mb-2">No resources found</h3>
                 <p className="text-muted-foreground">Try adjusting your search or filter criteria</p>
               </div>

@@ -303,9 +303,9 @@ const LifestyleRiskPredictor = () => {
             ) : (
               <div className="space-y-2">
                 {history.map((entry) => (
-                  <div key={entry.id} className="flex items-center justify-between border rounded-lg p-3 text-sm">
+                  <div key={entry.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border rounded-lg p-3 text-sm">
                     <span className="text-muted-foreground">{entry.timestamp.toDate().toLocaleString()}</span>
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2">
                       <Badge className={levelColor(entry.stress.level)}>Stress: {entry.stress.level}</Badge>
                       <Badge className={levelColor(entry.anxiety.level)}>Anxiety: {entry.anxiety.level}</Badge>
                       <Badge className={levelColor(entry.depression.level)}>Depression: {entry.depression.level}</Badge>

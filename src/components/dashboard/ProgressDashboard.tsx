@@ -148,7 +148,7 @@ const ProgressDashboard = ({ userId }: ProgressDashboardProps) => {
       <AIInsights userId={userId} />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="border-primary/10 col-span-2">
+        <Card className="border-primary/10 md:col-span-2">
           <CardHeader className="pb-2">
             <CardTitle className="text-lg font-medium">Mood Trends</CardTitle>
           </CardHeader>

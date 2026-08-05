@@ -50,6 +50,23 @@ const FindTheBall = () => {
   const cupWidth = 100;
   const cupSpacing = 150;
   const containerWidth = cupSpacing * 3;
+  const gameAreaHeight = 192; // matches h-48
+
+  const gameWrapperRef = useRef<HTMLDivElement>(null);
+  const [gameScale, setGameScale] = useState(1);
+
+  useEffect(() => {
+    const el = gameWrapperRef.current;
+    if (!el) return;
+    const updateScale = () => {
+      const available = el.clientWidth;
+      if (available > 0) setGameScale(Math.min(1, available / containerWidth));
+    };
+    updateScale();
+    const observer = new ResizeObserver(updateScale);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   // Sound Effect Refs
   const shuffleSoundRef = useRef<HTMLAudioElement>(null);
@@ -294,7 +311,7 @@ const FindTheBall = () => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row gap-8 items-start max-w-4xl mx-auto my-8"> {/* Flex layout for game + leaderboard */}
+    <div className="flex flex-col md:flex-row gap-8 items-stretch md:items-start max-w-4xl mx-auto my-8"> {/* Flex layout for game + leaderboard */}
         {/* Game Card */}
         <Card className="flex-grow"> {/* Game takes available space */}
           <CardHeader className="text-center relative">
@@ -319,10 +336,21 @@ const FindTheBall = () => {
           </CardHeader>
           <CardContent>
             <div
-                className="flex justify-start items-center h-48 mb-6 relative"
-                style={{ width: `${containerWidth}px`, margin: '0 auto' }}
+              ref={gameWrapperRef}
+              className="w-full mb-6"
+              style={{ height: gameAreaHeight * gameScale }}
             >
-              {[0, 1, 2].map(index => renderCup(index))}
+              <div
+                  className="flex justify-start items-center h-48 relative"
+                  style={{
+                    width: `${containerWidth}px`,
+                    margin: '0 auto',
+                    transform: `scale(${gameScale})`,
+                    transformOrigin: 'top center',
+                  }}
+              >
+                {[0, 1, 2].map(index => renderCup(index))}
+              </div>
             </div>
 
             <div className="text-center text-lg text-muted-foreground min-h-[28px] mb-6">

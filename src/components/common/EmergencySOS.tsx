@@ -101,7 +101,7 @@ const EmergencySOS = () => {
   return (
     <>
       <Button
-        className="fixed right-6 bottom-6 rounded-full h-12 w-12 shadow-lg z-40 flex items-center justify-center p-0"
+        className="fixed right-4 bottom-20 md:right-6 md:bottom-6 rounded-full h-12 w-12 shadow-lg z-40 flex items-center justify-center p-0"
         variant="destructive"
         onClick={handleOpen}
       >

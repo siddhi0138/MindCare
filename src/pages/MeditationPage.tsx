@@ -110,13 +110,13 @@ const MeditationPage = () => {
   return (
     <MainLayout>
       <div className="max-w-6xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">Guided Meditations</h1>
-          <div className="relative">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold">Guided Meditations</h1>
+          <div className="relative w-full sm:w-auto">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search meditations..."
-              className="pl-10 w-[250px]"
+              className="pl-10 w-full sm:w-[250px]"
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>

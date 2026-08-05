@@ -634,7 +634,7 @@ const ChatInterface = () => {
   };
 
   return (
-    <Card className="border-primary/10 h-[600px] flex flex-col">
+    <Card className="border-primary/10 h-[calc(100vh-260px)] min-h-[420px] sm:h-[600px] flex flex-col">
       <CardHeader className="pb-2">
         <div className="flex justify-between items-center">
           <CardTitle className="flex items-center gap-2">

@@ -2,16 +2,18 @@
 import { PropsWithChildren } from 'react';
 import Header from './Header';
 import Footer from './Footer';
+import BottomNav from './BottomNav';
 import EmergencySOS from '../common/EmergencySOS';
 
 const MainLayout = ({ children }: PropsWithChildren) => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header/>
-      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 pb-20 md:pb-6">
         {children}
       </main>
       <Footer />
+      <BottomNav />
       <EmergencySOS />
     </div>
   );

@@ -87,14 +87,14 @@ const AppointmentsList = ({ mode, refreshKey }: AppointmentsListProps) => {
     <div className="space-y-4">
       {appointments.map((appointment) => (
         <Card key={appointment.id} className="border-primary/10">
-          <CardContent className="p-4 flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="p-2 rounded-full bg-primary/10">
+          <CardContent className="p-4 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-4 min-w-0">
+              <div className="p-2 rounded-full bg-primary/10 shrink-0">
                 {appointment.type === 'video' ? <Video className="h-4 w-4" /> : <CalendarClock className="h-4 w-4" />}
               </div>
-              <div>
-                <h4 className="font-medium">{appointment.therapistName}</h4>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <div className="min-w-0">
+                <h4 className="font-medium truncate md:whitespace-normal md:overflow-visible">{appointment.therapistName}</h4>
+                <div className="flex items-center flex-wrap gap-2 text-sm text-muted-foreground">
                   <span>{appointment.scheduledFor.toDate().toLocaleString()}</span>
                   <Badge variant="outline" className="capitalize">{appointment.type}</Badge>
                   {appointment.status === 'cancelled' && <Badge variant="destructive">Cancelled</Badge>}

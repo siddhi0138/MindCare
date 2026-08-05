@@ -40,7 +40,7 @@ const ResourceDetailPage = () => {
           className="w-full h-64 object-cover rounded mb-6"
         />
         <p className="mb-4 text-muted-foreground">{resource.description}</p>
-        <div className="flex gap-4 text-sm text-muted-foreground mb-8">
+        <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-8">
           <span>Category: {resource.category}</span>
           <span>Read Time: {resource.readTime}</span>
           <span>Author: {resource.author}</span>

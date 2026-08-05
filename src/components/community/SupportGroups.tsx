@@ -207,8 +207,8 @@ const SupportGroups = ({ onJoinGroup }: SupportGroupsProps) => {
   return (
     <div>
       <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
-        <Tabs value={activeCategory} onValueChange={setActiveCategory}>
-          <TabsList>
+        <Tabs value={activeCategory} onValueChange={setActiveCategory} className="min-w-0 w-full sm:w-auto">
+          <TabsList className="w-full sm:w-auto justify-start">
             <TabsTrigger value="all">All Groups</TabsTrigger>
             <TabsTrigger value="anxiety">Anxiety</TabsTrigger>
             <TabsTrigger value="depression">Depression</TabsTrigger>

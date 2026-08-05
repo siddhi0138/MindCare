@@ -256,17 +256,17 @@ const CustomReminders = () => {
               key={reminder.id}
               className={`border-primary/10 ${!reminder.active ? 'opacity-60' : ''}`}
             >
-              <CardContent className="p-4 flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className={`p-2 rounded-full ${reminder.active ? 'bg-primary/10' : 'bg-muted'}`}>
+              <CardContent className="p-4 flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-4 min-w-0">
+                  <div className={`p-2 rounded-full shrink-0 ${reminder.active ? 'bg-primary/10' : 'bg-muted'}`}>
                     {reminder.active ?
                       getReminderIcon(reminder.type) :
                       <BellOff className="h-4 w-4 text-muted-foreground" />
                     }
                   </div>
-                  <div>
-                    <h4 className="font-medium">{reminder.title}</h4>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <div className="min-w-0">
+                    <h4 className="font-medium truncate md:whitespace-normal md:overflow-visible">{reminder.title}</h4>
+                    <div className="flex items-center flex-wrap gap-2 text-sm text-muted-foreground">
                       <Clock className="h-3 w-3" />
                       <span>{reminder.time}</span>
                       <span>•</span>

@@ -58,7 +58,7 @@ const HeroSection = () => {
             initial={{ y: 0 }}
             animate={{ y: [10, -10, 10] }}
             transition={{ repeat: Infinity, duration: 6, ease: "easeInOut", delay: 0.5 }}
-            className="absolute top-1/2 -left-6 bg-white dark:bg-gray-800 p-3 rounded-xl shadow-lg"
+            className="absolute top-1/2 left-2 md:-left-6 bg-white dark:bg-gray-800 p-3 rounded-xl shadow-lg"
           >
             <span className="flex items-center gap-2">
               <span className="w-3 h-3 bg-green-400 rounded-full"></span>

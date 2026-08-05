@@ -112,7 +112,7 @@ const MemoryGame: React.FC<GameProps> = ({ onBack }) => {
           <button
             key={card.id}
             onClick={() => handleCardClick(card.id)}
-            className={`aspect-square text-3xl p-4 rounded-lg transition-all transform ${
+            className={`aspect-square text-xl sm:text-3xl p-2 sm:p-4 rounded-lg transition-all transform ${
               card.isFlipped || card.isMatched || flippedCards.includes(card.id)
                 ? "bg-primary/10 rotate-0"
                 : "bg-primary rotate-180"

@@ -159,17 +159,17 @@ const JournalPage = () => {
             if (currentUser) recordActivity('tab-switch', value, 'JournalPage');
           }}
         >
-          <TabsList className="grid grid-cols-1 md:grid-cols-3 mb-8">
-            <TabsTrigger value="write" className="flex items-center gap-2">
-              <FileText className="h-4 w-4" />
+          <TabsList className="grid grid-cols-3 mb-8">
+            <TabsTrigger value="write" className="flex items-center gap-1.5 sm:gap-2 px-1">
+              <FileText className="h-4 w-4 shrink-0" />
               <span>Write</span>
             </TabsTrigger>
-            <TabsTrigger value="entries" className="flex items-center gap-2">
-              <List className="h-4 w-4" />
+            <TabsTrigger value="entries" className="flex items-center gap-1.5 sm:gap-2 px-1">
+              <List className="h-4 w-4 shrink-0" />
               <span>Entries</span>
             </TabsTrigger>
-            <TabsTrigger value="calendar" className="flex items-center gap-2">
-              <CalendarIcon className="h-4 w-4" />
+            <TabsTrigger value="calendar" className="flex items-center gap-1.5 sm:gap-2 px-1">
+              <CalendarIcon className="h-4 w-4 shrink-0" />
               <span>Calendar</span>
             </TabsTrigger>
           </TabsList>
